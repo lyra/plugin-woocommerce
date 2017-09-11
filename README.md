@@ -4,11 +4,12 @@ PayZen for WooCommerce is an open source plugin that links e-commerce websites b
 
 # Installation & Upgrade
 
-Coming soon.
+1. Upload the folder `woo-payzen-payment` to the `/wp-content/plugins/` directory.
+2. Activate the plug-in through the `Plugins` menu in WordPress.
 
 # Configuration
 
-Coming soon.
+To configure the plug-in, go to the `WooCommerce > Settings` menu in WordPress then choose `Checkout` tab.
 
 ## License
 
