@@ -1,0 +1,381 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce PayZen 1.0a\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-06-17 16:02-0000\n"
+"PO-Revision-Date: 2012-06-17 16:02-0000\n"
+"Last-Translator: \n"
+"Language-Team: Lyra Network <support@payzen.eu>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: French\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: wp-content/plugins/woocommerce/classes/gateways\n"
+"X-Poedit-Country: FRANCE\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: class-wc-payzen.php:66
+#, php-format
+msgid "%s works by sending the user to %s to select their payment mean and enter their payment information."
+msgstr "%s fonctionne en redirigeant l'utilisateur vers %s pour sélectionner leurs moyens de paiement et saisir leurs informations de paiement."
+
+#: class-wc-payzen.php:71
+#, php-format
+msgid "Your %s configuration parameters are reset."
+msgstr "Vos paramètres de configuration %s sont réinitialisés."
+
+#: class-wc-payzen.php:75
+msgid "Gateway Disabled"
+msgstr "Plateforme désactivée"
+
+#: class-wc-payzen.php:75
+#, php-format
+msgid "%s does not support your store currency."
+msgstr "%s ne supporte pas la devise de votre boutique."
+
+#: class-wc-payzen.php:86
+msgid "Reset configuration"
+msgstr "Réinitialiser la configuration"
+
+#: class-wc-payzen.php:118
+msgid "Developed by"
+msgstr "Développé par"
+
+#: class-wc-payzen.php:124
+msgid "Contact email"
+msgstr "Courriel de contact"
+
+#: class-wc-payzen.php:130
+msgid "Module version"
+msgstr "Version du module"
+
+#: class-wc-payzen.php:136
+msgid "Gateway version"
+msgstr "Version de la plateforme"
+
+#: class-wc-payzen.php:142
+msgid "Tested with"
+msgstr "Testé avec"
+
+#: class-wc-payzen.php:150
+msgid "Status"
+msgstr "État"
+
+#: class-wc-payzen.php:152
+#, php-format
+msgid "Enable %s"
+msgstr "Activer %s"
+
+#: class-wc-payzen.php:156
+msgid "Title"
+msgstr "Titre"
+
+#: class-wc-payzen.php:158
+msgid "This controls the title which the user sees during checkout."
+msgstr "Cela détermine le titre que les utilisateurs verront durant la commande."
+
+#: class-wc-payzen.php:162
+msgid "Description"
+msgstr "Description"
+
+#: class-wc-payzen.php:164
+msgid "This controls the description which the user sees during checkout."
+msgstr "Ceci contrôle la description que les utilisateurs verront durant la commande."
+
+#: class-wc-payzen.php:165
+#, php-format
+msgid "Pay via secured %s platform."
+msgstr "Payez via la plateforme sécurisée %s."
+
+#: class-wc-payzen.php:168
+msgid "Debug logging"
+msgstr "Logs et débogage"
+
+#: class-wc-payzen.php:170
+#: class-wc-payzen.php:298
+msgid "Enable"
+msgstr "Activer"
+
+#: class-wc-payzen.php:172
+#, php-format
+msgid "Log %s events, such as requests, inside <code>woocommerce/logs/%s.txt</code>"
+msgstr "Active le log des événements %s, tels que les requêtes, dans <code>woocommerce/logs/%s.txt</code>"
+
+#: class-wc-payzen.php:177
+msgid "Site ID"
+msgstr "Identifiant du Site"
+
+#: class-wc-payzen.php:180
+msgid "The identifier provided by your bank"
+msgstr "L'identifiant fourni par votre banque"
+
+#: class-wc-payzen.php:183
+msgid "Certificate in test mode"
+msgstr "Certificat en mode test"
+
+#: class-wc-payzen.php:186
+#, php-format
+msgid "Certificate provided by your bank for test (available on the back office %s)"
+msgstr "Certificat fourni par votre banque (disponible sur l'outil de gestion de caisse %s)."
+
+#: class-wc-payzen.php:189
+msgid "Certificate in production mode"
+msgstr "Certificat en mode production"
+
+#: class-wc-payzen.php:192
+#, php-format
+msgid "Certificate provided by your bank (available on the back office %s after validation)"
+msgstr "Certificat fourni par votre banque (disponible sur l'outil de gestion de caisse %s après passage en production)."
+
+#: class-wc-payzen.php:195
+msgid "Mode"
+msgstr "Mode"
+
+#: class-wc-payzen.php:199
+msgid "TEST"
+msgstr "TEST"
+
+#: class-wc-payzen.php:200
+msgid "PRODUCTION"
+msgstr "PRODUCTION"
+
+#: class-wc-payzen.php:202
+msgid "The context mode of this module"
+msgstr "Mode de fonctionnement du module"
+
+#: class-wc-payzen.php:205
+msgid "Platform URL"
+msgstr "URL de la plateforme"
+
+#: class-wc-payzen.php:208
+msgid "Link to the payment platform"
+msgstr "URL vers laquelle le client sera redirigé pour le paiement"
+
+#: class-wc-payzen.php:214
+msgid "Default language"
+msgstr "Langage par défaut"
+
+#: class-wc-payzen.php:218
+#: class-wc-payzen.php:236
+msgid "French"
+msgstr "Français"
+
+#: class-wc-payzen.php:219
+#: class-wc-payzen.php:237
+msgid "German"
+msgstr "Allemand"
+
+#: class-wc-payzen.php:220
+#: class-wc-payzen.php:238
+msgid "English"
+msgstr "Anglais"
+
+#: class-wc-payzen.php:221
+#: class-wc-payzen.php:239
+msgid "Spanish"
+msgstr "Espagnol"
+
+#: class-wc-payzen.php:222
+#: class-wc-payzen.php:240
+msgid "Chinese"
+msgstr "Chinois"
+
+#: class-wc-payzen.php:223
+#: class-wc-payzen.php:241
+msgid "Italian"
+msgstr "Italien"
+
+#: class-wc-payzen.php:224
+#: class-wc-payzen.php:242
+msgid "Japanese"
+msgstr "Japonnais"
+
+#: class-wc-payzen.php:225
+#: class-wc-payzen.php:243
+msgid "Portuguese"
+msgstr "Portugais"
+
+#: class-wc-payzen.php:226
+#: class-wc-payzen.php:244
+msgid "Dutch"
+msgstr "Néerlandais"
+
+#: class-wc-payzen.php:228
+msgid "Select the language to use on the payment page by default"
+msgstr "Sélectionner le langage par défaut à utiliser sur la page de paiement"
+
+#: class-wc-payzen.php:231
+msgid "Available languages"
+msgstr "Langues disponibles"
+
+#: class-wc-payzen.php:235
+#: class-wc-payzen.php:270
+msgid "All"
+msgstr "Toutes"
+
+#: class-wc-payzen.php:246
+msgid "Available languages on payment page, select all to use platform configuration"
+msgstr "Langues disponibles sur la page de paiement, sélectionner toutes pour utiliser la configuration de la plateforme"
+
+#: class-wc-payzen.php:249
+msgid "Capture delay"
+msgstr "Délai avant remise en banque"
+
+#: class-wc-payzen.php:252
+#, php-format
+msgid "The number of days before the bank restoration (adjustable in your back office %s)"
+msgstr "Le nombre de jours avant la remise en banque (paramétrable sur votre back office %s)."
+
+#: class-wc-payzen.php:255
+msgid "Validation mode"
+msgstr "Mode de validation"
+
+#: class-wc-payzen.php:259
+msgid "Default"
+msgstr "Par défaut"
+
+#: class-wc-payzen.php:260
+msgid "Automatic"
+msgstr "Automatique"
+
+#: class-wc-payzen.php:261
+msgid "Manual"
+msgstr "Manuel"
+
+#: class-wc-payzen.php:263
+msgid "If manual is selected, you will have to confirm payments manually in your store back office"
+msgstr "En mode manuel, vous devrez confirmer les paiements dans l'outil de gestion de caisse"
+
+#: class-wc-payzen.php:266
+msgid "Card Types"
+msgstr "Types de carte"
+
+#: class-wc-payzen.php:276
+msgid "The card type(s) that can be used for the payment"
+msgstr "Le(s) type(s) de cartes pouvant être utilisé(s) pour le paiement"
+
+#: class-wc-payzen.php:281
+msgid "Minimum amount"
+msgstr "Montant minimum"
+
+#: class-wc-payzen.php:284
+msgid "Minimum amount for which this payment method is available"
+msgstr "Montant minimum pour lequel cette méthode de paiement est disponible"
+
+#: class-wc-payzen.php:287
+msgid "Maximum amount"
+msgstr "Montant maximum"
+
+#: class-wc-payzen.php:290
+msgid "Maximum amount for which this payment method is available"
+msgstr "Montant maximum pour lequel cette méthode de paiement est disponible"
+
+#: class-wc-payzen.php:295
+msgid "Automatic forward"
+msgstr "Redirection automatique"
+
+#: class-wc-payzen.php:299
+msgid "If enabled, the client is automatically forwarded to your site at the end of the payment process"
+msgstr "Si activée, le client sera redirigé automatiquement vers votre site à la fin du processus de paiement"
+
+#: class-wc-payzen.php:302
+msgid "Success forward timeout"
+msgstr "Temps avant redirection (succès)"
+
+#: class-wc-payzen.php:305
+msgid "Time in seconds (0-300) before the client is automatically forwarded to your site when the payment was successful"
+msgstr "Temps en secondes (0-300) avant que le client ne soit redirigé automatiquement vers votre site lorsque le paiement a réussi"
+
+#: class-wc-payzen.php:308
+msgid "Success forward message"
+msgstr "Message avant redirection (succès)"
+
+#: class-wc-payzen.php:311
+msgid "Message posted on the payment platform before forwarding when the payment was successful"
+msgstr "Message affiché sur la plateforme de paiement avant redirection lorsque le paiement a réussi"
+
+#: class-wc-payzen.php:315
+msgid "Failure forward timeout"
+msgstr "Temps avant redirection (échec)"
+
+#: class-wc-payzen.php:318
+msgid "Time in seconds (0-300) before the client is automatically forwarded to your site when the payment failed"
+msgstr "Temps en secondes (0-300) avant que le client ne soit redirigé automatiquement vers votre site lorsque le paiement a échoué"
+
+#: class-wc-payzen.php:321
+msgid "Failure forward message"
+msgstr "Message avant redirection (échec)"
+
+#: class-wc-payzen.php:324
+msgid "Message posted on the payment platform before forwarding when the payment failed"
+msgstr "Message affiché sur la plateforme de paiement avant redirection lorsque le paiement a échoué"
+
+#: class-wc-payzen.php:328
+msgid "Return mode"
+msgstr "Mode de retour"
+
+#: class-wc-payzen.php:335
+msgid "Method that will be used for transmitting the payment result from the payment gateway to your store"
+msgstr "Façon dont le client transmettra le résultat du paiement lors de son retour sur la boutique"
+
+#: class-wc-payzen.php:338
+msgid "Server URL to copy in your store back office"
+msgstr "URL serveur à  copier dans l'outil de gestion de caisse"
+
+#: class-wc-payzen.php:416
+#, php-format
+msgid "We are now redirecting you to %s to make payment."
+msgstr "Nous sommes entrain de vous rediriger vers %s pour effectuer le paiement."
+
+#: class-wc-payzen.php:418
+msgid "Thank you for your order. If you are not redirected in 10 s, please click the button below."
+msgstr "Merci pour votre commande. Si vous n'êtes pas redirigé dans 10 s, veuillez cliquer sur le bouton ci-dessous."
+
+#: class-wc-payzen.php:426
+#, php-format
+msgid "Pay via %s"
+msgstr "Payer via %s"
+
+#: class-wc-payzen.php:427
+msgid "Cancel order &amp; restore cart"
+msgstr "Annuler la cmde &amp; voir le panier"
+
+#: class-wc-payzen.php:450
+#, php-format
+msgid "The store currency (%s) is not supported by %s."
+msgstr "La devise de votre boutique (%s) n'est pas supportée par %s."
+
+#: class-wc-payzen.php:553
+#, php-format
+msgid "%s response authentication failure."
+msgstr "Échec d'authentification de la réponse %s."
+
+#: class-wc-payzen.php:579
+#, php-format
+msgid "Error : order with id #%s cannot be found."
+msgstr "Erreur : une commande avec l'ID #%s est introuvable."
+
+#: class-wc-payzen.php:594
+msgid "Payment completed successfully."
+msgstr "Le paiement est terminé avec succès."
+
+#: class-wc-payzen.php:609
+#, php-format
+msgid "Payment failed. Error message: %s (%s)"
+msgstr "Paiement échoué. Message d'erreur: %s (%s)"
+
+#: class-wc-payzen.php:657
+#, php-format
+msgid "Error : invalid payment code received for already processed order (%s)."
+msgstr "Erreur : code de paiement invalide reçu pour une commande déjà traitée (%s)."
+
+#~ msgid "Your payment has been correctly done, you will be forwarded shortly."
+#~ msgstr ""
+#~ "Votre paiement a bien été pris en compte, vous allez être redirigé dans "
+#~ "quelques instants."
+#~ msgid "An error has occured, you will be forwarded shortly."
+#~ msgstr ""
+#~ "Une erreur est survenue, vous allez être redirigé dans quelques instants."
+
