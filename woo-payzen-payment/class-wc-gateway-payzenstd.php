@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.4.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.4.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -270,10 +270,12 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             return false;
         }
 
-        $amount = $woocommerce->cart->total;
-        if (($this->get_option('amount_max') != '' && $amount > $this->get_option('amount_max'))
-            || ($this->get_option('amount_min') != '' && $amount < $this->get_option('amount_min'))) {
-            return false;
+        if ($woocommerce->cart) {
+            $amount = $woocommerce->cart->total;
+            if (($this->get_option('amount_max') != '' && $amount > $this->get_option('amount_max'))
+                || ($this->get_option('amount_min') != '' && $amount < $this->get_option('amount_min'))) {
+                return false;
+            }
         }
 
         return parent::is_available();
@@ -435,7 +437,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         // PayZen params
         $misc_params = array(
             'amount' => $currency->convertAmountToInteger($order->get_total()),
-            'contrib' => 'WooCommerce2.x-3.x_1.4.0/' . $version . '/' . PHP_VERSION,
+            'contrib' => 'WooCommerce2.x-3.x_1.4.1/' . $version . '/' . PHP_VERSION,
             'currency' => $currency->getNum(),
             'order_id' => $this->get_order_property($order, 'id'),
             'order_info' => $this->get_order_property($order, 'order_key'),

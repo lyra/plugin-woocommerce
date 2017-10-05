@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.4.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.4.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -347,9 +347,11 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
      */
     public function is_available()
     {
+        global $woocommerce;
+
         // check if any multi payment option is available
         $available_options = $this->get_available_options();
-        if (empty($available_options)) {
+        if ($woocommerce->cart && empty($available_options)) {
             return false;
         }
 

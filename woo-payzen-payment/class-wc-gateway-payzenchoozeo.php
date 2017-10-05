@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.4.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.4.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -293,14 +293,14 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         global $woocommerce;
 
         // check billing country
-        if ($woocommerce->customer->get_billing_country() != 'FR') {
+        if ($woocommerce->customer && $woocommerce->customer->get_billing_country() != 'FR') {
             // Choozeo available only in France, otherwise module is not available
             return false;
         }
 
         // check Choozeo payment options
         $available_options = $this->get_available_options();
-        if (empty($available_options)) {
+        if ($woocommerce->cart && empty($available_options)) {
             return false;
         }
 

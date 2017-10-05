@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.4.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.4.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -213,7 +213,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'contrib_version' => array(
                 'title' => __('Module version', 'woo-payzen-payment'),
                 'type' => 'text',
-                'description' => '1.4.0',
+                'description' => '1.4.1',
                 'css' => 'display: none;'
             ),
             'platform_version' => array(
@@ -223,7 +223,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'css' => 'display: none;'
             ),
             'doc_link' => array(
-                'title' => '<a style="color: red;" href="'. WC_PAYZEN_PLUGIN_URL.'installation_doc/Integration_PayZen_WooCommerce_2.x-3.x_v1.4.0.pdf" target="_blank">'.
+                'title' => '<a style="color: red;" href="'. WC_PAYZEN_PLUGIN_URL.'installation_doc/Integration_PayZen_WooCommerce_2.x-3.x_v1.4.1.pdf" target="_blank">'.
                             __('Click here to view the module configuration documentation.', 'woo-payzen-payment') . '</a>',
                 'type' => 'label',
                 'css' => 'font-weight: bold; text-transform: uppercase;'

@@ -2,9 +2,9 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 4.5.1
+Tested up to: 4.8.2
 Depends: WooCommerce 2.0 or higher
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ The payment plug-in has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.4.1, 2017-10-09 =
+* Bug fix: check cart and customer when checking payment method is available (to avoid errors with WooCommerce Subscriptions).
 
 = 1.4.0, 2017-09-11 =
 * Bug fix: allow plugin installation on multisite WordPress platform.
