@@ -2,17 +2,18 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 4.8.2
-Depends: WooCommerce 2.0 or higher
-Stable tag: 1.4.1
+Tested up to: 4.9
+WC requires at least: 2.0
+WC tested up to: 3.3
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plug-in links your WordPress WooCommerce shop to the PayZen payment platform.
+This plugin links your WordPress WooCommerce shop to the PayZen payment platform.
 
 == Description ==
 
-The payment plug-in has the following features:
+The payment plugin has the following features:
 * Compatible with WooCommerce v 2.0.0 and above.
 * Management of one-time payment and payment in installments.
 * Possibility to define many options for payment in installments (2 times payment, 3 times payment,...).
@@ -28,8 +29,8 @@ The payment plug-in has the following features:
 == Installation ==
 
 1. Upload the folder `woo-payzen-payment` to the `/wp-content/plugins/` directory
-2. Activate the plug-in through the `Plugins` menu in WordPress
-3. To configure the plug-in, go to the `WooCommerce > Settings` menu in WordPress then choose `Checkout` tab.
+2. Activate the plugin through the `Plugins` menu in WordPress
+3. To configure the plugin, go to the `WooCommerce > Settings` menu in WordPress then choose `Checkout` tab.
 
 == Screenshots ==
 
@@ -40,6 +41,17 @@ The payment plug-in has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.5.0, 2018-03-26 =
+* Bug fix: error relative to missing shipping phone number.
+* [klarna]New Klarna sub-module.
+* Improve dropdown lists in module backend (only in WooCommerce 3.x).
+* Added payment in pop-in using iframe mode.
+* Display card brand user choice if any in backend order details.
+* Improve compatibility of plugin with WooCommerce 2.x and 3.x versions.
+* Improve management of fatal errors as wrong signature, order not found and inconsistent statuses.
+* Manage pending payments by putting orders in "On hold" status.
+* Added validation mode and capture delay configuration fields to sub-modules.
 
 = 1.4.1, 2017-10-09 =
 * Bug fix: check cart and customer when checking payment method is available (to avoid errors with WooCommerce Subscriptions).
@@ -55,7 +67,7 @@ The payment plug-in has the following features:
 * Rename translation domain name.
 
 = 1.3.1, 2017-05-01 =
-* Bug fix: consider contract entered in multiple payment options configuration.
+* [multi]Bug fix: consider contract entered in multiple payment options configuration.
 * Ability to propose the card type choice on the WooCommerce frontend.
 * Compatibility with WPML translation plugin (module lets WPML translate gateway title and description if installed).
 * Compatibility with new WooCommerce versions (3.x).
@@ -86,7 +98,7 @@ The payment plug-in has the following features:
 * Trim spaces from data before sending form to payment platform.
 
 = 1.2, 2015-02-19 =
-* Single and multi payment in the same plug-in.
+* [multi]Single and multi payment in the same plugin.
 * Bug fix: when returning back to store on payment error or cancel.
 * Improvement of text translations.
 * Bug fix: avoid a warning displayed on HTTPS sites.
@@ -98,10 +110,10 @@ The payment plug-in has the following features:
 = 1.1, 2013-10-21 =
 * Add the parameter minimum amount to enable selective 3-DS.
 * Reorganization of the configuration screen in module backend.
-* Compatibility with the PayZen multi payment plug-in.
+* [multi]Compatibility with the PayZen multi payment plugin.
 
 = 1.0a, 2013-05-15 =
-* Use hooks to avoid the modification of WooCommerce files on the plug-in (re)install.
+* Use hooks to avoid the modification of WooCommerce files on the plugin (re)install.
 
 = 1.0, 2013-03-18 =
 * Module creation.

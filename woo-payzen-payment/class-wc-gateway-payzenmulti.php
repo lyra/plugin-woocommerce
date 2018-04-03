@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.4.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.5.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,11 +18,15 @@
  *
  * @author    Lyra Network (http://www.lyra-network.com/)
  * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * @copyright 2014-2017 Lyra Network and contributors
+ * @copyright 2014-2018 Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
  * @category  payment
  * @package   payzen
  */
+
+if (! defined('ABSPATH')) {
+    exit; // exit if accessed directly
+}
 
 /**
  * PayZen Payment Gateway : multiple payment class.
@@ -49,8 +53,8 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         // define user set variables
         $this->title = $this->get_title();
         $this->description = $this->get_description();
-        $this->testmode = ($this->get_option('ctx_mode') == 'TEST');
-        $this->debug = ($this->get_option('debug') == 'yes') ? true : false;
+        $this->testmode = ($this->get_general_option('ctx_mode') == 'TEST');
+        $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
 
         // reset PayZen multi payment admin form action
         add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
@@ -63,15 +67,6 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 
         // generate PayZen multi payment form action
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
-
-        // return from payment platform action
-        add_action('woocommerce_api_wc_gateway_payzen', array($this, 'payzen_notify_response'));
-
-        // filter to allow order status override
-        add_filter('woocommerce_payment_complete_order_status', array($this, 'payzen_complete_order_status'), 10, 2);
-
-        // customize email
-        add_action('woocommerce_email_after_order_table', array($this, 'payzen_add_order_email_payment_result'), 10, 3);
     }
 
     /**
@@ -97,6 +92,18 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
                 'de_DE' => 'Ratenzahlung mit EC-/Kreditkarte'
             );
         }
+
+        $this->form_fields['card_data_mode'] = array(
+            'title' => __('Card type selection', 'woo-payzen-payment'),
+            'type' => 'select',
+            'default' => 'DEFAULT',
+            'options' => array(
+                'DEFAULT' => __('On payment platform', 'woo-payzen-payment'),
+                'MERCHANT' => __('On merchant site', 'woo-payzen-payment')
+            ),
+            'description' =>sprintf(__('Select where card type will be selected by buyer.', 'woo-payzen-payment'), 'PayZen'),
+            'class' => 'wc-enhanced-select'
+        );
 
         $this->form_fields['multi_options'] = array(
             'title' => __('MULTIPLE PAYMENT OPTIONS', 'woo-payzen-payment'),
@@ -330,7 +337,6 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
                     || ! is_numeric($option['count']) || $option['count'] < 1
                     || ! is_numeric($option['period']) || $option['period'] <= 0
                     || ($option['first'] && (! is_numeric($option['first']) || $option['first'] < 0 || $option['first'] > 100))) {
-
                 unset($value[$code]); // not save this option
             } else {
                 // clean string
@@ -405,7 +411,6 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
                     <input type="hidden" id="payzenmulti_option_' . $key . '" value="' . $key . '" name="payzenmulti_option">
                     <label style="display: inline;">' . $option['label'] . '</label>
                   </li>';
-
         } else {
             $first = true;
             echo '<span style="font-weight: bold;">' . __('Choose your payment option', 'woo-payzen-payment') . '</span>';

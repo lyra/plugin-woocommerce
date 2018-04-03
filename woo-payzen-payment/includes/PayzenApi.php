@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.4.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.5.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
  *
  * @author    Lyra Network (http://www.lyra-network.com/)
  * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * @copyright 2014-2017 Lyra Network and contributors
+ * @copyright 2014-2018 Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
  * @category  payment
  * @package   payzen
@@ -34,6 +34,11 @@ if (! class_exists('PayzenApi', false)) {
      */
     class PayzenApi
     {
+
+        const ALGO_SHA1 = 'SHA-1';
+        const ALGO_SHA256 = 'SHA-256';
+
+        public static $SUPPORTED_ALGOS = array(self::ALGO_SHA1, self::ALGO_SHA256);
 
         /**
          * The list of encodings supported by the API.
@@ -237,7 +242,7 @@ if (! class_exists('PayzenApi', false)) {
                 'POSTFINANCE_EFIN' => 'PostFinance mode E-finance', 'RUPAY' => 'RuPay',
                 'SCT' => 'Virement SEPA', 'SDD' => 'Prélèvement SEPA', 'SOFORT_BANKING' => 'Sofort',
                 'TRUFFAUT_CDX' => 'Carte cadeau Truffaut', 'VILLAVERDE' => 'Carte cadeau Villaverde',
-                'VILLAVERDE_SB' => 'Carte cadeau Villaverde - SandBox'
+                'VILLAVERDE_SB' => 'Carte cadeau Villaverde - SandBox', 'ECCARD' => 'EC Card'
             );
         }
 
@@ -246,10 +251,11 @@ if (! class_exists('PayzenApi', false)) {
          *
          * @param array[string][string] $parameters payment platform request/response parameters
          * @param string $key shop certificate
+         * @param string $algo signature algorithm
          * @param boolean $hashed set to false to get the unhashed signature
          * @return string
          */
-        public static function sign($parameters, $key, $hashed = true)
+        public static function sign($parameters, $key, $algo, $hashed = true)
         {
             ksort($parameters);
 
@@ -261,7 +267,19 @@ if (! class_exists('PayzenApi', false)) {
             }
 
             $sign .= $key;
-            return $hashed ? sha1($sign) : $sign;
+
+            if (! $hashed) {
+                return $sign;
+            }
+
+            switch ($algo) {
+                case self::ALGO_SHA1:
+                    return sha1($sign);
+                case self::ALGO_SHA256:
+                    return base64_encode(hash_hmac('sha256', $sign, $key, true));
+                default:
+                    throw new \InvalidArgumentException("Unsupported algorithm passed : {$algo}.");
+            }
         }
 
         /**
