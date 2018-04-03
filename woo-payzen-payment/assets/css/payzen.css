@@ -1,0 +1,44 @@
+@CHARSET "UTF-8";
+
+#payzen_iframe_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    background: #000 none repeat scroll 0 0;
+    opacity: 0.65; /* Safari, Opera */
+    filter: alpha(opacity=65); /* IE */
+    -moz-opacity: 0.65; /* FireFox */
+}
+
+#payzen_iframe_warn, #payzen_iframe_actions {
+    position: relative;
+    width: 100%;
+    background: #ffffff none repeat scroll 0 0;
+    z-index: 10001;
+    padding-bottom: 15px;
+}
+
+#payzen_iframe_warn {
+    text-align: center;
+    color: #7f7f7f;
+}
+
+#payzen_iframe_actions a {
+    font-size: 12px;
+    text-decoration: none;
+    border: 0;
+    padding-left: 15px;
+}
+
+#payzen_iframe {
+    position: relative;
+    width: 100%;
+    min-height: 440px;
+    border: 0 none;
+    background: #ffffff none repeat scroll 0 0;
+    z-index: 10001;
+    margin-bottom: 0 !important;
+}

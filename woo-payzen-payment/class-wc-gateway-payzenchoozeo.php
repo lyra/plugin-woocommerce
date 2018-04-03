@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.4.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.5.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,11 +18,15 @@
  *
  * @author    Lyra Network (http://www.lyra-network.com/)
  * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * @copyright 2014-2017 Lyra Network and contributors
+ * @copyright 2014-2018 Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
  * @category  payment
  * @package   payzen
  */
+
+if (! defined('ABSPATH')) {
+    exit; // exit if accessed directly
+}
 
 /**
  * PayZen Payment Gateway : multiple payment class.
@@ -49,26 +53,17 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         // define user set variables
         $this->title = $this->get_title();
         $this->description = $this->get_description();
-        $this->testmode = ($this->get_option('ctx_mode') == 'TEST');
-        $this->debug = ($this->get_option('debug') == 'yes') ? true : false;
+        $this->testmode = ($this->get_general_option('ctx_mode') == 'TEST');
+        $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
 
-        // reset PayZen multi payment admin form action
+        // reset PayZen choozeo payment admin form action
         add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
 
-        // update PayZen multi payment admin form action
+        // update PayZen choozeo payment admin form action
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
-        // generate PayZen multi payment form action
+        // generate PayZen choozeo payment form action
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
-
-        // return from payment platform action
-        add_action('woocommerce_api_wc_gateway_payzen', array($this, 'payzen_notify_response'));
-
-        // filter to allow order status override
-        add_filter('woocommerce_payment_complete_order_status', array($this, 'payzen_complete_order_status'), 10, 2);
-
-        // customize email
-        add_action('woocommerce_email_after_order_table', array($this, 'payzen_add_order_email_payment_result'), 10, 3);
     }
 
     /**
@@ -78,7 +73,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
     {
         parent::init_form_fields();
 
-        unset($this->form_fields['payment_page']);
+        unset($this->form_fields['validation_mode']);
         unset($this->form_fields['payment_cards']);
         unset($this->form_fields['advanced_options']);
         unset($this->form_fields['card_data_mode']);
@@ -292,9 +287,16 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
     {
         global $woocommerce;
 
+        if (! $woocommerce->customer) {
+            return false;
+        }
+
+        $customer = $woocommerce->customer;
+        $country = method_exists($customer, 'get_billing_country') ? $customer->get_billing_country() : $customer->get_country();
+
         // check billing country
-        if ($woocommerce->customer && $woocommerce->customer->get_billing_country() != 'FR') {
-            // Choozeo available only in France, otherwise module is not available
+        if ($country != 'FR') {
+            // Choozeo is only available in France
             return false;
         }
 
@@ -306,7 +308,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
 
         // check currency
         if (get_woocommerce_currency() != 'EUR') {
-            // Choozeo supports only EURO, otherwise module is not available
+            // Choozeo supports only EURO
             return false;
         }
 
