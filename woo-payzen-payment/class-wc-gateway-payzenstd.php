@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.5.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -205,7 +205,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 'type' => 'multiselect',
                 'default' => array(),
                 'options' => $this->get_supported_card_types(),
-                'description' => __('The card type(s) that can be used for the payment. Select none to use platform configuration.', 'woo-payzen-payment'),
+                'description' => __('The card type(s) that can be used for the payment. Select none to use gateway configuration.', 'woo-payzen-payment'),
                 'class' => 'wc-enhanced-select'
             ),
 
@@ -219,7 +219,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 'type' => 'select',
                 'default' => 'DEFAULT',
                 'options' => array(
-                    'DEFAULT' => __('Card data entry on payment platform', 'woo-payzen-payment'),
+                    'DEFAULT' => __('Card data entry on payment gateway', 'woo-payzen-payment'),
                     'MERCHANT' => __('Card type selection on merchant site', 'woo-payzen-payment'),
                     'IFRAME' => __('Payment page integrated to checkout process (iframe)', 'woo-payzen-payment')
                 ),
@@ -335,7 +335,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             case 'IFRAME':
                 // load css and create iframe
-                wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), '1.5.0');
+                wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), '1.6.0');
                 wp_enqueue_style('payzen');
 
                 // iframe endpoint url
@@ -461,15 +461,15 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $img_url = WC_PAYZEN_PLUGIN_URL . 'assets/images/loading.gif';
         $img_url = class_exists('WC_HTTPS') ? WC_HTTPS::force_https_url($img_url) : $woocommerce->force_ssl($img_url);
         echo '<img src="' . esc_url($img_url) . '" alt="..." style="float:left; margin-right: 10px;"/>';
-        echo __('Please wait, you will be redirected to the payment platform.', 'woo-payzen-payment');
+        echo __('Please wait, you will be redirected to the payment gateway.', 'woo-payzen-payment');
         echo '</div>';
         echo '<br />';
         echo '<p>' . __('If nothing happens in 10 seconds, please click the button below.', 'woo-payzen-payment') . '</p>';
 
         $this->payzen_fill_request($order);
 
-        // log data that will be sent to payment platform
-        $this->log('Data to be sent to payment platform : ' . print_r($this->payzen_request->getRequestFieldsArray(true /* to hide sensitive data */), true));
+        // log data that will be sent to payment gateway
+        $this->log('Data to be sent to payment gateway : ' . print_r($this->payzen_request->getRequestFieldsArray(true /* to hide sensitive data */), true));
 
         $form = "\n".'<form action="' . esc_url($this->payzen_request->get('platform_url')) . '" method="post" id="' . $this->id . '_payment_form">';
         $form .= "\n" . $this->payzen_request->getRequestHtmlFields();
@@ -513,8 +513,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $this->payzen_request->set('redirect_success_timeout', '0');
         $this->payzen_request->set('redirect_error_timeout', '0');
 
-        // log data that will be sent to payment platform
-        $this->log('Data to be sent to payment platform : ' . print_r($this->payzen_request->getRequestFieldsArray(true /* to hide sensitive data */), true));
+        // log data that will be sent to payment gateway
+        $this->log('Data to be sent to payment gateway : ' . print_r($this->payzen_request->getRequestFieldsArray(true /* to hide sensitive data */), true));
 
         $form = "\n" . '<form action="' . esc_url($this->payzen_request->get('platform_url')) .'" method="post" id="' . $this->id . '_payment_iframe_form">';
         $form .= "\n".$this->payzen_request->getRequestHtmlFields();
@@ -559,7 +559,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         // PayZen params
         $misc_params = array(
             'amount' => $currency->convertAmountToInteger($order->get_total()),
-            'contrib' => 'WooCommerce2.x-3.x_1.5.0/' . $version . '/' . PHP_VERSION,
+            'contrib' => 'WooCommerce2.x-3.x_1.6.0/' . $version . '/' . PHP_VERSION,
             'currency' => $currency->getNum(),
             'order_id' => $this->get_order_property($order, 'id'),
             'order_info' => $this->get_order_property($order, 'order_key'),

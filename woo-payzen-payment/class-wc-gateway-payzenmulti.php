@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.5.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -36,10 +36,12 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 
     public function __construct()
     {
+        global $payzen_plugin_features;
+
         $this->id = 'payzenmulti';
         $this->icon = apply_filters('woocommerce_payzenmulti_icon', WC_PAYZEN_PLUGIN_URL . '/assets/images/payzenmulti.png');
         $this->has_fields = true;
-        $this->method_title = 'PayZen - ' . __('Payment in several times', 'woo-payzen-payment');
+        $this->method_title = 'PayZen - ' . __('Payment in installments', 'woo-payzen-payment');
 
         // init PayZen common vars
         $this->payzen_init();
@@ -55,6 +57,10 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $this->description = $this->get_description();
         $this->testmode = ($this->get_general_option('ctx_mode') == 'TEST');
         $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
+
+        if ($payzen_plugin_features['restrictmulti']) {
+            $this->notices[] = __('ATTENTION: The payment in installments feature activation is subject to the prior agreement of Société Générale.<br />If you enable this feature while you have not the associated option, an error 07 - PAYMENT_CONFIG will occur and the buyer will not be able to pay.', 'woo-payzen-payment');
+        }
 
         // reset PayZen multi payment admin form action
         add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
@@ -80,14 +86,14 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $this->form_fields['enabled']['default'] = 'no';
         $this->form_fields['enabled']['description'] = __('Enables / disables multiple payment.', 'woo-payzen-payment');
 
-        $this->form_fields['title']['default'] = __('Pay by credit card in several times', 'woo-payzen-payment');
+        $this->form_fields['title']['default'] = __('Pay by credit card in installments', 'woo-payzen-payment');
 
         // if WooCommecre Multilingual is not available (or installed version not allow gateways UI translation)
         // let's suggest our translation feature
         if (! class_exists('WCML_WC_Gateways')) {
             $this->form_fields['title']['default'] = array(
-                'en_US' => 'Pay by credit card in several times',
-                'en_GB' => 'Pay by credit card in several times',
+                'en_US' => 'Pay by credit card in installments',
+                'en_GB' => 'Pay by credit card in installments',
                 'fr_FR' => 'Paiement par carte bancaire en plusieurs fois',
                 'de_DE' => 'Ratenzahlung mit EC-/Kreditkarte'
             );
@@ -98,7 +104,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
             'type' => 'select',
             'default' => 'DEFAULT',
             'options' => array(
-                'DEFAULT' => __('On payment platform', 'woo-payzen-payment'),
+                'DEFAULT' => __('On payment gateway', 'woo-payzen-payment'),
                 'MERCHANT' => __('On merchant site', 'woo-payzen-payment')
             ),
             'description' =>sprintf(__('Select where card type will be selected by buyer.', 'woo-payzen-payment'), 'PayZen'),
@@ -460,7 +466,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
     }
 
     /**
-     * Prepare PayZen form params to send to payment platform.
+     * Prepare PayZen form params to send to payment gateway.
      **/
     protected function payzen_fill_request($order)
     {

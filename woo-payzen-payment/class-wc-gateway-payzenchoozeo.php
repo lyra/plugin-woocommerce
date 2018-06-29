@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.5.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -423,7 +423,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
     }
 
     /**
-     * Prepare PayZen form params to send to payment platform.
+     * Prepare PayZen form params to send to payment gateway.
      **/
     protected function payzen_fill_request($order)
     {

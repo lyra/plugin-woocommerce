@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.5.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,10 +26,10 @@
 
 /**
  * Plugin Name: WooCommerce PayZen Payment
- * Description: This plugin links your WordPress WooCommerce shop to the payment platform.
+ * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.5.0
+ * Version: 1.6.0
  * Requires at least: 3.5
  * Tested up to: 4.9
  * WC requires at least: 2.0
@@ -53,6 +53,8 @@ global $payzen_plugin_features;
 $payzen_plugin_features = array(
     'qualif' => false,
     'prodfaq' => true,
+    'restrictmulti' => false,
+
     'multi' => true,
     'choozeo' => false,
     'klarna' => true
@@ -177,7 +179,7 @@ function woocommerce_payzen_add_link($links, $file)
     $links[] = '<a href="' . admin_url($url_std) . '">' . __('One-time Payment', 'woo-payzen-payment') .'</a>';
 
     if ($payzen_plugin_features['multi']) {
-        $links[] = '<a href="' . admin_url($url_multi) . '">' . __('Payment in several times', 'woo-payzen-payment')
+        $links[] = '<a href="' . admin_url($url_multi) . '">' . __('Payment in installments', 'woo-payzen-payment')
             . '</a>';
     }
 
