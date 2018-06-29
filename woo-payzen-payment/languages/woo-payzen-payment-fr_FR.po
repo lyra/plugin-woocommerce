@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce PayZen Payment 1.5.0\n"
+"Project-Id-Version: WooCommerce PayZen Payment 1.6.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-03-21 18:21+0100\n"
-"PO-Revision-Date: 2018-04-03 16:36+0200\n"
+"PO-Revision-Date: 2018-05-18 10:36+0200\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <support@payzen.eu>\n"
 "Language: fr_FR\n"
@@ -22,7 +22,7 @@ msgid "General configuration"
 msgstr "Configuration générale"
 
 #: ../class-wc-gateway-payzen.php:124
-msgid "Platform disabled"
+msgid "Gateway disabled"
 msgstr "Plateforme désactivée"
 
 #: ../class-wc-gateway-payzen.php:124
@@ -68,7 +68,7 @@ msgid "Module version"
 msgstr "Version du module"
 
 #: ../class-wc-gateway-payzen.php:236
-msgid "Platform version"
+msgid "Gateway version"
 msgstr "Version de la plateforme"
 
 #: ../class-wc-gateway-payzen.php:243
@@ -93,7 +93,7 @@ msgid "Enable / disable module logs. The log file will be inside <code>%s</code>
 msgstr "Activer / désactiver les logs du module. Le fichier de logs sera enregistré dans <code>%s</code>."
 
 #: ../class-wc-gateway-payzen.php:262
-msgid "PAYMENT PLATFORM ACCESS"
+msgid "PAYMENT GATEWAY ACCESS"
 msgstr "ACCÈS À LA PLATEFORME"
 
 #: ../class-wc-gateway-payzen.php:266
@@ -145,11 +145,13 @@ msgstr "Algorithme de signature"
 
 #: ../class-wc-gateway-payzen.php:305
 msgid ""
-"Algorithm used to compute the payment form signature. <b>Selected algorithm must be the same as one configured in the "
-"%s Back Office for the current context mode.</b>"
+"Algorithm used to compute the payment form signature. Selected algorithm must be the same as one configured in the %s "
+"Back Office.<br /><b>The SHA-256 algorithm should not be activated if it is not yet available in the %s Back Office, "
+"the feature will be available soon.</b>"
 msgstr ""
-"Algorithme utilisé pour calculer la signature du formulaire de paiement. <b>L'algorithme sélectionné doit être le "
-"même que celui configuré sur le Back Office %s pour le mode de fonctionnement actuel du module.</b>"
+"Algorithme utilisé pour calculer la signature du formulaire de paiement. L'algorithme sélectionné doit être le même "
+"que celui configuré sur le Back Office %s. <br /><b>Le SHA-256 ne doit pas être activé si celui-ci n'est pas encore "
+"disponible depuis le Back Office %s, la fonctionnalité sera disponible prochainement.</b>"
 
 #: ../class-wc-gateway-payzen.php:309
 msgid "Instant Payment Notification URL"
@@ -187,7 +189,9 @@ msgstr "Langues disponibles"
 #: ../class-wc-gateway-payzen.php:341
 msgid ""
 "Languages available on the payment page. If you do not select any, all the supported languages will be available."
-msgstr "Sélectionner les langues à proposer sur la page de paiement."
+msgstr ""
+"Sélectionner les langues à proposer sur la page de paiement. Ne rien sélectionner pour utiliser la configuration de "
+"la plateforme."
 
 #: ../class-wc-gateway-payzen.php:345 ../class-wc-gateway-payzenstd.php:164
 msgid "Capture delay"
@@ -224,12 +228,16 @@ msgid "SELECTIVE 3DS"
 msgstr "3DS SÉLECTIF"
 
 #: ../class-wc-gateway-payzen.php:369
-msgid "Minimum amount to activate 3-DS"
-msgstr "Montant minimum pour lequel activer 3-DS"
+msgid "Disable 3DS"
+msgstr "Désactiver 3DS"
 
 #: ../class-wc-gateway-payzen.php:372
-msgid "Needs subscription to Selective 3-D Secure option."
-msgstr "Nécessite la souscription à l’option 3-D Secure sélectif."
+msgid ""
+"Amount below which 3DS will be disabled. Needs subscription to selective 3DS option. For more information, refer to "
+"the module documentation."
+msgstr ""
+"Montant en dessous duquel 3DS sera désactivé. Nécessite la souscription à l'option 3DS sélectif. Pour plus "
+"d'informations, reportez-vous à la documentation du module."
 
 #: ../class-wc-gateway-payzen.php:377
 msgid "RETURN OPTIONS"
@@ -309,7 +317,7 @@ msgstr ""
 #: ../class-wc-gateway-payzen.php:820
 #, php-format
 msgid ""
-"The automatic notification (peer to peer connection between the payment platform and your shopping cart solution) "
+"The automatic notification (peer to peer connection between the payment gateway and your shopping cart solution) "
 "hasn't worked. Have you correctly set up the notification URL in the %s Back Office ?"
 msgstr ""
 "La validation automatique n'a pas fonctionné. Avez-vous configuré correctement l'URL de notification dans le Back "
@@ -410,16 +418,26 @@ msgstr "Activer / désactiver le paiement Klarna."
 msgid "Pay with Klarna"
 msgstr "Paiement avec Klarna"
 
-#: ../class-wc-gateway-payzenmulti.php:21 ../woo-payzen-payment.php:158
-msgid "Payment in several times"
+#: ../class-wc-gateway-payzenmulti.php:23 ../woo-payzen-payment.php:158
+msgid "Payment in installments"
 msgstr "Paiement en plusieurs fois"
+
+#: ../class-wc-gateway-payzenmulti.php:41
+msgid ""
+"ATTENTION: The payment in installments feature activation is subject to the prior agreement of Société Générale.<br /"
+">If you enable this feature while you have not the associated option, an error 07 - PAYMENT_CONFIG will occur and the "
+"buyer will not be able to pay."
+msgstr ""
+"ATTENTION: L'activation de la fonctionnalité de paiement en nfois est soumise à accord préalable de Société Générale."
+"<br />Si vous activez cette fonctionnalité alors que vous ne disposez pas de cette option, une erreur 07 - "
+"PAYMENT_CONFIG sera générée et l'acheteur sera dans l'incapacité de payer."
 
 #: ../class-wc-gateway-payzenmulti.php:60
 msgid "Enables / disables multiple payment."
 msgstr "Activer / désactiver le paiement multiple."
 
 #: ../class-wc-gateway-payzenmulti.php:62
-msgid "Pay by credit card in several times"
+msgid "Pay by credit card in installments"
 msgstr "Paiement par carte bancaire en plusieurs fois"
 
 #: ../class-wc-gateway-payzenmulti.php:76
@@ -427,7 +445,7 @@ msgid "Card type selection"
 msgstr "Sélection du type de carte"
 
 #: ../class-wc-gateway-payzenmulti.php:80
-msgid "On payment platform"
+msgid "On payment gateway"
 msgstr "Sur la plateforme de paiement"
 
 #: ../class-wc-gateway-payzenmulti.php:81
@@ -576,7 +594,7 @@ msgid "Card Types"
 msgstr "Types de carte"
 
 #: ../class-wc-gateway-payzenstd.php:187
-msgid "The card type(s) that can be used for the payment. Select none to use platform configuration."
+msgid "The card type(s) that can be used for the payment. Select none to use gateway configuration."
 msgstr ""
 "Le(s) type(s) de carte pouvant être utilisé(s) pour le paiement. Ne rien sélectionner pour utiliser la configuration "
 "de la plateforme."
@@ -590,7 +608,7 @@ msgid "Card data entry mode"
 msgstr "Mode de saisie des données de la carte"
 
 #: ../class-wc-gateway-payzenstd.php:201
-msgid "Card data entry on payment platform"
+msgid "Card data entry on payment gateway"
 msgstr "Acquisition des données sur la plateforme de paiement"
 
 #: ../class-wc-gateway-payzenstd.php:202
@@ -618,7 +636,7 @@ msgid "Please do not refresh the page until you complete payment."
 msgstr "Merci de ne pas rafraîchir la page jusqu'à la fin du paiement."
 
 #: ../class-wc-gateway-payzenstd.php:443
-msgid "Please wait, you will be redirected to the payment platform."
+msgid "Please wait, you will be redirected to the payment gateway."
 msgstr "Merci de patienter, vous allez être redirigé vers la plateforme de paiement."
 
 #: ../class-wc-gateway-payzenstd.php:446
@@ -709,5 +727,5 @@ msgid "Complete"
 msgstr "Terminée"
 
 #: ../woo-payzen-payment.php:9
-msgid "This plugin links your WordPress WooCommerce shop to the Payment platform."
+msgid "This plugin links your WordPress WooCommerce shop to the Payment gateway."
 msgstr "Ce module lie votre boutique WooCommerce sous WordPress à la plateforme de paiement."

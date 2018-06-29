@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.5.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -42,6 +42,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     protected $general_settings = array();
     protected $general_form_fields = array();
+    protected $notices = array();
 
     public function __construct()
     {
@@ -72,7 +73,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         // update payzen admin form action
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
-        // return from payment platform action
+        // return from payment gateway action
         add_action('woocommerce_api_wc_gateway_payzen', array($this, 'payzen_notify_response'));
 
         // filter to allow order status override
@@ -124,10 +125,14 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 font-style: normal !important;
             }
 
-            #woocommerce_payzen_url_check + p.description span {
+            #woocommerce_payzen_url_check + p.description span.url {
                 color: #23282d !important;
                 font-size: 16px;
                 font-weight: bold;
+            }
+
+            #woocommerce_payzen_url_check + p.description span.desc {
+                color: red !important;
             }
 
             #woocommerce_payzen_url_check + p.description img {
@@ -144,7 +149,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     public function admin_options()
     {
         if (! $this->is_supported_currency()) {
-            echo '<div class="inline error"><p><strong>' . __('Platform disabled', 'woo-payzen-payment') . ': ' . sprintf(__('%s does not support your store currency.', 'woo-payzen-payment'), 'PayZen') . '</strong></p></div>';
+            echo '<div class="inline error"><p><strong>' . __('Gateway disabled', 'woo-payzen-payment') . ': ' . sprintf(__('%s does not support your store currency.', 'woo-payzen-payment'), 'PayZen') . '</strong></p></div>';
         }
 
         if (get_transient($this->id . '_settings_reset')) {
@@ -157,6 +162,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         <br />
         <h3>PayZen</h3>
         <p><?php echo sprintf(__('The module works by sending users to %s in order to select their payment mean and enter their payment information.', 'woo-payzen-payment'), 'PayZen'); ?></p>
+
+        <?php foreach ($this->notices as $notice) { ?>
+            <p style="background: none repeat scroll 0 0 #FFFFE0; border: 1px solid #E6DB55; margin: 0 0 20px; padding: 10px; font-weight: bold;"><?php echo $notice; ?></p>
+        <?php } ?>
 
         <section class="payzen">
         <table class="form-table">
@@ -227,7 +236,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         // get documentation links
         $docs = '';
-        $filenames = glob(plugin_dir_path(__FILE__) . 'installation_doc/PayZen_WooCommerce_2.x-3.x_v1.5.0*.pdf');
+        $filenames = glob(plugin_dir_path(__FILE__) . 'installation_doc/PayZen_WooCommerce_2.x-3.x_v1.6.0*.pdf');
 
         $languages = array(
             'fr' => 'Français',
@@ -240,8 +249,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $base_filename = basename($filename, '.pdf');
             $lang = substr($base_filename, -2); // extract language code
 
-            $docs .= '<a style="margin-left: 10px; text-decoration: none;" href="' . WC_PAYZEN_PLUGIN_URL
-                . 'installation_doc/' . $base_filename . '.pdf" target="_blank">[' . $languages[$lang] . ']</a>';
+            $docs .= '<a style="margin-left: 10px; text-decoration: none; text-transform: uppercase;" href="' . WC_PAYZEN_PLUGIN_URL
+                . 'installation_doc/' . $base_filename . '.pdf" target="_blank">' . $languages[$lang] . '</a>';
         }
 
         // prepare succes order statuses array
@@ -272,11 +281,11 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'contrib_version' => array(
                 'title' => __('Module version', 'woo-payzen-payment'),
                 'type' => 'text',
-                'description' => '1.5.0',
+                'description' => '1.6.0',
                 'css' => 'display: none;'
             ),
             'platform_version' => array(
-                'title' => __('Platform version', 'woo-payzen-payment'),
+                'title' => __('Gateway version', 'woo-payzen-payment'),
                 'type' => 'text',
                 'description' => 'V2',
                 'css' => 'display: none;'
@@ -284,7 +293,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'doc_link' => array(
                 'title' => __('Click to view the module configuration documentation :', 'woo-payzen-payment') . $docs,
                 'type' => 'label',
-                'css' => 'font-weight: bold; color: red; cursor: auto !important;'
+                'css' => 'font-weight: bold; color: red; cursor: auto !important; text-transform: uppercase;'
             ),
 
             'base_settings' => array(
@@ -299,9 +308,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'description' => sprintf(__('Enable / disable module logs. The log file will be inside <code>%s</code>.', 'woo-payzen-payment'), $log_folder),
             ),
 
-            // payment platform access params
-            'payment_platform_access' => array(
-                'title' => __('PAYMENT PLATFORM ACCESS', 'woo-payzen-payment'),
+            // payment gateway access params
+            'payment_gateway_access' => array(
+                'title' => __('PAYMENT GATEWAY ACCESS', 'woo-payzen-payment'),
                 'type' => 'title'
             ),
             'site_id' => array(
@@ -336,7 +345,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'description' => __('The context mode of this module.', 'woo-payzen-payment'),
                 'class' => 'wc-enhanced-select'
             ),
-            /*'sign_algo' => array(
+            'sign_algo' => array(
                 'title' => __('Signature algorithm', 'woo-payzen-payment'),
                 'type' => 'select',
                 'default' => 'SHA-1',
@@ -344,14 +353,14 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     PayzenApi::ALGO_SHA1 => PayzenApi::ALGO_SHA1,
                     PayzenApi::ALGO_SHA256 => PayzenApi::ALGO_SHA256
                 ),
-                'description' => sprintf(__('Algorithm used to compute the payment form signature. <b>Selected algorithm must be the same as one configured in the %s Back Office for the current context mode.</b>', 'woo-payzen-payment'),'PayZen'),
+                'description' => sprintf(__('Algorithm used to compute the payment form signature. Selected algorithm must be the same as one configured in the %s Back Office.<br /><b>The SHA-256 algorithm should not be activated if it is not yet available in the %s Back Office, the feature will be available soon.</b>', 'woo-payzen-payment'), 'PayZen', 'PayZen'),
                 'class' => 'wc-enhanced-select'
-            ),*/
+            ),
             'url_check' => array(
                 'title' => __('Instant Payment Notification URL', 'woo-payzen-payment'),
                 'type' => 'text',
-                'description' => '<span>' . add_query_arg('wc-api', 'WC_Gateway_Payzen', network_home_url('/')) . '</span><br />' .
-                    '<img src="' . esc_url(WC_PAYZEN_PLUGIN_URL . 'assets/images/warn.png') . '">' . sprintf(__('URL to copy into your %s Back Office > Settings > Notification rules.', 'woo-payzen-payment'), 'PayZen'),
+                'description' => '<span class="url">' . add_query_arg('wc-api', 'WC_Gateway_Payzen', network_home_url('/')) . '</span><br />' .
+                    '<img src="' . esc_url(WC_PAYZEN_PLUGIN_URL . 'assets/images/warn.png') . '"><span class="desc">' . sprintf(__('URL to copy into your %s Back Office > Settings > Notification rules.', 'woo-payzen-payment'), 'PayZen') . '</span>',
                 'css' => 'display: none;'
             ),
             'platform_url' => array(
@@ -408,10 +417,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'type' => 'title'
             ),
             '3ds_min_amount' => array(
-                'title' => __('Minimum amount to activate 3-DS', 'woo-payzen-payment'),
+                'title' => __('Disable 3DS', 'woo-payzen-payment'),
                 'type' => 'text',
                 'default' => '',
-                'description' => __('Needs subscription to Selective 3-D Secure option.', 'woo-payzen-payment')
+                'description' => __('Amount below which 3DS will be disabled. Needs subscription to selective 3DS option. For more information, refer to the module documentation.', 'woo-payzen-payment')
             ),
 
             // return to store params
@@ -861,7 +870,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     $this->log("Warning ! IPN URL call has not worked. Payment completed by return URL call for order #$order_id.");
 
                     if ($this->testmode) {
-                        $ipn_url_warn = sprintf(__('The automatic notification (peer to peer connection between the payment platform and your shopping cart solution) hasn\'t worked. Have you correctly set up the notification URL in the %s Back Office ?', 'woo-payzen-payment'), 'PayZen');
+                        $ipn_url_warn = sprintf(__('The automatic notification (peer to peer connection between the payment gateway and your shopping cart solution) hasn\'t worked. Have you correctly set up the notification URL in the %s Back Office ?', 'woo-payzen-payment'), 'PayZen');
                         $ipn_url_warn .= '<br />';
                         $ipn_url_warn .= __('For understanding the problem, please read the documentation of the module : <br />&nbsp;&nbsp;&nbsp;- Chapter &laquo;To read carefully before going further&raquo;<br />&nbsp;&nbsp;&nbsp;- Chapter &laquo;Notification URL settings&raquo;', 'woo-payzen-payment');
 
