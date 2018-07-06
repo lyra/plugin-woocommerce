@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.6.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -236,7 +236,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         // get documentation links
         $docs = '';
-        $filenames = glob(plugin_dir_path(__FILE__) . 'installation_doc/PayZen_WooCommerce_2.x-3.x_v1.6.0*.pdf');
+        $filenames = glob(plugin_dir_path(__FILE__) . 'installation_doc/PayZen_WooCommerce_2.x-3.x_v1.6.1*.pdf');
 
         $languages = array(
             'fr' => 'Français',
@@ -281,7 +281,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'contrib_version' => array(
                 'title' => __('Module version', 'woo-payzen-payment'),
                 'type' => 'text',
-                'description' => '1.6.0',
+                'description' => '1.6.1',
                 'css' => 'display: none;'
             ),
             'platform_version' => array(
@@ -348,7 +348,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'sign_algo' => array(
                 'title' => __('Signature algorithm', 'woo-payzen-payment'),
                 'type' => 'select',
-                'default' => 'SHA-1',
+                'default' => 'SHA-256',
                 'options' => array(
                     PayzenApi::ALGO_SHA1 => PayzenApi::ALGO_SHA1,
                     PayzenApi::ALGO_SHA256 => PayzenApi::ALGO_SHA256
@@ -497,6 +497,12 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             unset($this->form_fields['key_test']);
 
             $this->form_fields['ctx_mode']['disabled'] = true;
+        }
+
+        if ($payzen_plugin_features['shatwo']) {
+            // SHA-256 already available, update field description
+            $desc = preg_replace('#<br /><b>[^<>]+</b>#', '', $this->form_fields['sign_algo']['description']);
+            $this->form_fields['sign_algo']['description'] = $desc;
         }
 
         // save general form fields

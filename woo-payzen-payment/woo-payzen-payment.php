@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.6.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,7 +29,7 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.6.0
+ * Version: 1.6.1
  * Requires at least: 3.5
  * Tested up to: 4.9
  * WC requires at least: 2.0
@@ -54,6 +54,7 @@ $payzen_plugin_features = array(
     'qualif' => false,
     'prodfaq' => true,
     'restrictmulti' => false,
+    'shatwo' => true,
 
     'multi' => true,
     'choozeo' => false,

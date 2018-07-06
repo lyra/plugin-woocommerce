@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 4.9
 WC requires at least: 2.0
 WC tested up to: 3.3
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,10 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.6.1, 2018-07-06 =
+- [shatwo]Enable SHA-256 signature algorithm by default.
+- Ignore spaces at the beginning and end of certificates when calculating the return signature.
 
 = 1.6.0, 2018-05-23 =
 - Enable signature algorithm selection (SHA-1 or SHA-256).

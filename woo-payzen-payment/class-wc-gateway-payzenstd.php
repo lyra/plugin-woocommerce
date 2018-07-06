@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.6.0 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -335,7 +335,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             case 'IFRAME':
                 // load css and create iframe
-                wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), '1.6.0');
+                wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), '1.6.1');
                 wp_enqueue_style('payzen');
 
                 // iframe endpoint url
@@ -559,7 +559,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         // PayZen params
         $misc_params = array(
             'amount' => $currency->convertAmountToInteger($order->get_total()),
-            'contrib' => 'WooCommerce2.x-3.x_1.6.0/' . $version . '/' . PHP_VERSION,
+            'contrib' => 'WooCommerce2.x-3.x_1.6.1/' . $version . '/' . PHP_VERSION,
             'currency' => $currency->getNum(),
             'order_id' => $this->get_order_property($order, 'id'),
             'order_info' => $this->get_order_property($order, 'order_key'),
