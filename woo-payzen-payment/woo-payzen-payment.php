@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.6.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.2 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,12 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
+ * @category  Payment
+ * @package   Payzen
  * @author    Lyra Network (http://www.lyra-network.com/)
  * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
  * @copyright 2014-2018 Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
- * @category  payment
- * @package   payzen
  */
 
 /**
@@ -29,11 +29,7 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.6.1
- * Requires at least: 3.5
- * Tested up to: 4.9
- * WC requires at least: 2.0
- * WC tested up to: 3.3
+ * Version: 1.6.2
  * Author URI: https://www.lyra-network.com
  * License: GPLv2 or later
  *
@@ -47,7 +43,7 @@ if (! defined('ABSPATH')) {
 
 define('WC_PAYZEN_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-/* A global var to easily enable/disable features */
+/* A global var to easily enable/disable features. */
 global $payzen_plugin_features;
 
 $payzen_plugin_features = array(
@@ -61,7 +57,7 @@ $payzen_plugin_features = array(
     'klarna' => true
 );
 
-/* Check requirements */
+/* Check requirements. */
 function woocommerce_payzen_activation()
 {
     $all_active_plugins = get_option('active_plugins');
@@ -83,11 +79,9 @@ function woocommerce_payzen_activation()
 }
 register_activation_hook(__FILE__, 'woocommerce_payzen_activation');
 
-// delete all data when uninstalling plugin
+// Delete all data when uninstalling plugin.
 function woocommerce_payzen_uninstallation()
 {
-    global $wpdb;
-
     delete_option('woocommerce_payzen_settings');
     delete_option('woocommerce_payzenstd_settings');
     delete_option('woocommerce_payzenmulti_settings');
@@ -96,7 +90,7 @@ function woocommerce_payzen_uninstallation()
 }
 register_uninstall_hook(__FILE__, 'woocommerce_payzen_uninstallation');
 
-/* Include gateway classes */
+/* Include gateway classes. */
 function woocommerce_payzen_init()
 {
     global $payzen_plugin_features;
@@ -129,7 +123,7 @@ function woocommerce_payzen_init()
 }
 add_action('woocommerce_init', 'woocommerce_payzen_init');
 
-/* Add PayZen method to woocommerce methods */
+/* Add PayZen method to woocommerce methods. */
 function woocommerce_payzen_add_method($methods)
 {
     global $payzen_plugin_features;
@@ -153,52 +147,52 @@ function woocommerce_payzen_add_method($methods)
 }
 add_filter('woocommerce_payment_gateways', 'woocommerce_payzen_add_method');
 
-/* Add a link from plugin list to parameters */
+/* Add a link to plugin settings page from plugins list. */
 function woocommerce_payzen_add_link($links, $file)
 {
-    global $woocommerce, $payzen_plugin_features;
+    global $payzen_plugin_features;
 
-    // consider payment gateways tab change
-    $base_url = 'admin.php?page=wc-settings&tab=checkout&section=';
-    $url_gen = $base_url . 'wc_gateway_payzen';
-    $url_std = $base_url . 'wc_gateway_payzenstd';
-    $url_multi = $base_url . 'wc_gateway_payzenmulti';
-    $url_choozeo = $base_url . 'wc_gateway_payzenchoozeo';
-    $url_klarna = $base_url . 'wc_gateway_payzenklarna';
-
-    // backward compatibility
-    if (version_compare($woocommerce->version, '2.1.0', '<')) {
-        $base_url = 'admin.php?page=woocommerce_settings&tab=payment_gateways&section=';
-        $url_gen = $base_url . 'WC_Gateway_Payzen';
-        $url_std = $base_url . 'WC_Gateway_PayzenStd';
-        $url_multi = $base_url . 'WC_Gateway_PayzenMulti';
-        $url_choozeo = $base_url . 'WC_Gateway_PayzenChoozeo';
-        $url_klarna = $base_url . 'WC_Gateway_PayzenKlarna';
-    }
-
-    $links[] = '<a href="' . admin_url($url_gen) . '">' . __('General configuration', 'woo-payzen-payment') .'</a>';
-    $links[] = '<a href="' . admin_url($url_std) . '">' . __('One-time Payment', 'woo-payzen-payment') .'</a>';
+    $links[] = '<a href="' . payzen_admin_url('Payzen') . '">' . __('General configuration', 'woo-payzen-payment') .'</a>';
+    $links[] = '<a href="' . payzen_admin_url('PayzenStd') . '">' . __('One-time Payment', 'woo-payzen-payment') .'</a>';
 
     if ($payzen_plugin_features['multi']) {
-        $links[] = '<a href="' . admin_url($url_multi) . '">' . __('Payment in installments', 'woo-payzen-payment')
-            . '</a>';
+        $links[] = '<a href="' . payzen_admin_url('PayzenMulti') . '">' . __('Payment in installments', 'woo-payzen-payment')
+        . '</a>';
     }
 
     if ($payzen_plugin_features['choozeo']) {
-        $links[] = '<a href="' . admin_url($url_choozeo) . '">' . __('Payment with Choozeo', 'woo-payzen-payment')
-            . '</a>';
+        $links[] = '<a href="' . payzen_admin_url('PayzenChoozeo') . '">' . __('Payment with Choozeo', 'woo-payzen-payment')
+        . '</a>';
     }
 
     if ($payzen_plugin_features['klarna']) {
-        $links[] = '<a href="' . admin_url($url_klarna) . '">' . __('Payment with Klarna', 'woo-payzen-payment')
-            . '</a>';
+        $links[] = '<a href="' . payzen_admin_url('PayzenKlarna') . '">' . __('Payment with Klarna', 'woo-payzen-payment')
+        . '</a>';
     }
 
     return $links;
 }
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'woocommerce_payzen_add_link', 10, 2);
 
-/* Retrieve blog_id from post when this is a PayZen IPN URL call */
+function payzen_admin_url($id)
+{
+    global $woocommerce;
+
+    $base_url = 'admin.php?page=wc-settings&tab=checkout&section=';
+    $section = strtolower($id); // method id in lower case
+
+    // backward compatibility
+    if (version_compare($woocommerce->version, '2.1.0', '<')) {
+        $base_url = 'admin.php?page=woocommerce_settings&tab=payment_gateways&section=';
+        $section = 'WC_Gateway_' . $id; // class name as it is
+    } elseif (version_compare($woocommerce->version, '2.6.2', '<')) {
+        $section = 'wc_gateway_' . $section; // class name in lower case
+    }
+
+    return admin_url($base_url . $section);
+}
+
+/* Retrieve blog_id from post when this is a PayZen IPN URL call. */
 if (is_multisite() && key_exists('vads_hash', $_POST) && $_POST['vads_hash']
     && key_exists('vads_order_info2', $_POST) && $_POST['vads_order_info2']) {
     global $wpdb, $current_blog, $current_site;
