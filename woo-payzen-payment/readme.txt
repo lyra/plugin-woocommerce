@@ -2,10 +2,10 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 4.9
+Tested up to: 5.0
 WC requires at least: 2.0
-WC tested up to: 3.3
-Stable tag: 1.6.1
+WC tested up to: 3.5
+Stable tag: 1.6.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,7 +19,7 @@ The payment plugin has the following features:
 * Possibility to define many options for payment in installments (2 times payment, 3 times payment,...).
 * Can do automatic redirection to the shop at the end of the payment.
 * Setting of a minimum / maximum amount to enable payment module.
-* Selective 3D-Secure depending on the order amount.
+* Selective 3D Secure depending on the order amount.
 * Update orders after payment through a silent URL (Instant Payment Notification).
 * Multi languages compliance.
 * Multi currencies compliance.
@@ -30,7 +30,7 @@ The payment plugin has the following features:
 
 1. Upload the folder `woo-payzen-payment` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the `Plugins` menu in WordPress
-3. To configure the plugin, go to the `WooCommerce > Settings` menu in WordPress then choose `Checkout` tab.
+3. To configure the plugin, go to the `WooCommerce > Settings` menu in WordPress then choose `Checkout` or `Payments` tab (depending on your WooCommerce version).
 
 == Screenshots ==
 
@@ -42,12 +42,22 @@ The payment plugin has the following features:
 
 == Changelog ==
 
+= 1.6.2, 2018-11-26 =
+- Fix new signature algorithm name (HMAC-SHA-256).
+- Update payment means logos.
+- [prodfaq]Fix notice about shifting the shop to production mode.
+- Added Spanish translation.
+- Improve iframe mode interface.
+- Allow comma when entering amounts in configuration fields.
+- [klarna]Send product amounts including taxes for Klarna payments.
+- Send shipping fees in vads_shipping_amount variable.
+
 = 1.6.1, 2018-07-06 =
-- [shatwo]Enable SHA-256 signature algorithm by default.
+- [shatwo]Enable HMAC-SHA-256 signature algorithm by default.
 - Ignore spaces at the beginning and end of certificates when calculating the return signature.
 
 = 1.6.0, 2018-05-23 =
-- Enable signature algorithm selection (SHA-1 or SHA-256).
+- Enable signature algorithm selection (SHA-1 or HMAC-SHA-256).
 - Improve backend configuration screen.
 
 = 1.5.0, 2018-03-26 =

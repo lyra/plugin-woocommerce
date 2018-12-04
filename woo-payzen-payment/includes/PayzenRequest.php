@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.6.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.2 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,12 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
+ * @category  Payment
+ * @package   Payzen
  * @author    Lyra Network (http://www.lyra-network.com/)
  * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
  * @copyright 2014-2018 Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
- * @category  payment
- * @package   payzen
  */
 
 require_once 'PayzenApi.php';
@@ -128,6 +128,7 @@ if (! class_exists('PayzenRequest', false)) {
             $regex_payment_cfg = '#^(SINGLE|MULTI:first=\d+;count=' . $supzero . ';period=' . $supzero . ')$#u';
             // AAAAMMJJhhmmss
             $regex_trans_date = '#^\d{4}(1[0-2]|0[1-9])(3[01]|[1-2]\d|0[1-9])(2[0-3]|[0-1]\d)([0-5]\d){2}$#u';
+            $regex_sub_effect_date = '#^\d{4}(1[0-2]|0[1-9])(3[01]|[1-2]\d|0[1-9])$#u';
             $regex_mail = '#^[^@]+@[^@]+\.\w{2,4}$#u'; // TODO plus restrictif
             $regex_params = '#^([^&=]+=[^&=]*)?(&[^&=]+=[^&=]*)*$#u'; // name1=value1&name2=value2...
             $regex_ship_type = '#^RECLAIM_IN_SHOP|RELAY_POINT|RECLAIM_IN_STATION|PACKAGE_DELIVERY_COMPANY|ETICKET$#u';
@@ -205,7 +206,9 @@ if (! class_exists('PayzenRequest', false)) {
             $this->addField('vads_shop_url', 'Shop URL', '#^https?://(\w+(:\w*)?@)?(\S+)(:[0-9]+)?[\w\#!:.?+=&%@`~;,|!\-/]*$#u');
             $this->addField('vads_site_id', 'Shop ID', '#^\d{8}$#u', true, 8);
             $this->addField('vads_tax_amount', 'The amount of tax', '#^' . $supzero . '$#u', false, 12);
+            $this->addField('vads_tax_rate', 'The rate of tax', '#^\d{1,2}\.\d{1,4}$#u', false, 6);
             $this->addField('vads_theme_config', 'Theme configuration', '#^[^;=]+=[^;=]*(;[^;=]+=[^;=]*)*;?$#u');
+            $this->addField('vads_totalamount_vat', 'The total amount of VAT', '#^' . $supzero . '$#u', false, 12);
             $this->addField('vads_threeds_mpi', 'Enable / disable 3D Secure', '#^[0-2]$#u', false);
             $this->addField('vads_trans_date', 'Transaction date', $regex_trans_date, true, 14);
             $this->addField('vads_trans_id', 'Transaction ID', '#^[0-8]\d{5}$#u', true, 6);
@@ -218,6 +221,14 @@ if (! class_exists('PayzenRequest', false)) {
             $this->addField('vads_user_info', 'User info', $ans255);
             $this->addField('vads_validation_mode', 'Validation mode', '#^[01]?$#u', false, 1);
             $this->addField('vads_version', 'Platform version', '#^V2$#u', true, 2);
+
+            // Subscription payment fields
+            $this->addField('vads_sub_amount', 'Subscription amount', '#^' . $supzero . '$#u');
+            $this->addField('vads_sub_currency', 'Subscription currency', '#^\d{3}$#u', false, 3);
+            $this->addField('vads_sub_desc', 'Subscription description', $ans255);
+            $this->addField('vads_sub_effect_date', 'Subscription effect date', $regex_sub_effect_date);
+            $this->addField('vads_sub_init_amount', 'Subscription initial amount', '#^' . $supzero . '$#u');
+            $this->addField('vads_sub_init_amount_number', 'subscription initial amount number', '#^\d+$#u');
 
             // set some default values
             $this->set('vads_version', 'V2');

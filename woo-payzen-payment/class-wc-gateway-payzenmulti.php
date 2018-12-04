@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.6.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.2 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,12 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
+ * @category  Payment
+ * @package   Payzen
  * @author    Lyra Network (http://www.lyra-network.com/)
  * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
  * @copyright 2014-2018 Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
- * @category  payment
- * @package   payzen
  */
 
 if (! defined('ABSPATH')) {
@@ -59,24 +59,29 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
 
         if ($payzen_plugin_features['restrictmulti']) {
-            $this->notices[] = __('ATTENTION: The payment in installments feature activation is subject to the prior agreement of Société Générale.<br />If you enable this feature while you have not the associated option, an error 07 - PAYMENT_CONFIG will occur and the buyer will not be able to pay.', 'woo-payzen-payment');
+            $this->notices[] = __('ATTENTION: The payment in installments feature activation is subject to the prior agreement of Société Générale.<br />If you enable this feature while you have not the associated option, an error 10000 – INSTALLMENTS_NOT_ALLOWED or 07 - PAYMENT_CONFIG will occur and the buyer will not be able to pay.', 'woo-payzen-payment');
         }
 
-        // reset PayZen multi payment admin form action
-        add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
+        if ($this->payzen_is_section_loaded()) {
+            // reset PayZen multi payment admin form action
+            add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
 
-        // update PayZen multi payment admin form action
-        add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+            // update PayZen multi payment admin form action
+            add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
-        // adding JS to admin form action
-        add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_script'));
+            // adding style to admin form action
+            add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_style'));
+
+            // adding JS to admin form action
+            add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_script'));
+        }
 
         // generate PayZen multi payment form action
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
     }
 
     /**
-     * Initialise Gateway Settings Form Fields
+     * Initialise gateway settings form fields.
      */
     public function init_form_fields()
     {
@@ -95,7 +100,8 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
                 'en_US' => 'Pay by credit card in installments',
                 'en_GB' => 'Pay by credit card in installments',
                 'fr_FR' => 'Paiement par carte bancaire en plusieurs fois',
-                'de_DE' => 'Ratenzahlung mit EC-/Kreditkarte'
+                'de_DE' => 'Ratenzahlung mit EC-/Kreditkarte',
+                'es_ES' => 'Pagar con tarjeta de crédito en cuotas'
             );
         }
 
@@ -175,10 +181,11 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 
         $multi_cards_keys = array(
             'AMEX', 'CB', 'DINERS', 'DISCOVER', 'E-CARTEBLEUE', 'JCB', 'MASTERCARD',
-            'PRV_BDP', 'PRV_BDT', 'PRV_OPT', 'PRV_SOC', 'VISA', 'VISA_ELECTRON'
+            'PRV_BDP', 'PRV_BDT', 'PRV_OPT', 'PRV_SOC', 'VISA', 'VISA_ELECTRON', 'VPAY'
         );
 
-        foreach ($cards as $key => $value) {
+        $keys = array_keys($cards);
+        foreach ($keys as $key) {
             if (! in_array($key, $multi_cards_keys)) {
                 unset($cards[$key]);
             }
@@ -233,7 +240,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
     }
 
     /**
-     * Generate Text Input HTML.
+     * Generate text input HTML.
      *
      * @access public
      * @param mixed $key
@@ -361,13 +368,17 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
     {
         global $woocommerce;
 
+        if (! parent::is_available()) {
+            return false;
+        }
+
         // check if any multi payment option is available
         $available_options = $this->get_available_options();
         if ($woocommerce->cart && empty($available_options)) {
             return false;
         }
 
-        return parent::is_available();
+        return true;
     }
 
     private function get_available_options()
@@ -433,7 +444,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
     }
 
     /**
-     * Process the payment and return the result
+     * Process the payment and return the result.
      **/
     public function process_payment($order_id)
     {

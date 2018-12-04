@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.6.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.2 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,12 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
+ * @category  Payment
+ * @package   Payzen
  * @author    Lyra Network (http://www.lyra-network.com/)
  * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
  * @copyright 2014-2018 Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
- * @category  payment
- * @package   payzen
  */
 
 require_once 'PayzenApi.php';
@@ -154,7 +154,8 @@ if (! class_exists('PayzenResponse', false)) {
                 'AUTHORISED',
                 'AUTHORISED_TO_VALIDATE',
                 'CAPTURED',
-                'CAPTURE_FAILED' /* capture will be redone */
+                'CAPTURE_FAILED', /* capture will be redone */
+                'ACCEPTED'
             );
 
             return in_array($this->transStatus, $confirmedStatuses) || $this->isPendingPayment();
@@ -171,7 +172,8 @@ if (! class_exists('PayzenResponse', false)) {
                 'INITIAL',
                 'WAITING_AUTHORISATION',
                 'WAITING_AUTHORISATION_TO_VALIDATE',
-                'UNDER_VERIFICATION'
+                'UNDER_VERIFICATION',
+                'WAITING_FOR_PAYMENT'
             );
 
             return in_array($this->transStatus, $pendingStatuses);

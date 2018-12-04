@@ -1,6 +1,6 @@
 <?php
 /**
-  * PayZen V2-Payment Module version 1.6.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+  * PayZen V2-Payment Module version 1.6.2 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,12 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
+ * @category  Payment
+ * @package   Payzen
  * @author    Lyra Network (http://www.lyra-network.com/)
  * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
  * @copyright 2014-2018 Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
- * @category  payment
- * @package   payzen
  */
 
 if (! defined('ABSPATH')) {
@@ -33,6 +33,7 @@ if (! defined('ABSPATH')) {
  */
 class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
 {
+    protected $payzen_countries = array('AT', 'DE', 'DK', 'FI', 'NL', 'NO', 'SE');
 
     public function __construct()
     {
@@ -56,18 +57,23 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
         $this->testmode = ($this->get_general_option('ctx_mode') == 'TEST');
         $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
 
-        // reset PayZen klarna payment admin form action
-        add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
+        if ($this->payzen_is_section_loaded()) {
+            // reset PayZen klarna payment admin form action
+            add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
 
-        // update PayZen klarna payment admin form action
-        add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+            // update PayZen klarna payment admin form action
+            add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+
+            // adding style to admin form action
+            add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_style'));
+        }
 
         // generate PayZen klarna payment form action
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
     }
 
     /**
-     * Initialise Gateway Settings Form Fields
+     * Initialise gateway settings form fields.
      */
     public function init_form_fields()
     {
@@ -94,7 +100,8 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
                 'en_US' => 'Pay with Klarna',
                 'en_GB' => 'Pay with Klarna',
                 'fr_FR' => 'Paiement avec Klarna',
-                'de_DE' => 'Zahlung mit Klarna'
+                'de_DE' => 'Zahlung mit Klarna',
+                'es_ES' => 'Pago con Klarna'
             );
         }
     }
@@ -111,29 +118,6 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
     }
 
     /**
-     * Check if this gateway is enabled and available for the current cart.
-     */
-    public function is_available()
-    {
-        global $woocommerce;
-
-        if (! $woocommerce->customer) {
-            return false;
-        }
-
-        $customer = $woocommerce->customer;
-        $country = method_exists($customer, 'get_billing_country') ? $customer->get_billing_country() : $customer->get_country();
-
-        // check billing country
-        if (! in_array($country, array('AT', 'DE', 'DK', 'FI', 'NL', 'NO', 'SE'))) {
-            // Klarna is available in some countries
-            return false;
-        }
-
-        return parent::is_available();
-    }
-
-    /**
      * Prepare PayZen form params to send to payment gateway.
      **/
     protected function payzen_fill_request($order)
@@ -147,20 +131,22 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
         $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
 
         // add cart products info
-        foreach ($order->get_items() as $item_id => $line_item) {
+        foreach ($order->get_items() as $line_item) {
             $item_data = $line_item->get_data();
 
-            $product_amount = $item_data['total'] / $item_data['quantity'];
-            $product_tax_amount = $item_data['total_tax'] / $item_data['quantity'];
+            $qty = (int) $item_data['quantity'];
+
+            $product_amount = $item_data['total'] / $qty;
+            $product_tax_amount = $item_data['total_tax'] / $qty;
             $product_tax_rate = round($product_tax_amount / $product_amount * 100, 4);
 
             $this->payzen_request->addProduct(
                 $item_data['name'],
-                $currency->convertAmountToInteger($product_amount),
-                $item_data['quantity'],
+                $currency->convertAmountToInteger($product_amount + $product_tax_amount), // amount with taxes
+                $qty,
                 $item_data['product_id'],
                 null, // we have no product category
-                $product_tax_rate
+                $product_tax_rate // in percentage
             );
         }
     }

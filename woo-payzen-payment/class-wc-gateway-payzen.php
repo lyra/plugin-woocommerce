@@ -1,6 +1,6 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.6.1 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * PayZen V2-Payment Module version 1.6.2 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,12 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
+ * @category  Payment
+ * @package   Payzen
  * @author    Lyra Network (http://www.lyra-network.com/)
  * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
  * @copyright 2014-2018 Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
- * @category  payment
- * @package   payzen
  */
 
 if (! defined('ABSPATH')) {
@@ -34,11 +34,9 @@ if (! defined('ABSPATH')) {
 class WC_Gateway_Payzen extends WC_Payment_Gateway
 {
 
-    private static $success_order_statues = array(
-        'on-hold' => 'On Hold',
-        'processing' => 'Processing',
-        'completed' => 'Complete'
-    );
+    protected $admin_page;
+    protected $admin_link;
+    protected $reset_admin_link;
 
     protected $general_settings = array();
     protected $general_form_fields = array();
@@ -64,14 +62,16 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $this->testmode = ($this->get_general_option('ctx_mode') == 'TEST');
         $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
 
-        // reset payzen common admin form action
-        add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
+        if ($this->payzen_is_section_loaded()) {
+            // reset payzen common admin form action
+            add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
 
-        // adding style to admin form action
-        add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_style'));
+            // adding style to admin form action
+            add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_style'));
 
-        // update payzen admin form action
-        add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+            // update payzen admin form action
+            add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+        }
 
         // return from payment gateway action
         add_action('woocommerce_api_wc_gateway_payzen', array($this, 'payzen_notify_response'));
@@ -83,37 +83,28 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         add_action('woocommerce_email_after_order_table', array($this, 'payzen_add_order_email_payment_result'), 10, 3);
     }
 
+    protected function payzen_is_section_loaded()
+    {
+        $current_section = isset($_GET['section']) ? $_GET['section'] : null;
+        return ($current_section === $this->id) || (strtolower($current_section) === strtolower(get_class($this)));
+    }
+
+
     protected function payzen_init()
     {
-        global $woocommerce;
-
         $this->logger = new WC_Logger();
 
         // init PayZen API
         $this->payzen_request = new PayzenRequest();
 
-        $this->admin_section = 'wc_gateway_' . $this->id;
-        $this->admin_tab = 'checkout';
-        $this->admin_page = 'wc-settings';
+        if ($this->payzen_is_section_loaded()) {
+            $this->admin_page = $_GET['page'];
 
-        // backward compatibility
-        if (version_compare($woocommerce->version, '2.1.0', '<')) {
-            $this->admin_section = get_class($this);
-            $this->admin_tab = 'payment_gateways';
-            $this->admin_page = 'woocommerce_settings';
+            $this->admin_link = admin_url('admin.php?page=' . $_GET['page'] . '&tab=' . $_GET['tab'] . '&section=' . $_GET['section']);
+
+            $this->reset_admin_link = add_query_arg('noheader', '', add_query_arg('reset', '', $this->admin_link));
+            $this->reset_admin_link = wp_nonce_url($this->reset_admin_link, $_GET['page']);
         }
-
-        // admin settings page URL
-        $this->admin_link = add_query_arg(
-            'section',
-            $this->admin_section,
-            add_query_arg('tab', $this->admin_tab, add_query_arg('page', $this->admin_page, admin_url('admin.php')))
-        );
-
-        // reset admin settings URL
-        $this->reset_admin_link = $this->admin_link;
-        $this->reset_admin_link = add_query_arg('noheader', 'true', add_query_arg('reset', 'true', $this->reset_admin_link));
-        $this->reset_admin_link = wp_nonce_url($this->reset_admin_link, $this->admin_page);
     }
 
     public function payzen_admin_head_style()
@@ -144,7 +135,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     }
 
     /**
-     * Admin Panel Options.
+     * Admin panel options.
      */
     public function admin_options()
     {
@@ -186,7 +177,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         // check if correct link
-        if ($this->admin_section != $_GET['section']) {
+        if (! $this->payzen_is_section_loaded()) {
             return;
         }
 
@@ -211,7 +202,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     }
 
     /**
-     * Initialise Gateway Settings Form Fields
+     * Initialise gateway settings form fields.
      */
     public function init_form_fields()
     {
@@ -236,7 +227,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         // get documentation links
         $docs = '';
-        $filenames = glob(plugin_dir_path(__FILE__) . 'installation_doc/PayZen_WooCommerce_2.x-3.x_v1.6.1*.pdf');
+        $filenames = glob(plugin_dir_path(__FILE__) . 'installation_doc/PayZen_WooCommerce_2.x-3.x_v1.6.2*.pdf');
 
         $languages = array(
             'fr' => 'Français',
@@ -251,12 +242,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
             $docs .= '<a style="margin-left: 10px; text-decoration: none; text-transform: uppercase;" href="' . WC_PAYZEN_PLUGIN_URL
                 . 'installation_doc/' . $base_filename . '.pdf" target="_blank">' . $languages[$lang] . '</a>';
-        }
-
-        // prepare succes order statuses array
-        $statues = array('default' => __('Default', 'woo-payzen-payment'));
-        foreach (self::$success_order_statues as $key => $value) {
-            $statues[$key] = __($value, 'woo-payzen-payment');
         }
 
         $this->form_fields = array(
@@ -281,7 +266,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'contrib_version' => array(
                 'title' => __('Module version', 'woo-payzen-payment'),
                 'type' => 'text',
-                'description' => '1.6.1',
+                'description' => '1.6.2',
                 'css' => 'display: none;'
             ),
             'platform_version' => array(
@@ -350,10 +335,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'type' => 'select',
                 'default' => 'SHA-256',
                 'options' => array(
-                    PayzenApi::ALGO_SHA1 => PayzenApi::ALGO_SHA1,
-                    PayzenApi::ALGO_SHA256 => PayzenApi::ALGO_SHA256
+                    PayzenApi::ALGO_SHA1 => 'SHA-1',
+                    PayzenApi::ALGO_SHA256 => 'HMAC-SHA-256'
                 ),
-                'description' => sprintf(__('Algorithm used to compute the payment form signature. Selected algorithm must be the same as one configured in the %s Back Office.<br /><b>The SHA-256 algorithm should not be activated if it is not yet available in the %s Back Office, the feature will be available soon.</b>', 'woo-payzen-payment'), 'PayZen', 'PayZen'),
+                'description' => sprintf(__('Algorithm used to compute the payment form signature. Selected algorithm must be the same as one configured in the %s Back Office.<br /><b>The HMAC-SHA-256 algorithm should not be activated if it is not yet available in the %s Back Office, the feature will be available soon.</b>', 'woo-payzen-payment'), 'PayZen', 'PayZen'),
                 'class' => 'wc-enhanced-select'
             ),
             'url_check' => array(
@@ -403,7 +388,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'type' => 'select',
                 'default' => '',
                 'options' => array(
-                    '' => __('Back Office configuration', 'woo-payzen-payment'),
+                    '' => sprintf(__('%s Back Office configuration', 'woo-payzen-payment'), 'PayZen'),
                     '0' => __('Automatic', 'woo-payzen-payment'),
                     '1' => __('Manual', 'woo-payzen-payment')
                 ),
@@ -448,7 +433,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     'en_US' => 'Redirection to shop in a few seconds...',
                     'en_GB' => 'Redirection to shop in a few seconds...',
                     'fr_FR' => 'Redirection vers la boutique dans quelques instants...',
-                    'de_DE' => 'Weiterleitung zum Shop in Kürze...'
+                    'de_DE' => 'Weiterleitung zum Shop in Kürze...',
+                    'es_ES' => 'Redirección a la tienda en unos momentos...'
                 ),
                 'description' => __('Message displayed on the payment page prior to redirection after a successful payment.', 'woo-payzen-payment'),
                 'css' => 'width: 35em;'
@@ -466,7 +452,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     'en_US' => 'Redirection to shop in a few seconds...',
                     'en_GB' => 'Redirection to shop in a few seconds...',
                     'fr_FR' => 'Redirection vers la boutique dans quelques instants...',
-                    'de_DE' => 'Weiterleitung zum Shop in Kürze...'
+                    'de_DE' => 'Weiterleitung zum Shop in Kürze...',
+                    'es_ES' => 'Redirección a la tienda en unos momentos...'
                 ),
                 'description' => __('Message displayed on the payment page prior to redirection after a declined payment.', 'woo-payzen-payment'),
                 'css' => 'width: 35em;'
@@ -486,7 +473,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'title' => __('Order Status', 'woo-payzen-payment'),
                 'type' => 'select',
                 'default' => 'default',
-                'options' => $statues,
+                'options' => $this->get_success_order_statuses(true),
                 'description' => __('Defines the status of orders paid with this payment mode.', 'woo-payzen-payment'),
                 'class' => 'wc-enhanced-select'
             )
@@ -500,7 +487,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         if ($payzen_plugin_features['shatwo']) {
-            // SHA-256 already available, update field description
+            // HMAC-SHA-256 already available, update field description
             $desc = preg_replace('#<br /><b>[^<>]+</b>#', '', $this->form_fields['sign_algo']['description']);
             $this->form_fields['sign_algo']['description'] = $desc;
         }
@@ -723,6 +710,22 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return parent::validate_select_field($key, $value);
     }
 
+    public function validate_3ds_min_amount_field($key, $value = null)
+    {
+        if (empty($value)) {
+            return '';
+        }
+
+        $new_value = parent::validate_text_field($key, $value);
+
+        $new_value = str_replace(',', '.', $new_value);
+        if (! is_numeric($new_value) || ($new_value < 0)) { // invalid value, restore old
+            return $this->get_option($key);
+        }
+
+        return $new_value;
+    }
+
     /**
      * Check if this gateway is available for the current currency.
      */
@@ -737,7 +740,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     }
 
     /**
-     * Check for PayZen notify Response.
+     * Check for PayZen notify response.
      **/
     public function payzen_notify_response()
     {
@@ -759,7 +762,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         if (! $payzen_response->isAuthentified()) {
             $this->log('Authentication failed: received invalid response with parameters: ' . print_r($raw_response, true));
-            // $this->log('Signature algorithm selected in module settings must be the same as one selected in PayZen Back Office.');
+            $this->log('Signature algorithm selected in module settings must be the same as one selected in PayZen Back Office.');
 
             if ($from_server) {
                 $this->log('IPN URL PROCESS END');
@@ -767,7 +770,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             } else {
                 // fatal error, empty cart
                 $woocommerce->cart->empty_cart();
-                $this->add_notice(__('An error has occured in the payment process.', 'woo-payzen-payment'), 'error');
+                $this->add_notice(__('An error has occurred in the payment process.', 'woo-payzen-payment'), 'error');
 
                 $this->log('RETURN URL PROCESS END');
 
@@ -809,7 +812,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             } else {
                 // fatal error, empty cart
                 $woocommerce->cart->empty_cart();
-                $this->add_notice(__('An error has occured in the payment process.', 'woo-payzen-payment'), 'error');
+                $this->add_notice(__('An error has occurred in the payment process.', 'woo-payzen-payment'), 'error');
 
                 $this->log('RETURN URL PROCESS END');
                 $this->payzen_redirect($cart_url, $iframe);
@@ -817,8 +820,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         if ($this->testmode && $payzen_plugin_features['prodfaq']) {
-            $msg = __('<p><u>GOING INTO PRODUCTION</u></p>You want to know how to put your shop into production mode, please go to this URL: ', 'woo-payzen-payment');
-            $msg .= '<a href="https://secure.payzen.eu/html/faq/prod" target="_blank">https://secure.payzen.eu/html/faq/prod</a>';
+            $msg = __('<p><u>GOING INTO PRODUCTION</u></p>You want to know how to put your shop into production mode, please read chapters « Proceeding to test phase » and « Shifting the shop to production mode » in the documentation of the module.', 'woo-payzen-payment');
 
             $this->add_notice($msg);
         }
@@ -876,9 +878,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     $this->log("Warning ! IPN URL call has not worked. Payment completed by return URL call for order #$order_id.");
 
                     if ($this->testmode) {
-                        $ipn_url_warn = sprintf(__('The automatic notification (peer to peer connection between the payment gateway and your shopping cart solution) hasn\'t worked. Have you correctly set up the notification URL in the %s Back Office ?', 'woo-payzen-payment'), 'PayZen');
+                        $ipn_url_warn = sprintf(__('The automatic validation has not worked. Have you correctly set up the notification URL in the %s Back Office?', 'woo-payzen-payment'), 'PayZen');
                         $ipn_url_warn .= '<br />';
-                        $ipn_url_warn .= __('For understanding the problem, please read the documentation of the module : <br />&nbsp;&nbsp;&nbsp;- Chapter &laquo;To read carefully before going further&raquo;<br />&nbsp;&nbsp;&nbsp;- Chapter &laquo;Notification URL settings&raquo;', 'woo-payzen-payment');
+                        $ipn_url_warn .= __('For understanding the problem, please read the documentation of the module : <br />&nbsp;&nbsp;&nbsp;- Chapter &laquo; To read carefully before going further &raquo;<br />&nbsp;&nbsp;&nbsp;- Chapter &laquo; Notification URL settings &raquo;', 'woo-payzen-payment');
 
                         $this->add_notice($ipn_url_warn, 'error');
                     }
@@ -920,7 +922,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     default:
                         $this->log("Order #$order_id is in a pending status and payment failed. Cancel order.");
 
-                        // Add order note
+                        // add order note
                         $this->payzen_add_order_note($payzen_response, $order);
 
                         $order->update_status('failed');
@@ -930,7 +932,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 $this->log('IPN URL PROCESS END');
                 die();
-            } elseif ($payzen_response->isAcceptedPayment() && key_exists($this->get_order_property($order, 'status'), self::$success_order_statues)) {
+            } elseif ($payzen_response->isAcceptedPayment() && key_exists($this->get_order_property($order, 'status'), $this->get_success_order_statuses())) {
                 $status = $payzen_response->isPendingPayment() ? 'pending' : 'successfull';
                 $this->log("Payment $status confirmed for order #$order_id.");
 
@@ -967,7 +969,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 } else {
                     // fatal error, empty cart
                     $woocommerce->cart->empty_cart();
-                    $this->add_notice(__('An error has occured in the payment process.', 'woo-payzen-payment'), 'error');
+                    $this->add_notice(__('An error has occurred in the payment process.', 'woo-payzen-payment'), 'error');
 
                     $this->log('RETURN URL PROCESS END');
                     $this->payzen_redirect($cart_url, $iframe);
@@ -1148,5 +1150,19 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $note .= sprintf(__('Transaction status : %s.', 'woo-payzen-payment'), $payzen_response->getTransStatus());
 
         $order->add_order_note($note);
+    }
+
+    private function get_success_order_statuses($default = false) {
+        $statuses =  array(
+            'on-hold' => __('On Hold', 'woo-payzen-payment'),
+            'processing' => __('Processing', 'woo-payzen-payment'),
+            'completed' => __('Complete', 'woo-payzen-payment')
+        );
+
+        if ($default) {
+            $statuses = array('default' => __('Default', 'woo-payzen-payment')) + $statuses;
+        }
+
+        return $statuses;
     }
 }
