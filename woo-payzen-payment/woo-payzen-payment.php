@@ -1,27 +1,12 @@
 <?php
 /**
- * PayZen V2-Payment Module version 1.6.2 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * Copyright © Lyra Network and contributors.
+ * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
- * @category  Payment
- * @package   Payzen
- * @author    Lyra Network (http://www.lyra-network.com/)
- * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * @copyright 2014-2018 Lyra Network and contributors
- * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
+ * @author    Lyra Network (https://www.lyra-network.com/)
+ * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
+ * @copyright Lyra Network and contributors
+ * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
  */
 
 /**
@@ -29,9 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.6.2
+ * Version: 1.7.0
  * Author URI: https://www.lyra-network.com
  * License: GPLv2 or later
+ * Requires at least: 3.5
+ * Tested up to: 5.0
+ * WC requires at least: 2.0
+ * WC tested up to: 3.5
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -79,7 +68,7 @@ function woocommerce_payzen_activation()
 }
 register_activation_hook(__FILE__, 'woocommerce_payzen_activation');
 
-// Delete all data when uninstalling plugin.
+/* Delete all data when uninstalling plugin. */
 function woocommerce_payzen_uninstallation()
 {
     delete_option('woocommerce_payzen_settings');
@@ -97,6 +86,10 @@ function woocommerce_payzen_init()
 
     // load translation files
     load_plugin_textdomain('woo-payzen-payment', false, plugin_basename(dirname(__FILE__)) . '/languages');
+
+    if (! class_exists('Payzen_Subscriptions_Loader')) { // load subscriptions processing mecanism
+        require_once 'includes/subscriptions/payzen-subscriptions-loader.php';
+    }
 
     if (! class_exists('WC_Gateway_Payzen')) {
         require_once 'class-wc-gateway-payzen.php';
@@ -123,7 +116,7 @@ function woocommerce_payzen_init()
 }
 add_action('woocommerce_init', 'woocommerce_payzen_init');
 
-/* Add PayZen method to woocommerce methods. */
+/* Add our payment methods to woocommerce methods. */
 function woocommerce_payzen_add_method($methods)
 {
     global $payzen_plugin_features;
@@ -192,7 +185,7 @@ function payzen_admin_url($id)
     return admin_url($base_url . $section);
 }
 
-/* Retrieve blog_id from post when this is a PayZen IPN URL call. */
+/* Retrieve blog_id from post when this is an IPN URL call. */
 if (is_multisite() && key_exists('vads_hash', $_POST) && $_POST['vads_hash']
     && key_exists('vads_order_info2', $_POST) && $_POST['vads_order_info2']) {
     global $wpdb, $current_blog, $current_site;
