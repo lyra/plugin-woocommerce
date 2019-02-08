@@ -1,0 +1,35 @@
+<?php
+/**
+ * Copyright © Lyra Network and contributors.
+ * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
+ *
+ * @author    Lyra Network (https://www.lyra-network.com/)
+ * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
+ * @copyright Lyra Network and contributors
+ * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
+ */
+
+if (! defined('ABSPATH')) {
+    exit; // exit if accessed directly
+}
+
+class Payzen_Subscriptions_Loader
+{
+    private static $handlers = array(
+        'disabled' => 'Payzen_Disabled_Subscriptions_Handler',
+        'subscriptio' => 'Payzen_Subscriptio_Subscriptions_Handler'
+    );
+
+    public static function getInstance($handler)
+    {
+        if (! key_exists($handler, self::$handlers)) {
+            throw new InvalidArgumentException("\" $handler \" is not a valid subscriptions handler identifier.");
+        }
+
+        include_once 'payzen-subscriptions-handler-interface.php';
+        include_once "payzen-$handler-subscriptions-handler.php";
+
+        $class = self::$handlers[$handler];
+        return new $class();
+    }
+}

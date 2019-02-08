@@ -1,36 +1,18 @@
 <?php
 /**
-  * PayZen V2-Payment Module version 1.6.2 for WooCommerce 2.x-3.x. Support contact : support@payzen.eu.
+ * Copyright © Lyra Network and contributors.
+ * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
- * @category  Payment
- * @package   Payzen
- * @author    Lyra Network (http://www.lyra-network.com/)
- * @author    Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * @copyright 2014-2018 Lyra Network and contributors
- * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html  GNU General Public License (GPL v2)
+ * @author    Lyra Network (https://www.lyra-network.com/)
+ * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
+ * @copyright Lyra Network and contributors
+ * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
  */
 
 if (! defined('ABSPATH')) {
     exit; // exit if accessed directly
 }
 
-/**
- * PayZen Payment Gateway : standard payment class.
- */
 class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
 {
     protected $payzen_countries = array('AT', 'DE', 'DK', 'FI', 'NL', 'NO', 'SE');
@@ -40,9 +22,9 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
         $this->id = 'payzenklarna';
         $this->icon = apply_filters('woocommerce_payzenklarna_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/klarna.png');
         $this->has_fields = true;
-        $this->method_title = 'PayZen - ' . __('Payment with Klarna', 'woo-payzen-payment');
+        $this->method_title = self::GATEWAY_NAME . ' - ' . __('Payment with Klarna', 'woo-payzen-payment');
 
-        // init PayZen common vars
+        // init common vars
         $this->payzen_init();
 
         // load the form fields
@@ -58,17 +40,20 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
         $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
 
         if ($this->payzen_is_section_loaded()) {
-            // reset PayZen klarna payment admin form action
+            // reset klarna payment admin form action
             add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
 
-            // update PayZen klarna payment admin form action
+            // update klarna payment admin form action
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
             // adding style to admin form action
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_style'));
+
+            // adding JS to admin form action
+            add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_script'));
         }
 
-        // generate PayZen klarna payment form action
+        // generate klarna payment form action
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
     }
 
@@ -83,6 +68,7 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
         unset($this->form_fields['payment_cards']);
         unset($this->form_fields['advanced_options']);
         unset($this->form_fields['card_data_mode']);
+        unset($this->form_fields['payment_by_token']);
 
         $this->form_fields['capture_delay']['default'] = 0;
         $this->form_fields['capture_delay']['description'] = __('The number of days before the bank capture. Should be between 0 and 7.', 'woo-payzen-payment');
@@ -118,7 +104,7 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
     }
 
     /**
-     * Prepare PayZen form params to send to payment gateway.
+     * Prepare form params to send to payment gateway.
      **/
     protected function payzen_fill_request($order)
     {
