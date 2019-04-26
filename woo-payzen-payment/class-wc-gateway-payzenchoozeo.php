@@ -3,14 +3,14 @@
  * Copyright © Lyra Network and contributors.
  * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
  *
- * @author    Lyra Network (https://www.lyra-network.com/)
+ * @author    Lyra Network (https://www.lyra.com/)
  * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
  * @copyright Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
  */
 
 if (! defined('ABSPATH')) {
-    exit; // exit if accessed directly
+    exit; // Exit if accessed directly.
 }
 
 class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
@@ -24,38 +24,38 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         $this->id = 'payzenchoozeo';
         $this->icon = apply_filters('woocommerce_payzenchoozeo_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/choozeo.png');
         $this->has_fields = true;
-        $this->method_title = self::GATEWAY_NAME. ' - ' . __('Payment with Choozeo', 'woo-payzen-payment');
+        $this->method_title = self::GATEWAY_NAME. ' - ' . __('Choozeo payment', 'woo-payzen-payment');
 
-        // init common vars
+        // Init common vars.
         $this->payzen_init();
 
-        // load the form fields
+        // Load the form fields.
         $this->init_form_fields();
 
-        // load the module settings
+        // Load the module settings.
         $this->init_settings();
 
-        // define user set variables
+        // Define user set variables.
         $this->title = $this->get_title();
         $this->description = $this->get_description();
         $this->testmode = ($this->get_general_option('ctx_mode') == 'TEST');
         $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
 
         if ($this->payzen_is_section_loaded()) {
-            // reset choozeo payment admin form action
+            // Reset choozeo payment admin form action.
             add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
 
-            // update choozeo payment admin form action
+            // Update choozeo payment admin form action.
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
-            // adding style to admin form action
+            // Adding style to admin form action.
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_style'));
 
-            // adding JS to admin form action
+            // Adding JS to admin form action.
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_script'));
         }
 
-        // generate choozeo payment form action
+        // Generate choozeo payment form action.
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
     }
 
@@ -72,25 +72,25 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         unset($this->form_fields['card_data_mode']);
         unset($this->form_fields['payment_by_token']);
 
-        // by default, disable Choozeo payment sub-module
+        // By default, disable Choozeo payment sub-module.
         $this->form_fields['enabled']['default'] = 'no';
         $this->form_fields['enabled']['description'] = __('Enables / disables Choozeo payment.', 'woo-payzen-payment');
 
-        $this->form_fields['title']['default'] = __('Pay with Choozeo', 'woo-payzen-payment');
+        $this->form_fields['title']['default'] = __('Payment with Choozeo without fees', 'woo-payzen-payment');
 
-        // if WooCommecre Multilingual is not available (or installed version not allow gateways UI translation)
-        // let's suggest our translation feature
+        // If WooCommecre Multilingual is not available (or installed version not allow gateways UI translation).
+        // Let's suggest our translation feature.
         if (! class_exists('WCML_WC_Gateways')) {
             $this->form_fields['title']['default'] = array(
-                'en_US' => 'Pay with Choozeo',
-                'en_GB' => 'Pay with Choozeo',
-                'fr_FR' => 'Paiement avec Choozeo',
-                'de_DE' => 'Zahlung mit Choozeo',
-                'es_ES' => 'Pago con Choozeo'
+                'en_US' => 'Payment with Choozeo without fees',
+                'en_GB' => 'Payment with Choozeo without fees',
+                'fr_FR' => 'Paiement avec Choozeo sans frais',
+                'de_DE' => 'Zahlung mit Choozeo ohne zusätzliche',
+                'es_ES' => 'Pago con Choozeo sin gastos'
             );
         }
 
-        // set amount restrictions default values
+        // Set amount restrictions default values.
         $this->form_fields['amount_min']['default'] = '135';
         $this->form_fields['amount_max']['default'] = '2000';
 
@@ -153,7 +153,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         $data['columns']         = isset($data['columns']) ? (array) $data['columns'] : array();
         $data['default']         = isset($data['default']) ? (array) $data['default'] : array();
 
-        // description handling
+        // Description handling.
         if ($data['desc_tip'] === true) {
             $description = '';
             $tip         = $data['description'];
@@ -235,16 +235,16 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         $max = $this->get_option('amount_max');
 
         foreach ($value as $code => $option) {
-            // clean strings
+            // Clean strings.
             $fnc = function_exists('wc_clean') ? 'wc_clean' : 'woocommerce_clean';
             $value[$code] = array_map('esc_attr', array_map($fnc, (array) $option));
 
             if (($option['amount_min'] && (! is_numeric($option['amount_min']) || $option['amount_min'] < 0 || $option['amount_min'] < $min))) {
-                $value[$code]['amount_min'] = $old_value[$code]['amount_min']; // restore old value
+                $value[$code]['amount_min'] = $old_value[$code]['amount_min']; // Restore old value.
             }
 
             if ($option['amount_max'] && (! is_numeric($option['amount_max']) || $option['amount_max'] < 0 || $option['amount_max'] > $max)) {
-                $value[$code]['amount_max'] = $old_value[$code]['amount_max']; // restore old value
+                $value[$code]['amount_max'] = $old_value[$code]['amount_max']; // Restore old value.
             }
         }
 
@@ -262,7 +262,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
             return false;
         }
 
-        // check Choozeo payment options
+        // Check Choozeo payment options.
         $available_options = $this->get_available_options();
         if ($woocommerce->cart && empty($available_options)) {
             return false;
@@ -359,10 +359,10 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         $options = $this->get_available_options();
         $label = $options[$option]['label'];
 
-        // save selected payment option into session
+        // Save selected payment option into session...
         set_transient('payzenchoozeo_option_' . $order_id, $option);
 
-        // ... and into DB
+        // ... and into DB.
         $order = new WC_Order($order_id);
         update_post_meta($this->get_order_property($order, 'id'), '_payment_method_title', $this->get_order_property($order, 'payment_method_title') . " ({$label})");
 
@@ -388,13 +388,13 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         $option = get_transient('payzenchoozeo_option_' . $this->get_order_property($order, 'id'));
         $this->payzen_request->set('payment_cards', $option);
 
-        // by default WooCommerce does not manage customer type
+        // By default WooCommerce does not manage customer type.
         $this->payzen_request->set('cust_status', 'PRIVATE');
 
         // Choozeo supports only automatic validation
         $this->payzen_request->set('validation_mode', '0');
 
-        // send FR even address is in DOM-TOM unless form is rejected
+        // Send FR even address is in DOM-TOM unless form is rejected.
         $this->payzen_request->set('cust_country', 'FR');
 
         delete_transient('payzenchoozeo_option_' . $this->get_order_property($order, 'id'));

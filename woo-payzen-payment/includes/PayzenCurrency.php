@@ -3,7 +3,7 @@
  * Copyright © Lyra Network and contributors.
  * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
  *
- * @author    Lyra Network (https://www.lyra-network.com/)
+ * @author    Lyra Network (https://www.lyra.com/)
  * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
  * @copyright Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
@@ -33,7 +33,7 @@ if (! class_exists('PayzenCurrency', false)) {
             $coef = pow(10, $this->decimals);
 
             $amount = $float * $coef;
-            return (int) (string) $amount; // cast amount to string (to avoid rounding) than return it as int
+            return (int) (string) $amount; // Cast amount to string (to avoid rounding) than return it as int.
         }
 
         public function convertAmountToFloat($integer)

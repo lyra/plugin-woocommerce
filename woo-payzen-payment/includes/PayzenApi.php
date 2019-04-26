@@ -3,7 +3,7 @@
  * Copyright © Lyra Network and contributors.
  * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
  *
- * @author    Lyra Network (https://www.lyra-network.com/)
+ * @author    Lyra Network (https://www.lyra.com/)
  * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
  * @copyright Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
@@ -62,7 +62,7 @@ if (! class_exists('PayzenApi', false)) {
         }
 
         /**
-         * Returns an array of languages accepted by the PayZen payment platform.
+         * Returns an array of languages accepted by the payment gateway.
          *
          * @return array[string][string]
          */
@@ -103,7 +103,7 @@ if (! class_exists('PayzenApi', false)) {
         }
 
         /**
-         * Return the list of currencies recognized by the PayZen platform.
+         * Return the list of currencies recognized by the payment gateway.
          *
          * @return array[int][PayzenCurrency]
          */
@@ -206,7 +206,7 @@ if (! class_exists('PayzenApi', false)) {
         }
 
         /**
-         * Returns an array of card types accepted by the PayZen payment platform.
+         * Returns an array of card types accepted by the payment gateway.
          *
          * @return array[string][string]
          */
@@ -251,9 +251,9 @@ if (! class_exists('PayzenApi', false)) {
         }
 
         /**
-         * Compute a PayZen signature. Parameters must be in UTF-8.
+         * Compute the signature. Parameters must be in UTF-8.
          *
-         * @param array[string][string] $parameters payment platform request/response parameters
+         * @param array[string][string] $parameters payment gateway request/response parameters
          * @param string $key shop certificate
          * @param string $algo signature algorithm
          * @param boolean $hashed set to false to get the unhashed signature
@@ -288,7 +288,7 @@ if (! class_exists('PayzenApi', false)) {
 
         /**
          * PHP is not yet a sufficiently advanced technology to be indistinguishable from magic...
-         * so don't use magic_quotes, they mess up with the platform response analysis.
+         * so don't use magic_quotes, they mess up with the gateway response analysis.
          *
          * @param array $potentially_quoted_data
          * @return mixed

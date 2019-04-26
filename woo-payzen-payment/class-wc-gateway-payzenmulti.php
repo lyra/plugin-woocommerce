@@ -3,14 +3,14 @@
  * Copyright © Lyra Network and contributors.
  * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
  *
- * @author    Lyra Network (https://www.lyra-network.com/)
+ * @author    Lyra Network (https://www.lyra.com/)
  * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
  * @copyright Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
  */
 
 if (! defined('ABSPATH')) {
-    exit; // exit if accessed directly
+    exit; // Exit if accessed directly.
 }
 
 class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
@@ -25,16 +25,16 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME . ' - ' . __('Payment in installments', 'woo-payzen-payment');
 
-        // init common vars
+        // Init common vars.
         $this->payzen_init();
 
-        // load the form fields
+        // Load the form fields.
         $this->init_form_fields();
 
-        // load the module settings
+        // Load the module settings.
         $this->init_settings();
 
-        // define user set variables
+        // Define user set variables.
         $this->title = $this->get_title();
         $this->description = $this->get_description();
         $this->testmode = ($this->get_general_option('ctx_mode') == 'TEST');
@@ -45,20 +45,20 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         }
 
         if ($this->payzen_is_section_loaded()) {
-            // reset multi payment admin form action
+            // Reset multi payment admin form action.
             add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
 
-            // update multi payment admin form action
+            // Update multi payment admin form action.
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
-            // adding style to admin form action
+            // Adding style to admin form action.
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_style'));
 
-            // adding JS to admin form action
+            // Adding JS to admin form action.
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_script'));
         }
 
-        // generate multi payment form action
+        // Generate multi payment form action.
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
     }
 
@@ -71,21 +71,21 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 
         unset($this->form_fields['payment_by_token']);
 
-        // by default, disable multiple payment sub-module
+        // By default, disable multiple payment sub-module.
         $this->form_fields['enabled']['default'] = 'no';
         $this->form_fields['enabled']['description'] = __('Enables / disables multiple payment.', 'woo-payzen-payment');
 
-        $this->form_fields['title']['default'] = __('Pay by credit card in installments', 'woo-payzen-payment');
+        $this->form_fields['title']['default'] = __('Payment by credit card in installments', 'woo-payzen-payment');
 
-        // if WooCommecre Multilingual is not available (or installed version not allow gateways UI translation)
-        // let's suggest our translation feature
+        // If WooCommecre Multilingual is not available (or installed version not allow gateways UI translation).
+        // Let's suggest our translation feature.
         if (! class_exists('WCML_WC_Gateways')) {
             $this->form_fields['title']['default'] = array(
-                'en_US' => 'Pay by credit card in installments',
-                'en_GB' => 'Pay by credit card in installments',
+                'en_US' => 'Payment by credit card in installments',
+                'en_GB' => 'Payment by credit card in installments',
                 'fr_FR' => 'Paiement par carte bancaire en plusieurs fois',
                 'de_DE' => 'Ratenzahlung mit EC-/Kreditkarte',
-                'es_ES' => 'Pagar con tarjeta de crédito en cuotas'
+                'es_ES' => 'Pago con tarjeta de crédito en cuotas'
             );
         }
 
@@ -106,7 +106,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
             'type' => 'title'
         );
 
-        // multiple payment options
+        // Multiple payment options.
         $descr = __('Click on "Add" button to configure one or more payment options. <br /><b>Label : </b>The option label to display on the frontend. <br /><b>Min amount : </b>Minimum amount to enable the payment option. <br /><b>Max amount : </b>Maximum amount to enable the payment option. <br /><b>Count : </b>Total number of payments. <br /><b>Period : </b>Delay (in days) between payments. <br /><b>1st payment : </b>Amount of first payment, in percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do not forget to click on "Save" button to save your modifications.</b>', 'woo-payzen-payment');
 
         $cards = $this->get_supported_card_types();
@@ -191,7 +191,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
                 }
 
                 if (! key) {
-                    // new line, generate key
+                    // New line, generate key.
                     key = new Date().getTime();
                 }
 
@@ -249,7 +249,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $data['description']    = isset($data['description']) ? $data['description'] : '';
         $data['columns']        = isset($data['columns']) ? (array) $data['columns'] : array();
 
-        // description handling
+        // Description handling.
         if ($data['desc_tip'] === true) {
             $description = '';
             $tip         = $data['description'];
@@ -305,7 +305,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
                          })';
 
         if (! empty($options)) {
-            // add already inserted lines
+            // Add already inserted lines.
             foreach ($options as $code => $option) {
                 $html .= "\n" . 'payzenAddOption("' . $field_name . '", ' . json_encode($option) . ', "' . $code . '");';
             }
@@ -335,9 +335,9 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
                     || ! is_numeric($option['count']) || $option['count'] < 1
                     || ! is_numeric($option['period']) || $option['period'] <= 0
                     || ($option['first'] && (! is_numeric($option['first']) || $option['first'] < 0 || $option['first'] > 100))) {
-                unset($value[$code]); // not save this option
+                unset($value[$code]); // Not save this option.
             } else {
-                // clean string
+                // Clean string.
                 $fnc = function_exists('wc_clean') ? 'wc_clean' : 'woocommerce_clean';
                 $value[$code] = array_map('esc_attr', array_map($fnc, (array) $option));
             }
@@ -357,7 +357,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
             return false;
         }
 
-        // check if any multi payment option is available
+        // Check if any multi payment option is available.
         $available_options = $this->get_available_options();
         if ($woocommerce->cart && empty($available_options)) {
             return false;
@@ -399,15 +399,15 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $options = $this->get_available_options();
 
         if (empty($options)) {
-            // should not happens for multi payment
+            // Should not happens for multi payment.
             return;
         }
 
         echo '<ul>';
 
         if (count($options) == 1) {
-            $option = reset($options); // the option itself
-            $key = key($options); // the option key in options array
+            $option = reset($options); // The option itself.
+            $key = key($options); // The option key in options array.
             echo '<span style="font-weight: bold;">' . __('Your payment option', 'woo-payzen-payment') . '</span>';
             echo '<li style="list-style-type: none;">
                     <input type="hidden" id="payzenmulti_option_' . $key . '" value="' . $key . '" name="payzenmulti_option">
@@ -442,7 +442,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $options = $this->get_available_options();
         $option = $options[$_POST['payzenmulti_option']];
 
-        // save selected payment option into session
+        // Save selected payment option into session.
         set_transient('payzenmulti_option_' . $order_id, $option);
 
         // ... and into DB
@@ -470,7 +470,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 
         $option = get_transient('payzenmulti_option_' . $this->get_order_property($order, 'id'));
 
-        // multiple payment options
+        // Multiple payment options.
         $amount = $this->payzen_request->get('amount');
         $first = $option['first'] ? round(($option['first'] / 100) * $amount) : null;
         $this->payzen_request->setMultiPayment($amount, $first, $option['count'], $option['period']);

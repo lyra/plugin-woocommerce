@@ -1,3 +1,8 @@
+1.7.1, 2019-04-01:
+- Fix some plugin translations.
+- Do not use vads\_order\_info2 gateway parameter.
+- Bug fix: cannot re-order after a cancelled payment in iframe mode.
+
 1.7.0, 2019-02-04:
 - Fix error in shipping amount calculation (on some WooCommerce 2.x versions).
 - Improve payment error display on order details and hide message in order email.
@@ -16,7 +21,7 @@
 - Improve iframe mode interface.
 - Allow comma when entering amounts in configuration fields.
 - [klarna] Send product amounts including taxes for Klarna payments.
-- Send shipping fees in vads_shipping_amount variable.
+- Send shipping fees in vads\_shipping\_amount variable.
 
 1.6.1, 2018-07-06:
 - [shatwo] Enable HMAC-SHA-256 signature algorithm by default.

@@ -3,7 +3,7 @@
  * Copyright © Lyra Network and contributors.
  * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
  *
- * @author    Lyra Network (https://www.lyra-network.com/)
+ * @author    Lyra Network (https://www.lyra.com/)
  * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
  * @copyright Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
@@ -14,20 +14,20 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.7.0
+ * Version: 1.7.1
  * Author URI: https://www.lyra-network.com
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 5.0
+ * Tested up to: 5.1
  * WC requires at least: 2.0
- * WC tested up to: 3.5
+ * WC tested up to: 3.6
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
  */
 
 if (! defined('ABSPATH')) {
-    exit; // exit if accessed directly
+    exit; // Exit if accessed directly.
 }
 
 define('WC_PAYZEN_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -57,9 +57,9 @@ function woocommerce_payzen_activation()
     $all_active_plugins = apply_filters('active_plugins', $all_active_plugins);
 
     if (! stripos(implode($all_active_plugins), '/woocommerce.php')) {
-        deactivate_plugins(plugin_basename(__FILE__)); // deactivate ourself
+        deactivate_plugins(plugin_basename(__FILE__)); // Deactivate ourself.
 
-        // load translation files
+        // Load translation files.
         load_plugin_textdomain('woo-payzen-payment', false, plugin_basename(dirname(__FILE__)) . '/languages');
 
         $message = sprintf(__('Sorry ! In order to use WooCommerce %s Payment plugin, you need to install and activate the WooCommerce plugin.', 'woo-payzen-payment'), 'PayZen');
@@ -84,10 +84,10 @@ function woocommerce_payzen_init()
 {
     global $payzen_plugin_features;
 
-    // load translation files
+    // Load translation files.
     load_plugin_textdomain('woo-payzen-payment', false, plugin_basename(dirname(__FILE__)) . '/languages');
 
-    if (! class_exists('Payzen_Subscriptions_Loader')) { // load subscriptions processing mecanism
+    if (! class_exists('Payzen_Subscriptions_Loader')) { // Load subscriptions processing mecanism.
         require_once 'includes/subscriptions/payzen-subscriptions-loader.php';
     }
 
@@ -146,7 +146,7 @@ function woocommerce_payzen_add_link($links, $file)
     global $payzen_plugin_features;
 
     $links[] = '<a href="' . payzen_admin_url('Payzen') . '">' . __('General configuration', 'woo-payzen-payment') .'</a>';
-    $links[] = '<a href="' . payzen_admin_url('PayzenStd') . '">' . __('One-time Payment', 'woo-payzen-payment') .'</a>';
+    $links[] = '<a href="' . payzen_admin_url('PayzenStd') . '">' . __('Standard payment', 'woo-payzen-payment') .'</a>';
 
     if ($payzen_plugin_features['multi']) {
         $links[] = '<a href="' . payzen_admin_url('PayzenMulti') . '">' . __('Payment in installments', 'woo-payzen-payment')
@@ -154,12 +154,12 @@ function woocommerce_payzen_add_link($links, $file)
     }
 
     if ($payzen_plugin_features['choozeo']) {
-        $links[] = '<a href="' . payzen_admin_url('PayzenChoozeo') . '">' . __('Payment with Choozeo', 'woo-payzen-payment')
+        $links[] = '<a href="' . payzen_admin_url('PayzenChoozeo') . '">' . __('Choozeo payment', 'woo-payzen-payment')
         . '</a>';
     }
 
     if ($payzen_plugin_features['klarna']) {
-        $links[] = '<a href="' . payzen_admin_url('PayzenKlarna') . '">' . __('Payment with Klarna', 'woo-payzen-payment')
+        $links[] = '<a href="' . payzen_admin_url('PayzenKlarna') . '">' . __('Klarna payment', 'woo-payzen-payment')
         . '</a>';
     }
 
@@ -172,33 +172,39 @@ function payzen_admin_url($id)
     global $woocommerce;
 
     $base_url = 'admin.php?page=wc-settings&tab=checkout&section=';
-    $section = strtolower($id); // method id in lower case
+    $section = strtolower($id); // Method id in lower case.
 
-    // backward compatibility
+    // Backward compatibility.
     if (version_compare($woocommerce->version, '2.1.0', '<')) {
         $base_url = 'admin.php?page=woocommerce_settings&tab=payment_gateways&section=';
-        $section = 'WC_Gateway_' . $id; // class name as it is
+        $section = 'WC_Gateway_' . $id; // Class name as it is.
     } elseif (version_compare($woocommerce->version, '2.6.2', '<')) {
-        $section = 'wc_gateway_' . $section; // class name in lower case
+        $section = 'wc_gateway_' . $section; // Class name in lower case.
     }
 
     return admin_url($base_url . $section);
 }
 
+// Destroy current session and restore the session in which the payment was initiated.
+
+
 /* Retrieve blog_id from post when this is an IPN URL call. */
 if (is_multisite() && key_exists('vads_hash', $_POST) && $_POST['vads_hash']
-    && key_exists('vads_order_info2', $_POST) && $_POST['vads_order_info2']) {
+    && key_exists('vads_order_info', $_POST) && $_POST['vads_order_info']) {
     global $wpdb, $current_blog, $current_site;
 
-    $blog = substr($_POST['vads_order_info2'], strlen('blog_id='));
+    // Parse order_info parameter.
+    $parts = explode('&', $_POST['vads_order_info']);
+
+    $blog = substr($parts[1], strlen('blog_id='));
     switch_to_blog((int)$blog);
 
-    // set current_blog global var
+    // Set current_blog global var.
     $current_blog = $wpdb->get_row(
         $wpdb->prepare("SELECT * FROM $wpdb->blogs WHERE blog_id = %s", $blog)
     );
 
-    // set current_site global var
+    // Set current_site global var.
     $network_fnc = function_exists('get_network') ? 'get_network' : 'wp_get_network';
     $current_site = $network_fnc($current_blog->site_id);
     $current_site->blog_id = $wpdb->get_var(
