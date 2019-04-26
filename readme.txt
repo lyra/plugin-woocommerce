@@ -2,10 +2,10 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 5.0
+Tested up to: 5.1
 WC requires at least: 2.0
-WC tested up to: 3.5
-Stable tag: 1.7.0
+WC tested up to: 3.6
+Stable tag: 1.7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,23 +35,18 @@ The payment plugin has the following features:
 == Screenshots ==
 
 1. PayZen general configuration.
-2. PayZen one-time payment configuration.
+2. PayZen standard payment configuration.
 3. PayZen payment in installments configuration.
 4. PayZen payment options in checkout page.
 5. PayZen payment page.
 
 == Changelog ==
 
-= 1.7.0, 2019-01-21 =
-* Fix error in shipping amount calculation (on some WooCommerce 2.x versions).
-* Improve payment error display on order details and hide message in order email.
-* Added payment by token (requires PayZen payment by token option).
-* Added possibility to restrict payment submodules to specific countries.
-* Manage successful order statuses dynamically to support custom statuses.
-* Redirect buyer to cart page (instead of checkout page) after a failed payment.
-* Display error messages and notices in WooCommerce 3.5.
-* Added API to manage subscriptions payment integration (for developpers).
+= 1.7.1, 2019-04-01 =
+* Fixed some plugin translations.
+* Do not use vads_order_info2 gateway parameter.
+* Bug fix: cannot re-order after a cancelled payment in iframe mode.
 
 --------
 
-[See the previous changelogs here](./CHANGELOG.md).
+A full changelog is available in the CHANGELOG.md file.

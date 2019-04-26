@@ -3,14 +3,14 @@
  * Copyright © Lyra Network and contributors.
  * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
  *
- * @author    Lyra Network (https://www.lyra-network.com/)
+ * @author    Lyra Network (https://www.lyra.com/)
  * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
  * @copyright Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
  */
 
 if (! defined('ABSPATH')) {
-    exit; // exit if accessed directly
+    exit; // Exit if accessed directly.
 }
 
 class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
@@ -30,47 +30,47 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $this->id = 'payzenstd';
         $this->icon = apply_filters('woocommerce_payzenstd_icon', WC_PAYZEN_PLUGIN_URL . '/assets/images/payzen.png');
         $this->has_fields = true;
-        $this->method_title = self::GATEWAY_NAME . ' - ' . __('One-time Payment', 'woo-payzen-payment');
+        $this->method_title = self::GATEWAY_NAME . ' - ' . __('Standard payment', 'woo-payzen-payment');
 
-        // init common vars
+        // Init common vars.
         $this->payzen_init();
 
-        // load the form fields
+        // Load the form fields.
         $this->init_form_fields();
 
-        // load the module settings
+        // Load the module settings.
         $this->init_settings();
 
-        // define user set variables
+        // Define user set variables.
         $this->title = $this->get_title();
         $this->description = $this->get_description();
         $this->testmode = ($this->get_general_option('ctx_mode') == 'TEST');
         $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
 
-        // use the selected susbscriptions handler
+        // Use the selected susbscriptions handler.
         $this->subscriptions_handler = Payzen_Subscriptions_Loader::getInstance(self::SUBSCRIPTIONS_HANDLER);
 
         if ($this->payzen_is_section_loaded()) {
-            // reset standard payment admin form action
+            // Reset standard payment admin form action.
             add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
 
-            // update standard payment admin form action
+            // Update standard payment admin form action.
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
-            // adding style to admin form action
+            // Adding style to admin form action.
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_style'));
 
-            // adding JS to admin form action
+            // Adding JS to admin form action.
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_script'));
         }
 
-        // generate standard payment form action
+        // Generate standard payment form action.
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
 
-        // iframe payment endpoint action
+        // Iframe payment endpoint action.
         add_action('woocommerce_api_wc_gateway_payzenstd', array($this, 'payzen_generate_iframe_form'));
 
-        // order needs payment filter
+        // Order needs payment filter.
         add_filter('woocommerce_order_needs_payment', array($this, 'payzen_order_needs_payment'), 10, 2);
     }
 
@@ -151,7 +151,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
      */
     public function init_form_fields()
     {
-        // load common form fields to concat them with sub-module settings
+        // Load common form fields to concat them with sub-module settings.
         parent::init_form_fields();
 
         $countries = new WC_Countries();
@@ -174,7 +174,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 'title' => __('Title', 'woo-payzen-payment'),
                 'type' => 'text',
                 'description' => __('This controls the title which the user sees during checkout.', 'woo-payzen-payment'),
-                'default' => __('Pay by credit card', 'woo-payzen-payment')
+                'default' => __('Payment by credit card', 'woo-payzen-payment')
             ),
             'description' => array(
                 'title' => __('Description', 'woo-payzen-payment'),
@@ -184,7 +184,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 'css' => 'width: 35em;'
             ),
 
-            // amount restrictions
+            // Amount restrictions.
             'restrictions' => array(
                 'title' => __('RESTRICTIONS', 'woo-payzen-payment'),
                 'type' => 'title'
@@ -200,7 +200,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                     self::ALL_COUNTRIES => __('All allowed countries', 'woo-payzen-payment'),
                     self::SPECIFIC_COUNTRIES => __('Specific countries', 'woo-payzen-payment')
                 ),
-                'class' => 'wc-enhanced-select'
+                'class' => 'wc-enhanced-select',
+                'description' => __('Buyer\'s billing countries in which this payment method is available.', 'woo-payzen-payment')
             ),
             'specific_countries' => array(
                 'title' => __('Authorized countries', 'woo-payzen-payment'),
@@ -222,7 +223,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 'description' => __('Maximum amount to activate this payment method.', 'woo-payzen-payment')
             ),
 
-            // payment page
+            // Payment page.
             'payment_page' => array(
                 'title' => __('PAYMENT PAGE', 'woo-payzen-payment'),
                 'type' => 'title'
@@ -255,7 +256,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 'class' => 'wc-enhanced-select'
             ),
 
-            // advanced options
+            // Advanced options.
             'advanced_options' => array(
                 'title' => __('ADVANCED OPTIONS', 'woo-payzen-payment'),
                 'type' => 'title'
@@ -285,16 +286,16 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             )
         );
 
-        // if WooCommecre Multilingual is not available (or installed version not allow gateways UI translation)
-        // let's suggest our translation feature
+        // If WooCommecre Multilingual is not available (or installed version not allow gateways UI translation).
+        // Let's suggest our translation feature.
         if (! class_exists('WCML_WC_Gateways')) {
             $this->form_fields['title']['type'] = 'multilangtext';
             $this->form_fields['title']['default'] = array(
-                'en_US' => 'Pay by credit card',
-                'en_GB' => 'Pay by credit card',
+                'en_US' => 'Payment by credit card',
+                'en_GB' => 'Payment by credit card',
                 'fr_FR' => 'Paiement par carte bancaire',
                 'de_DE' => 'Zahlung mit EC-/Kreditkarte',
-                'es_ES' => 'Pagar con tarjeta de crédito'
+                'es_ES' => 'Pago con tarjeta de crédito'
             );
 
             $this->form_fields['description']['type'] = 'multilangtext';
@@ -317,7 +318,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $new_value = parent::validate_text_field($key, $value);
 
         $new_value = str_replace(',', '.', $new_value);
-        if (! is_numeric($new_value) || ($new_value < 0)) { // invalid value, restore old
+        if (! is_numeric($new_value) || ($new_value < 0)) { // Invalid value, restore old.
             return $this->get_option($key);
         }
 
@@ -333,7 +334,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $new_value = parent::validate_text_field($key, $value);
 
         $new_value = str_replace(',', '.', $new_value);
-        if (! is_numeric($new_value) || ($new_value < 0)) { // invalid value, restore old
+        if (! is_numeric($new_value) || ($new_value < 0)) { // Invalid value, restore old.
             return $this->get_option($key);
         }
 
@@ -358,7 +359,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             function payzenUpdateSpecificCountriesDisplay() {
                 var allowSpecificElt = jQuery('#<?php echo esc_attr($prefix . 'allows_specific'); ?>');
                 var allowAll = allowSpecificElt.val() === '1';
-                var specificCountries = allowSpecificElt.parents('table').find('tr:eq(1)'); // second line of RESTRICTIONS section
+                var specificCountries = allowSpecificElt.parents('table').find('tr:eq(1)'); // Second line of RESTRICTIONS section.
 
                 if (allowAll) {
                     specificCountries.hide();
@@ -382,12 +383,12 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             return false;
         }
 
-        // check if authorized currency
+        // Check if authorized currency.
         if (! $this->is_supported_currency()) {
             return false;
         }
 
-        // check if authorized country
+        // Check if authorized country.
         if (! $this->is_available_for_country()) {
             return false;
         }
@@ -430,7 +431,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $customer = $woocommerce->customer;
         $country = method_exists($customer, 'get_billing_country') ? $customer->get_billing_country() : $customer->get_country();
 
-        // check billing country
+        // Check billing country.
         if ($this->get_option('allows_specific') === self::ALL_COUNTRIES) {
             return empty($this->payzen_countries) || in_array($country, $this->payzen_countries);
         } else {
@@ -470,7 +471,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                     }
                 }
 
-                // get first array key
+                // Get first array key.
                 reset($cards);
                 $selected_value = key($cards);
 
@@ -505,11 +506,11 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 break;
 
             case 'IFRAME':
-                // load css and create iframe
+                // Load css and create iframe.
                 wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), self::PLUGIN_VERSION);
                 wp_enqueue_style('payzen');
 
-                // iframe endpoint url
+                // Iframe endpoint URL.
                 $link = add_query_arg('wc-api', 'WC_Gateway_PayzenStd', home_url('/'));
 
                 $html = '<div>
@@ -517,6 +518,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                          </iframe>';
 
                 $html .= "\n".'<script type="text/javascript">';
+                $html .= "\njQuery('form.checkout').removeClass('processing').unblock();";
                 $html .= "\njQuery('form.checkout').on('checkout_place_order_payzenstd', function() {
                                 jQuery.ajaxPrefilter(function(options, originalOptions, jqXHR) {
                                     if ((originalOptions.url.indexOf('wc-ajax=checkout') == -1)
@@ -529,15 +531,15 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                                     }
 
                                     options.success = function(data, status, jqXHR) {
-                                        if (typeof data  === 'string') { // for backward compatibility
-                                            // get the valid JSON only from the returned string
+                                        if (typeof data  === 'string') { // For backward compatibility.
+                                            // Get the valid JSON only from the returned string.
                                             if (data.indexOf('<!--WC_START-->') >= 0)
                                                 data = data.split('<!--WC_START-->')[1];
 
                                             if (data.indexOf('<!--WC_END-->') >= 0)
                                                 data = data.split('<!--WC_END-->')[0];
 
-                                            // parse
+                                            // Parse.
                                             data = jQuery.parseJSON(data);
                                         }
 
@@ -547,7 +549,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                                             return;
                                         }
 
-                                        // unblock screen
+                                        // Unblock screen.
                                         jQuery('form.checkout').unblock();
 
                                         jQuery('#" . $this->id . "_payment_by_token_description').hide();
@@ -578,7 +580,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
 
         if ($can_pay_by_alias) {
-            // display specific description for payment by token if enabled
+            // Display specific description for payment by token if enabled.
             $this->display_payment_by_alias_interface($cust_id);
         }
     }
@@ -668,7 +670,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             $this->save_selected_card($order_id);
         }
 
-        // save flag about use of saved identifier
+        // Save flag about use of saved identifier.
         if (isset($_POST[$this->id . '_use_identifier'])) {
             set_transient($this->id . '_use_identifier_' . $order_id, $_POST[$this->id . '_use_identifier']);
         }
@@ -691,7 +693,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
     {
         $selected_card = $_POST[$this->id . '_card_type'];
 
-        // save selected card into database as transcient
+        // Save selected card into database as transcient.
         set_transient($this->id . '_card_type_' . $order_id, $selected_card);
     }
 
@@ -716,7 +718,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         $this->payzen_fill_request($order);
 
-        // log data that will be sent to payment gateway
+        // Log data that will be sent to payment gateway.
         $this->log('Data to be sent to payment gateway : ' . print_r($this->payzen_request->getRequestFieldsArray(true /* to hide sensitive data */), true));
 
         $form = "\n".'<form action="' . esc_url($this->payzen_request->get('platform_url')) . '" method="post" id="' . $this->id . '_payment_form">';
@@ -729,9 +731,9 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $form .= "\nfunction payzen_submit_form() {
                     document.getElementById('" . $this->id . "_payment_form_submit').click();
                   }";
-        $form .= "\nif (window.addEventListener) { // for all major browsers
+        $form .= "\nif (window.addEventListener) { // For all major browsers.
                     window.addEventListener('load', payzen_submit_form, false);
-                  } else if (window.attachEvent) { // for IE 8 and earlier versions
+                  } else if (window.attachEvent) { // For IE 8 and earlier versions.
                     window.attachEvent('onload', payzen_submit_form);
                   }";
         $form .= "\n</script>\n";
@@ -750,13 +752,13 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             die();
         }
 
-        // order ID from session
+        // Order ID from session.
         $order_id = $woocommerce->session->get('order_awaiting_payment');
 
         $order = new WC_Order((int)$order_id);
         $this->payzen_fill_request($order);
 
-        // hide logos below payment fields
+        // Hide logos below payment fields.
         $this->payzen_request->set('theme_config', '3DS_LOGOS=false;');
 
         $this->payzen_request->set('action_mode', 'IFRAME');
@@ -764,7 +766,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $this->payzen_request->set('redirect_success_timeout', '0');
         $this->payzen_request->set('redirect_error_timeout', '0');
 
-        // log data that will be sent to payment gateway
+        // Log data that will be sent to payment gateway.
         $this->log('Data to be sent to payment gateway : ' . print_r($this->payzen_request->getRequestFieldsArray(true /* to hide sensitive data */), true));
 
         $form = "\n" . '<form action="' . esc_url($this->payzen_request->get('platform_url')) .'" method="post" id="' . $this->id . '_payment_iframe_form">';
@@ -775,9 +777,9 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $form .= "\nfunction payzen_submit_form() {
                         document.getElementById('" . $this->id . "_payment_iframe_form').submit();
                       }";
-        $form .= "\nif (window.addEventListener) { // for all major browsers
+        $form .= "\nif (window.addEventListener) { // For all major browsers.
                         window.addEventListener('load', payzen_submit_form, false);
-                      } else if (window.attachEvent) { // for IE 8 and earlier versions
+                      } else if (window.attachEvent) { // For IE 8 and earlier versions.
                         window.attachEvent('onload', payzen_submit_form);
                       }";
         $form .= "\n</script>\n";
@@ -798,7 +800,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         $this->log('Generating payment form for order #' . $order_id . '.');
 
-        // get currency
+        // Get currency.
         $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
         if ($currency == null) {
             $this->log('The store currency (' . get_woocommerce_currency() . ') is not supported by payment gateway.');
@@ -806,20 +808,19 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             wp_die(sprintf(__('The store currency (%s) is not supported by %s.', 'woo-payzen-payment'), get_woocommerce_currency(), self::GATEWAY_NAME));
         }
 
-        // effective used version
+        // Effective used version.
         include ABSPATH . WPINC . '/version.php'; // $wp_version;
         $version = $wp_version . '_' . $woocommerce->version;
 
-        // params
+        // Params.
         $misc_params = array(
             'amount' => $currency->convertAmountToInteger($order->get_total()),
             'contrib' => self::CMS_IDENTIFIER . '_' . self::PLUGIN_VERSION . '/' . $version . '/' . PHP_VERSION,
             'currency' => $currency->getNum(),
             'order_id' => $order_id,
-            'order_info' => $this->get_order_property($order, 'order_key'),
-            'order_info2' => 'blog_id=' . $wpdb->blogid, // save blog_id for multisite cases
+            'order_info' => 'order_key=' . $this->get_order_property($order, 'order_key') . '&blog_id=' . $wpdb->blogid,
 
-            // billing address info
+            // Billing address info.
             'cust_id' => $cust_id,
             'cust_email' => $this->get_order_property($order, 'billing_email'),
             'cust_first_name' => $this->get_order_property($order, 'billing_first_name'),
@@ -831,7 +832,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             'cust_city' => $this->get_order_property($order, 'billing_city'),
             'cust_state' => $this->get_order_property($order, 'billing_state'),
 
-            // shipping address info
+            // Shipping address info.
             'ship_to_first_name' => $this->get_order_property($order, 'shipping_first_name'),
             'ship_to_last_name' => $this->get_order_property($order, 'shipping_last_name'),
             'ship_to_street' => $this->get_order_property($order, 'shipping_address_1'),
@@ -843,7 +844,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             'shipping_amount' => $currency->convertAmountToInteger($this->get_shipping_with_tax($order)),
 
-            // return URLs
+            // Return URLs.
             'url_return' => add_query_arg('wc-api', 'WC_Gateway_Payzen', home_url('/'))
         );
         $this->payzen_request->setFromArray($misc_params);
@@ -851,7 +852,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         // VAT amount for colombian payment means
         $this->payzen_request->set('totalamount_vat', $currency->convertAmountToInteger($order->get_total_tax()));
 
-        // activate 3ds ?
+        // Activate 3ds ?.
         $threeds_mpi = null;
         if ($this->get_general_option('3ds_min_amount') != '' && $order->get_total() < $this->get_general_option('3ds_min_amount')) {
             $threeds_mpi = '2';
@@ -859,7 +860,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         $this->payzen_request->set('threeds_mpi', $threeds_mpi);
 
-        // detect language
+        // Detect language.
         $locale = get_locale() ? substr(get_locale(), 0, 2) : null;
         if ($locale && PayzenApi::isSupportedLanguage($locale)) {
             $this->payzen_request->set('language', $locale);
@@ -867,14 +868,14 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             $this->payzen_request->set('language', $this->get_general_option('language'));
         }
 
-        // available languages
+        // Available languages.
         $langs = $this->get_general_option('available_languages');
         if (is_array($langs) && ! in_array('', $langs)) {
             $this->payzen_request->set('available_languages', implode(';', $langs));
         }
 
         if (isset($this->form_fields['card_data_mode'])) {
-            // payment cards
+            // Payment cards.
             if ($this->get_option('card_data_mode') == 'MERCHANT') {
                 $selected_card = get_transient($this->id . '_card_type_' . $order_id);
                 $this->payzen_request->set('payment_cards', $selected_card);
@@ -888,10 +889,10 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             }
         }
 
-        // enable automatic redirection ?
+        // Enable automatic redirection ?.
         $this->payzen_request->set('redirect_enabled', ($this->get_general_option('redirect_enabled') == 'yes') ? true : false);
 
-        // redirection messages
+        // Redirection messages.
         $success_message = $this->get_general_option('redirect_success_message');
         $success_message = isset($success_message[get_locale()]) && $success_message[get_locale()] ? $success_message[get_locale()] :
             (is_array($success_message) ? $success_message['en_US'] : $success_message);
@@ -902,7 +903,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             (is_array($error_message) ? $error_message['en_US'] : $error_message);
         $this->payzen_request->set('redirect_error_message', $error_message);
 
-        // other configuration params
+        // Other configuration params.
         $config_keys = array(
             'site_id', 'key_test', 'key_prod', 'ctx_mode', 'platform_url', 'capture_delay', 'validation_mode',
             'redirect_success_timeout', 'redirect_error_timeout', 'return_mode', 'sign_algo'
@@ -912,7 +913,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             $this->payzen_request->set($key, $this->get_general_option($key));
         }
 
-        // check if capture_delay and validation_mode are overriden in sub-modules
+        // Check if capture_delay and validation_mode are overriden in sub-modules.
         if (is_numeric($this->get_option('capture_delay'))) {
             $this->payzen_request->set('capture_delay', $this->get_option('capture_delay'));
         }
@@ -925,7 +926,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             && ($info = $this->subscriptions_handler->subscription_info($order))) {
 
             $this->payzen_request->set('sub_amount', $currency->convertAmountToInteger($info['amount']));
-            $this->payzen_request->set('sub_currency', $currency->getNum()); // same as general order currency
+            $this->payzen_request->set('sub_currency', $currency->getNum()); // Same as general order currency.
 
             $desc = 'RRULE:FREQ=' . $info['frequency']. ';INTERVAL=' . $info['interval'];
             if (isset($info['end_date']) && $info['end_date']) {
@@ -936,7 +937,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             $this->payzen_request->set('sub_effect_date', $info['effect_date']);
 
-            // initial amount
+            // Initial amount.
             if (isset($info['init_amount']) && $info['init_amount'] && isset($info['init_number']) && $info['init_number']) {
                 $this->payzen_request->set('sub_init_amount', $currency->convertAmountToInteger($info['init_amount']));
                 $this->payzen_request->set('sub_init_amount_number', $info['init_number']);
@@ -945,7 +946,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             if ($order->get_total() > 0) {
                 $this->payzen_request->set('page_action', 'REGISTER_PAY_SUBSCRIBE');
             } else {
-                // only subscriptions
+                // Only subscriptions.
                 if ($saved_identifier = $this->get_cust_identifier($cust_id)) {
                     $this->payzen_request->set('identifier', $saved_identifier);
                     $this->payzen_request->set('page_action', 'SUBSCRIBE');
@@ -953,15 +954,15 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                     $this->payzen_request->set('page_action', 'REGISTER_SUBSCRIBE');
                 }
             }
-        } elseif ($this->can_use_alias($cust_id)) { // if option enabled
+        } elseif ($this->can_use_alias($cust_id)) { // If option enabled.
             if ($saved_identifier = $this->get_cust_identifier($cust_id)) {
                 $this->payzen_request->set('identifier', $saved_identifier);
 
-                if (! get_transient($this->id . '_use_identifier_' . $order_id)) { // customer choose to not use alias
+                if (! get_transient($this->id . '_use_identifier_' . $order_id)) { // Customer choose to not use alias.
                     $this->payzen_request->set('page_action', 'REGISTER_UPDATE_PAY');
                 }
 
-                // delete flag about use of saved identifier
+                // Delete flag about use of saved identifier.
                 delete_transient($this->id . '_use_identifier_' . $order_id);
             } else {
                 $this->payzen_request->set('page_action', 'ASK_REGISTER_PAY');
@@ -976,9 +977,9 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         if (method_exists($order, 'get_shipping_total')) {
             $shipping += $order->get_shipping_total();
         } elseif (method_exists($order, 'get_total_shipping')) {
-            $shipping += $order->get_total_shipping(); // WC old versions
+            $shipping += $order->get_total_shipping(); // WC old versions.
         } else {
-            $shipping += $order->get_shipping(); // WC older versions
+            $shipping += $order->get_shipping(); // WC older versions.
         }
 
         $shipping += $order->get_shipping_tax();

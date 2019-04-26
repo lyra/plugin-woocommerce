@@ -3,7 +3,7 @@
  * Copyright © Lyra Network and contributors.
  * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
  *
- * @author    Lyra Network (https://www.lyra-network.com/)
+ * @author    Lyra Network (https://www.lyra.com/)
  * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
  * @copyright Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
@@ -12,7 +12,7 @@
 if (! class_exists('PayzenField', false)) {
 
     /**
-     * Class representing a form field to send to the payment platform.
+     * Class representing a form field to send to the payment gateway.
      */
     class PayzenField
     {
@@ -107,7 +107,7 @@ if (! class_exists('PayzenField', false)) {
         public function setValue($value)
         {
             $value = ($value === null) ? null : (string) $value;
-            // we save value even if invalid but we return "false" as warning
+            // We save value even if invalid but we return "false" as warning.
             $this->value = $value;
 
             return $this->isValid();
