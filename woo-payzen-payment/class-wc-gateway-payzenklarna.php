@@ -73,7 +73,7 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
         $this->form_fields['capture_delay']['default'] = 0;
         $this->form_fields['capture_delay']['description'] = __('The number of days before the bank capture. Should be between 0 and 7.', 'woo-payzen-payment');
 
-        // By default, disable Klarna payment sub-module.
+        // By default, disable Klarna payment submodule.
         $this->form_fields['enabled']['default'] = 'no';
         $this->form_fields['enabled']['description'] = __('Enables / disables Klarna payment.', 'woo-payzen-payment');
 
@@ -92,6 +92,11 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
         }
     }
 
+    protected function get_rest_fields()
+    {
+        // REST API fields are not available for this payment.
+    }
+
     public function validate_capture_delay_field($key, $value = null)
     {
         $new_value = parent::validate_text_field($key, $value);
@@ -108,32 +113,11 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
      **/
     protected function payzen_fill_request($order)
     {
-        parent::payzen_fill_request($order);
+        parent::payzen_fill_request($order, true);
+        $this->send_cart_data($order);
 
         // Specific fields for klarna payment.
         $this->payzen_request->set('payment_cards', 'KLARNA');
         $this->payzen_request->set('validation_mode', '1');
-
-        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
-
-        // Add cart products info.
-        foreach ($order->get_items() as $line_item) {
-            $item_data = $line_item->get_data();
-
-            $qty = (int) $item_data['quantity'];
-
-            $product_amount = $item_data['total'] / $qty;
-            $product_tax_amount = $item_data['total_tax'] / $qty;
-            $product_tax_rate = round($product_tax_amount / $product_amount * 100, 4);
-
-            $this->payzen_request->addProduct(
-                $item_data['name'],
-                $currency->convertAmountToInteger($product_amount + $product_tax_amount), // Amount with taxes.
-                $qty,
-                $item_data['product_id'],
-                null, // We have no product category.
-                $product_tax_rate // In percentage.
-            );
-        }
     }
 }

@@ -1,3 +1,9 @@
+1.8.0, 2019-11-20:
+- Possibility to dynamically propose new payment means (only by redirection).
+- [embedded] Added feature embedded payment fields (directly on site or in a pop-in) using REST API.
+- Improve plugin translations.
+- Added support of payment by subscription with Subcriptio plugin in a new submodule (needs activation in source code).
+
 1.7.1, 2019-04-01:
 - Fix some plugin translations.
 - Do not use vads\_order\_info2 gateway parameter.

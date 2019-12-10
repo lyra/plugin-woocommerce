@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.7.1
+ * Version: 1.8.0
  * Author URI: https://www.lyra-network.com
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 5.1
+ * Tested up to: 5.3
  * WC requires at least: 2.0
- * WC tested up to: 3.6
+ * WC tested up to: 3.8
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -40,6 +40,8 @@ $payzen_plugin_features = array(
     'prodfaq' => true,
     'restrictmulti' => false,
     'shatwo' => true,
+    'embedded' => true,
+    'subscr' => false,
 
     'multi' => true,
     'choozeo' => false,
@@ -76,6 +78,8 @@ function woocommerce_payzen_uninstallation()
     delete_option('woocommerce_payzenmulti_settings');
     delete_option('woocommerce_payzenchoozeo_settings');
     delete_option('woocommerce_payzenklarna_settings');
+    delete_option('woocommerce_payzenregroupedother_settings');
+    delete_option('woocommerce_payzensubscription_settings');
 }
 register_uninstall_hook(__FILE__, 'woocommerce_payzen_uninstallation');
 
@@ -111,15 +115,29 @@ function woocommerce_payzen_init()
         require_once 'class-wc-gateway-payzenklarna.php';
     }
 
+    if (! class_exists('WC_Gateway_PayzenRegroupedOther')) {
+        require_once 'class-wc-gateway-payzenregroupedother.php';
+    }
+
+    if (! class_exists('WC_Gateway_PayzenOther')) {
+        require_once 'class-wc-gateway-payzenother.php';
+    }
+
+    if ($payzen_plugin_features['subscr'] && ! class_exists('WC_Gateway_PayzenSubscription')) {
+        require_once 'class-wc-gateway-payzensubscription.php';
+    }
+
     require_once 'includes/PayzenRequest.php';
     require_once 'includes/PayzenResponse.php';
+    require_once 'includes/PayzenRest.php';
+    require_once 'includes/PayzenRestTools.php';
 }
 add_action('woocommerce_init', 'woocommerce_payzen_init');
 
 /* Add our payment methods to woocommerce methods. */
 function woocommerce_payzen_add_method($methods)
 {
-    global $payzen_plugin_features;
+    global $payzen_plugin_features, $woocommerce;
 
     $methods[] = 'WC_Gateway_Payzen';
     $methods[] = 'WC_Gateway_PayzenStd';
@@ -136,6 +154,26 @@ function woocommerce_payzen_add_method($methods)
         $methods[] = 'WC_Gateway_PayzenKlarna';
     }
 
+    $methods[] = 'WC_Gateway_PayzenRegroupedOther';
+
+    // Since 2.3.0, we can display other payment means as submodules.
+    if (version_compare($woocommerce->version, '2.3.0', '>=') && $woocommerce->cart) {
+        $regrouped_other_payments = new WC_Gateway_PayzenRegroupedOther();
+
+        if (! $regrouped_other_payments->regroup_other_payment_means()) {
+            $payment_means = $regrouped_other_payments->get_available_options();
+            if (is_array($payment_means) && ! empty($payment_means)) {
+                foreach ($payment_means as $option) {
+                    $methods[] = new WC_Gateway_PayzenOther($option['payment_mean'], $option['label']);
+                }
+            }
+        }
+    }
+
+    if ($payzen_plugin_features['subscr']) {
+        $methods[] = 'WC_Gateway_PayzenSubscription';
+    }
+
     return $methods;
 }
 add_filter('woocommerce_payment_gateways', 'woocommerce_payzen_add_method');
@@ -150,17 +188,7 @@ function woocommerce_payzen_add_link($links, $file)
 
     if ($payzen_plugin_features['multi']) {
         $links[] = '<a href="' . payzen_admin_url('PayzenMulti') . '">' . __('Payment in installments', 'woo-payzen-payment')
-        . '</a>';
-    }
-
-    if ($payzen_plugin_features['choozeo']) {
-        $links[] = '<a href="' . payzen_admin_url('PayzenChoozeo') . '">' . __('Choozeo payment', 'woo-payzen-payment')
-        . '</a>';
-    }
-
-    if ($payzen_plugin_features['klarna']) {
-        $links[] = '<a href="' . payzen_admin_url('PayzenKlarna') . '">' . __('Klarna payment', 'woo-payzen-payment')
-        . '</a>';
+            . '</a>';
     }
 
     return $links;
@@ -184,9 +212,6 @@ function payzen_admin_url($id)
 
     return admin_url($base_url . $section);
 }
-
-// Destroy current session and restore the session in which the payment was initiated.
-
 
 /* Retrieve blog_id from post when this is an IPN URL call. */
 if (is_multisite() && key_exists('vads_hash', $_POST) && $_POST['vads_hash']

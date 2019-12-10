@@ -23,7 +23,7 @@ class Payzen_Subscriptions_Loader
     public static function getInstance($handler)
     {
         if (! key_exists($handler, self::$handlers)) {
-            throw new InvalidArgumentException("\" $handler \" is not a valid subscriptions handler identifier.");
+            throw new \InvalidArgumentException("\" $handler \" is not a valid subscriptions handler identifier.");
         }
 
         include_once 'payzen-subscriptions-handler-interface.php';
