@@ -2,10 +2,10 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 5.1
+Tested up to: 5.3
 WC requires at least: 2.0
-WC tested up to: 3.6
-Stable tag: 1.7.1
+WC tested up to: 3.8
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,7 +23,7 @@ The payment plugin has the following features:
 * Update orders after payment through a silent URL (Instant Payment Notification).
 * Multi languages compliance.
 * Multi currencies compliance.
-* Possibility to enable / disbale module logs.
+* Possibility to enable / disable module logs.
 * Possibility to configure order status on payment success.
 
 == Installation ==
@@ -42,10 +42,11 @@ The payment plugin has the following features:
 
 == Changelog ==
 
-= 1.7.1, 2019-04-01 =
-* Fixed some plugin translations.
-* Do not use vads_order_info2 gateway parameter.
-* Bug fix: cannot re-order after a cancelled payment in iframe mode.
+= 1.8.0, 2019-11-20 =
+* Possibility to dynamically propose new payment means (only by redirection).
+* [embedded] Added feature embedded payment fields (directly on site or in a pop-in) using REST API.
+* Improve plugin translations.
+* Added support of payment by subscription with Subcriptio plugin in a new submodule (needs activation in source code).
 
 --------
 

@@ -118,7 +118,7 @@ if (! class_exists('PayzenApi', false)) {
                 array('SGD', '702', 2), array('ZAR', '710', 2), array('SEK', '752', 2), array('CHF', '756', 2),
                 array('THB', '764', 2), array('TND', '788', 3), array('GBP', '826', 2), array('USD', '840', 2),
                 array('TWD', '901', 2), array('TRY', '949', 2), array('EUR', '978', 2), array('PLN', '985', 2),
-                array('BRL', '986', 2)
+                array('BRL', '986', 2), array('ARS', '032', 2), array('COP', '170', 2), array('PEN', '604', 2)
             );
 
             $payzen_currencies = array();
@@ -219,7 +219,7 @@ if (! class_exists('PayzenApi', false)) {
                 'ALINEA' => 'Carte enseigne Alinéa', 'ALINEA_CDX' => 'Carte cadeau Alinéa',
                 'ALINEA_CDX_SB' => 'Carte cadeau Alinéa - Sandbox', 'ALINEA_SB' => 'Carte enseigne Alinéa - Sandbox',
                 'ALIPAY' => 'Alipay', 'ALLOBEBE_CDX' => 'Carte cadeau AlloBébé', 'ALLOBEBE_CDX_SB' => 'Carte cadeau AlloBébé - Sandbox',
-                'AUCHAN' => 'Carte enseigne Auchan', 'AUCHAN_SB' => 'Carte enseigne Auchan - Sandbox', 'AURORE_MULTI' => 'Carte Aurore',
+                'AUCHAN' => 'Carte enseigne Auchan', 'AUCHAN_SB' => 'Carte enseigne Auchan - Sandbox', 'AURORE-MULTI' => 'Carte Aurore',
                 'BANCONTACT' => 'Bancontact Mistercash', 'BIZZBEE_CDX' => 'Carte cadeau BizzBee',
                 'BIZZBEE_CDX_SB' => 'Carte cadeau BizzBee - Sandbox', 'BOULANGER' => 'Carte enseigne Boulanger',
                 'BOULANGER_SB' => 'Carte enseigne Boulanger - Sandbox', 'BRICE_CDX' => 'Carte cadeau Brice',
@@ -232,7 +232,7 @@ if (! class_exists('PayzenApi', false)) {
                 'EDENRED_TR' => 'Ticket Restaurant Edenred', 'ELV' => 'Prélèvement Bancaire Hobex',
                 'EPS' => 'EPS Online Überweisung', 'EPS_GIROPAY' => 'EPS Online Überweisung',
                 'FULLCB_3X' => 'Paiement en 3x sans frais par BNPP PF', 'FULLCB_4X' => 'Paiement en 4x sans frais par BNPP PF',
-                'GIROPAY' => 'Giropay', 'IDEAL' => 'iDEAL', 'ILLICADO' => 'Cartes Cadeau Illicado',
+                'GOOGLEPAY' => 'Google Pay', 'GIROPAY' => 'Giropay', 'IDEAL' => 'iDEAL', 'ILLICADO' => 'Cartes Cadeau Illicado',
                 'ILLICADO_SB' => 'Cartes Cadeau Illicado - Sandbox - Sandbox', 'JCB' => 'JCB',
                 'JOUECLUB_CDX' => 'Carte cadeau JouéClub', 'JOUECLUB_CDX_SB' => 'Carte cadeau JouéClub - Sandbox',
                 'KLARNA' => 'Klarna Internet Banking', 'LEROY-MERLIN' => 'Carte enseigne Leroy-Merlin',

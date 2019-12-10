@@ -72,7 +72,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         unset($this->form_fields['card_data_mode']);
         unset($this->form_fields['payment_by_token']);
 
-        // By default, disable Choozeo payment sub-module.
+        // By default, disable Choozeo payment submodule.
         $this->form_fields['enabled']['default'] = 'no';
         $this->form_fields['enabled']['description'] = __('Enables / disables Choozeo payment.', 'woo-payzen-payment');
 
@@ -127,6 +127,11 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         );
     }
 
+    protected function get_rest_fields()
+    {
+        // REST API fields are not available for this payment.
+    }
+
     /**
      * Generate text input HTML.
      *
@@ -142,27 +147,27 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
 
         $html = '';
 
-        $data['title']           = isset($data['title']) ? $data['title'] : '';
-        $data['disabled']        = empty($data['disabled']) ? false : true;
-        $data['class']           = isset($data['class']) ? $data['class'] : '';
-        $data['css']             = isset($data['css']) ? $data['css'] : '';
-        $data['placeholder']     = isset($data['placeholder']) ? $data['placeholder'] : '';
-        $data['type']            = isset($data['type']) ? $data['type'] : 'text';
-        $data['desc_tip']        = isset($data['desc_tip']) ? $data['desc_tip'] : false;
-        $data['description']     = isset($data['description']) ? $data['description'] : '';
-        $data['columns']         = isset($data['columns']) ? (array) $data['columns'] : array();
-        $data['default']         = isset($data['default']) ? (array) $data['default'] : array();
+        $data['title'] = isset($data['title']) ? $data['title'] : '';
+        $data['disabled'] = empty($data['disabled']) ? false : true;
+        $data['class'] = isset($data['class']) ? $data['class'] : '';
+        $data['css'] = isset($data['css']) ? $data['css'] : '';
+        $data['placeholder'] = isset($data['placeholder']) ? $data['placeholder'] : '';
+        $data['type'] = isset($data['type']) ? $data['type'] : 'text';
+        $data['desc_tip'] = isset($data['desc_tip']) ? $data['desc_tip'] : false;
+        $data['description'] = isset($data['description']) ? $data['description'] : '';
+        $data['columns'] = isset($data['columns']) ? (array) $data['columns'] : array();
+        $data['default'] = isset($data['default']) ? (array) $data['default'] : array();
 
         // Description handling.
         if ($data['desc_tip'] === true) {
             $description = '';
-            $tip         = $data['description'];
+            $tip = $data['description'];
         } elseif (! empty($data['desc_tip'])) {
             $description = $data['description'];
-            $tip         = $data['desc_tip'];
+            $tip = $data['desc_tip'];
         } elseif (! empty($data['description'])) {
             $description = $data['description'];
-            $tip         = '';
+            $tip = '';
         } else {
             $description = $tip = '';
         }
@@ -262,10 +267,12 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
             return false;
         }
 
-        // Check Choozeo payment options.
-        $available_options = $this->get_available_options();
-        if ($woocommerce->cart && empty($available_options)) {
-            return false;
+        if ($woocommerce->cart) {
+            // Check Choozeo payment options.
+            $available_options = $this->get_available_options();
+            if (empty($available_options)) {
+                return false;
+            }
         }
 
         return true;
@@ -336,11 +343,11 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
                 $first = false;
             }
 
-            echo '<label for="payzenchoozeo_option_' . $key . '" style="display: inline;">' .  '
+            echo '<label for="payzenchoozeo_option_' . $key . '" style="display: inline;">' . '
                       <img src="' . WC_PAYZEN_PLUGIN_URL . 'assets/images/' . strtolower($key) . '.png"
                            alt="' . $option['label'] . '"
                            title="' . $option['label'] . '"
-                           style="vertical-align: middle; margin-right: 10px; height: 45px;">
+                           style="vertical-align: middle; margin: 0 10px 0 5px; max-height: 35px; display: unset;">
                   </label>
               </div>';
         }

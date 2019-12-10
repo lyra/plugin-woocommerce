@@ -71,7 +71,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 
         unset($this->form_fields['payment_by_token']);
 
-        // By default, disable multiple payment sub-module.
+        // By default, disable multiple payment submodule.
         $this->form_fields['enabled']['default'] = 'no';
         $this->form_fields['enabled']['description'] = __('Enables / disables multiple payment.', 'woo-payzen-payment');
 
@@ -159,6 +159,11 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         );
     }
 
+    protected function get_rest_fields()
+    {
+        // REST API fields are not available for this payment.
+    }
+
     protected function get_supported_card_types()
     {
         $cards = parent::get_supported_card_types();
@@ -224,105 +229,6 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 <?php
     }
 
-    /**
-     * Generate text input HTML.
-     *
-     * @access public
-     * @param mixed $key
-     * @param mixed $data
-     * @since 1.0.0
-     * @return string
-     */
-    public function generate_table_html($key, $data)
-    {
-        global $woocommerce;
-
-        $html = '';
-
-        $data['title']            = isset($data['title']) ? $data['title'] : '';
-        $data['disabled']        = empty($data['disabled']) ? false : true;
-        $data['class']             = isset($data['class']) ? $data['class'] : '';
-        $data['css']             = isset($data['css']) ? $data['css'] : '';
-        $data['placeholder']     = isset($data['placeholder']) ? $data['placeholder'] : '';
-        $data['type']             = isset($data['type']) ? $data['type'] : 'text';
-        $data['desc_tip']        = isset($data['desc_tip']) ? $data['desc_tip'] : false;
-        $data['description']    = isset($data['description']) ? $data['description'] : '';
-        $data['columns']        = isset($data['columns']) ? (array) $data['columns'] : array();
-
-        // Description handling.
-        if ($data['desc_tip'] === true) {
-            $description = '';
-            $tip         = $data['description'];
-        } elseif (! empty($data['desc_tip'])) {
-            $description = $data['description'];
-            $tip         = $data['desc_tip'];
-        } elseif (! empty($data['description'])) {
-            $description = $data['description'];
-            $tip         = '';
-        } else {
-            $description = $tip = '';
-        }
-
-        $options = $this->get_option($key);
-
-        $field_name = esc_attr($this->plugin_id . $this->id . '_' . $key);
-
-        $html .= '<tr valign="top">' . "\n";
-        $html .= '<th scope="row" class="titledesc">';
-        $html .= '<label for="' . esc_attr($this->plugin_id . $this->id . '_' . $key) . '">' . wp_kses_post($data['title']) . '</label>';
-
-        if ($tip) {
-            $html .= '<img class="help_tip" data-tip="' . esc_attr($tip) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
-        }
-
-        $html .= '</th>' . "\n";
-        $html .= '<td class="forminp">' . "\n";
-        $html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post($data['title']) . '</span></legend>' . "\n";
-
-        $html .= '<input id="' . $field_name . '_btn" class="' . $field_name . '_btn '. esc_attr($data['class']) . '"' . (! empty($options) ? ' style="display: none;"' : '') . ' type="button" value="' . __('Add', 'woo-payzen-payment') . '">';
-         $html .= '<table id="' . $field_name . '_table" class="'. esc_attr($data['class']) . '"' . (empty($options) ? ' style="display: none;"' : '') . ' cellpadding="10" cellspacing="0" >';
-
-        $html .= '<thead><tr>';
-        $record = array();
-        foreach ($data['columns'] as $code => $column) {
-            $record[$code] = '';
-            $html .= '<th class="' . $code . '" style="width: ' . $column['width'] . '; padding: 0px;">' . $column['title'] . '</th>';
-        }
-
-        $html .= '<th style="width: auto; padding: 0px;"></th>';
-        $html .= '</tr></thead>';
-
-        $html .= '<tbody>';
-        $html .= '<tr id="' . $field_name . '_add">
-                    <td colspan="' . count($data['columns']) . '"></td>
-                    <td style="padding: 0px;"><input class="' . $field_name . '_btn" type="button" value="' . __('Add') . '"></td>
-                  </tr>';
-        $html .= '</tbody></table>';
-
-        $html .= "\n" . '<script type="text/javascript">';
-        $html .= "\n" . 'jQuery(".' . $field_name . '_btn").click(function() {
-                            payzenAddOption("' . $field_name . '", ' . json_encode($record) . ');
-                         })';
-
-        if (! empty($options)) {
-            // Add already inserted lines.
-            foreach ($options as $code => $option) {
-                $html .= "\n" . 'payzenAddOption("' . $field_name . '", ' . json_encode($option) . ', "' . $code . '");';
-            }
-        }
-        $html .= "\n" . '</script>';
-
-        if ($description) {
-            $html .= ' <p class="description">' . wp_kses_post($description) . '</p>' . "\n";
-        }
-
-        $html .= '</fieldset>';
-        $html .= '</td>' . "\n";
-        $html .= '</tr>' . "\n";
-
-        return $html;
-    }
-
     public function validate_payment_options_field($key, $value = null)
     {
         $name = $this->plugin_id . $this->id . '_' . $key;
@@ -357,10 +263,12 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
             return false;
         }
 
-        // Check if any multi payment option is available.
-        $available_options = $this->get_available_options();
-        if ($woocommerce->cart && empty($available_options)) {
-            return false;
+        if ($woocommerce->cart) {
+            // Check if any multi payment option is available.
+            $available_options = $this->get_available_options();
+            if (empty($available_options)) {
+                return false;
+            }
         }
 
         return true;
@@ -383,7 +291,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
             }
         }
 
-        return $enabled_options;
+        return apply_filters("woocommerce_payzenmulti_enabled_options", $enabled_options);
     }
 
     /**
