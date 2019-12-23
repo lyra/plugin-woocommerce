@@ -1,3 +1,6 @@
+1.8.1, 2019-12-23:
+- Bug fix: update order by IPN call when many attempts option is enabled.
+
 1.8.0, 2019-11-20:
 - Possibility to dynamically propose new payment means (only by redirection).
 - [embedded] Added feature embedded payment fields (directly on site or in a pop-in) using REST API.
