@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 5.3
 WC requires at least: 2.0
 WC tested up to: 3.8
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,11 +42,8 @@ The payment plugin has the following features:
 
 == Changelog ==
 
-= 1.8.0, 2019-11-20 =
-* Possibility to dynamically propose new payment means (only by redirection).
-* [embedded] Added feature embedded payment fields (directly on site or in a pop-in) using REST API.
-* Improve plugin translations.
-* Added support of payment by subscription with Subcriptio plugin in a new submodule (needs activation in source code).
+= 1.8.1, 2019-12-23 =
+* Bug fix: update order by IPN call when many attempts option is enabled.
 
 --------
 

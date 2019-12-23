@@ -30,7 +30,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-3.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.8.0';
+    const PLUGIN_VERSION = '1.8.1';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -959,7 +959,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $method = $this->get_order_property($order, 'payment_method');
         $subscriptions_handler = self::subscriptions_handler($method);
 
-        if ($this->is_new_order($order, $payzen_response->get('trans_id'))) {
+        if ($this->is_new_order($order, $payzen_response->get('trans_id'), $payzen_response->get('sequence_number'))) {
             // Order not processed yet or a failed payment (re-order).
 
             // Add order note.
@@ -970,11 +970,13 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             delete_post_meta((int) $order_id, 'Card number');
             delete_post_meta((int) $order_id, 'Means of payment');
             delete_post_meta((int) $order_id, 'Card expiry');
+            delete_post_meta((int) $order_id, 'Sequence number');
 
             // Store transaction details.
             update_post_meta((int) $order_id, 'Transaction ID', $payzen_response->get('trans_id'));
             update_post_meta((int) $order_id, 'Card number', $payzen_response->get('card_number'));
             update_post_meta((int) $order_id, 'Means of payment', $payzen_response->get('card_brand'));
+            update_post_meta((int) $order_id, 'Sequence number', $payzen_response->get('sequence_number'));
 
             $expiry = '';
             if ($payzen_response->get('expiry_month') && $payzen_response->get('expiry_year')) {
@@ -1153,7 +1155,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return $status;
     }
 
-    private function is_new_order($order, $trs_id)
+    private function is_new_order($order, $trs_id, $seq_nb)
     {
         if ($this->get_order_property($order, 'status') === 'pending') {
             return true;
@@ -1161,7 +1163,11 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         if ($this->get_order_property($order, 'status') === 'failed'
             || $this->get_order_property($order, 'status') === 'cancelled') {
-            return get_post_meta((int) $this->get_order_property($order, 'id'), 'Transaction ID', true) !== $trs_id;
+            if (get_post_meta((int) $this->get_order_property($order, 'id'), 'Transaction ID', true) !== $trs_id) {
+                return  true;
+            } elseif (get_post_meta((int) $this->get_order_property($order, 'id'), 'Sequence number', true) !== $seq_nb) {
+                return true;
+            }
         }
 
         return false;
