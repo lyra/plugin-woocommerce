@@ -2,10 +2,10 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 5.3
+Tested up to: 5.4
 WC requires at least: 2.0
-WC tested up to: 3.8
-Stable tag: 1.8.1
+WC tested up to: 4.0
+Stable tag: 1.8.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,8 +42,13 @@ The payment plugin has the following features:
 
 == Changelog ==
 
-= 1.8.1, 2019-12-23 =
-* Bug fix: update order by IPN call when many attempts option is enabled.
+= 1.8.2, 2020-03-16 =
+* Bug fix: Manage products with zero amount in tax calculation.
+* Bug fix: Payment by alias available only for logged in users.
+* Bug fix: Skip confirmation alert after clicking on payment button with IFRAME and REST modes (on WooCommerce >= v3.9).
+* Bug fix: Exit script after redirection to cart URL in error cases.
+* Fix errors (NOTICE level) when retrieving some configuration fields.
+* [embedded] Fix embedded payment fields display in WooCommerce v3.9 (relative to WooCommerce issue #24271).
 
 --------
 

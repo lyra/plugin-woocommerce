@@ -28,9 +28,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     const SIGN_ALGO = 'SHA-256';
     const LANGUAGE = 'fr';
 
-    const CMS_IDENTIFIER = 'WooCommerce_2.x-3.x';
+    const CMS_IDENTIFIER = 'WooCommerce_2.x-4.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.8.1';
+    const PLUGIN_VERSION = '1.8.2';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -161,9 +161,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         <?php } ?>
 
         <section class="payzen">
-        <table class="form-table">
-            <?php $this->generate_settings_html(); // Generate the HTML For the settings form. ?>
-        </table>
+            <table class="form-table">
+                <?php $this->generate_settings_html(); // Generate the HTML For the settings form. ?>
+            </table>
         </section>
 
         <a href="<?php echo $this->reset_admin_link; ?>"><?php _e('Reset configuration', 'woo-payzen-payment');?></a>
@@ -189,7 +189,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         set_transient($this->id . '_settings_reset', true);
 
         wp_redirect($this->admin_link);
-        die();
+        exit();
     }
 
     protected function get_supported_languages()
@@ -207,9 +207,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     {
         $modes = array(
             '-1' => sprintf(__('%s general configuration', 'woo-payzen-payment'), self::GATEWAY_NAME),
-            ' ' => sprintf(__('%s Back Office configuration', 'woo-payzen-payment'), self::BACKOFFICE_NAME),
-            '0' => __('Automatic', 'woo-payzen-payment'),
-            '1' => __('Manual', 'woo-payzen-payment')
+            ' '  => sprintf(__('%s Back Office configuration', 'woo-payzen-payment'), self::BACKOFFICE_NAME),
+            '0'  => __('Automatic', 'woo-payzen-payment'),
+            '1'  => __('Manual', 'woo-payzen-payment')
         );
 
         if ($is_general_settings) {
@@ -251,29 +251,33 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $doc_pattern .= self::GATEWAY_CODE . '_' . self::CMS_IDENTIFIER . '_v' . $minor . '*.pdf';
         $filenames = glob($doc_pattern);
 
-        $languages = array(
-            'fr' => 'Français',
-            'en' => 'English',
-            'de' => 'Deutsch',
-            'es' => 'Español'
-            // Complete when other languages are managed.
-        );
+        if(! empty($filenames)) {
+            $languages = array(
+                'fr' => 'Français',
+                'en' => 'English',
+                'de' => 'Deutsch',
+                'es' => 'Español'
+                // Complete when other languages are managed.
+            );
 
-        foreach ($filenames as $filename) {
-            $base_filename = basename($filename, '.pdf');
-            $lang = substr($base_filename, -2); // Extract language code.
+            $docs = __('Click to view the module configuration documentation :', 'woo-payzen-payment');
 
-            $docs .= '<a style="margin-left: 10px; text-decoration: none; text-transform: uppercase;" href="' . WC_PAYZEN_PLUGIN_URL
+            foreach ($filenames as $filename) {
+                $base_filename = basename($filename, '.pdf');
+                $lang = substr($base_filename, -2); // Extract language code.
+
+                $docs .= '<a style="margin-left: 10px; text-decoration: none; text-transform: uppercase;" href="' . WC_PAYZEN_PLUGIN_URL
                 . 'installation_doc/' . $base_filename . '.pdf" target="_blank">' . $languages[$lang] . '</a>';
+            }
         }
 
+
         $this->form_fields = array(
-                // Module information.
+            // Module information.
             'module_details' => array(
                 'title' => __('MODULE DETAILS', 'woo-payzen-payment'),
                 'type' => 'title'
             ),
-
             'developed_by' => array(
                 'title' => __('Developed by', 'woo-payzen-payment'),
                 'type' => 'text',
@@ -299,7 +303,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'css' => 'display: none;'
             ),
             'doc_link' => array(
-                'title' => __('Click to view the module configuration documentation :', 'woo-payzen-payment') . $docs,
+                'title' => $docs,
                 'type' => 'label',
                 'css' => 'font-weight: bold; color: red; cursor: auto !important; text-transform: uppercase;'
             ),
@@ -506,7 +510,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         if ($payzen_plugin_features['shatwo']) {
-            // HMAC-SHA-256 already available, update field description
+            // HMAC-SHA-256 already available, update field description.
             $desc = preg_replace('#<br /><b>[^<>]+</b>#', '', $this->form_fields['sign_algo']['description']);
             $this->form_fields['sign_algo']['description'] = $desc;
         }
@@ -1054,7 +1058,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $this->log("Order #$order_id is already saved.");
 
             if ($payzen_response->get('recurrence_number') && $subscriptions_handler) {
-                // IPN URL called for each recurrence creation on gateway
+                // IPN URL called for each recurrence creation on gateway.
                 $this->log("New recurrence created for order #$order_id. Let subscriptions handler do the work.");
 
                 $subscriptions_handler->update_subscription($order, $payzen_response);
@@ -1291,7 +1295,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                   </div>';
 
             echo '<script type="text/javascript">
-                    var url = "'.$url.'";
+                    var url = "' . $url . '";
 
                     if (window.top) {
                       window.top.location = url;
@@ -1435,8 +1439,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
             $matches = array();
             if (preg_match('#^([A-Z]{2}[0-9]{2}[A-Z0-9]{10,30})(_[A-Z0-9]{8,11})?$#i', $number, $matches)) {
-                // IBAN(_BIC)
-                $masked .= isset($matches[2]) ? str_replace('_', '', $matches[2]) . ' / ' : ''; // BIC
+                // IBAN(_BIC).
+                $masked .= isset($matches[2]) ? str_replace('_', '', $matches[2]) . ' / ' : ''; // BIC.
 
                 $iban = $matches[1];
                 $masked .= substr($iban, 0, 4) . str_repeat('X', strlen($iban) - 8) . substr($iban, - 4);

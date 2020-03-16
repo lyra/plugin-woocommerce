@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.8.1
- * Author URI: https://www.lyra-network.com
+ * Version: 1.8.2
+ * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 5.3
+ * Tested up to: 5.4
  * WC requires at least: 2.0
- * WC tested up to: 3.8
+ * WC tested up to: 4.0
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -183,8 +183,8 @@ function woocommerce_payzen_add_link($links, $file)
 {
     global $payzen_plugin_features;
 
-    $links[] = '<a href="' . payzen_admin_url('Payzen') . '">' . __('General configuration', 'woo-payzen-payment') .'</a>';
-    $links[] = '<a href="' . payzen_admin_url('PayzenStd') . '">' . __('Standard payment', 'woo-payzen-payment') .'</a>';
+    $links[] = '<a href="' . payzen_admin_url('Payzen') . '">' . __('General configuration', 'woo-payzen-payment') . '</a>';
+    $links[] = '<a href="' . payzen_admin_url('PayzenStd') . '">' . __('Standard payment', 'woo-payzen-payment') . '</a>';
 
     if ($payzen_plugin_features['multi']) {
         $links[] = '<a href="' . payzen_admin_url('PayzenMulti') . '">' . __('Payment in installments', 'woo-payzen-payment')

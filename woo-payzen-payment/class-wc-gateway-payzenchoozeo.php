@@ -16,7 +16,7 @@ if (! defined('ABSPATH')) {
 class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
 {
 
-    protected $payzen_countries = array('FR', 'GP', 'MQ', 'GF', 'RE', 'YT'); // France and DOM
+    protected $payzen_countries = array('FR', 'GP', 'MQ', 'GF', 'RE', 'YT'); // France and DOM.
     protected $payzen_currencies = array('EUR');
 
     public function __construct()
@@ -205,13 +205,13 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
 
         foreach ($options as $code => $option) {
             $html .= '<tr>';
-            $html .= '<td style="padding: 0px;"><input name="'.$field_name.'['.$code.'][label]"
+            $html .= '<td style="padding: 0px;"><input name="' . $field_name . '[' . $code . '][label]"
                       value="'. $option['label'] .'"
                       type="text" readonly></td>';
-            $html .= '<td style="padding: 0px;"><input name="'.$field_name.'['.$code.'][amount_min]"
+            $html .= '<td style="padding: 0px;"><input name="' . $field_name . '[' . $code . '][amount_min]"
                       value="' . $option['amount_min'] . '"
                       type="text"></td>';
-            $html .= '<td style="padding: 0px;"><input name="'.$field_name.'['.$code.'][amount_max]"
+            $html .= '<td style="padding: 0px;"><input name="' . $field_name . '[' . $code . '][amount_max]"
                       value="' . $option['amount_max'] . '"
                       type="text"></td>';
             $html .= '</tr>';
@@ -398,7 +398,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         // By default WooCommerce does not manage customer type.
         $this->payzen_request->set('cust_status', 'PRIVATE');
 
-        // Choozeo supports only automatic validation
+        // Choozeo supports only automatic validation.
         $this->payzen_request->set('validation_mode', '0');
 
         // Send FR even address is in DOM-TOM unless form is rejected.

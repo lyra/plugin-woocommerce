@@ -48,6 +48,7 @@ var payzenInitRestEvents = function() {
         }
 
         jQuery('.kr-form-error').html('<span style="color: red;"><span>' + msg + '</span></span>');
+        jQuery('ul.payzenstd-view-bottom').show();
     });
 
     KR.onFocus(function(e) {
