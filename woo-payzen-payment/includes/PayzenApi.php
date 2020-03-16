@@ -249,6 +249,55 @@ if (! class_exists('PayzenApi', false)) {
         }
 
         /**
+         * Return the statuses list of finalized successful payments (authorized or captured).
+         * @return array
+         */
+        public static function getSuccessStatuses()
+        {
+            return array(
+                'AUTHORISED',
+                'AUTHORISED_TO_VALIDATE', // TODO is this a pending status?
+                'CAPTURED',
+                'ACCEPTED'
+            );
+        }
+
+        /**
+         * Return the statuses list of payments that are waiting confirmation (successful but
+         * the amount has not been transfered and is not yet guaranteed).
+         * @return array
+         */
+        public static function getPendingStatuses()
+        {
+            return array(
+                'INITIAL',
+                'WAITING_AUTHORISATION',
+                'WAITING_AUTHORISATION_TO_VALIDATE',
+                'UNDER_VERIFICATION',
+                'PRE_AUTHORISED',
+                'WAITING_FOR_PAYMENT'
+            );
+        }
+
+        /**
+         * Return the statuses list of payments interrupted by the buyer.
+         * @return array
+         */
+        public static function getCancelledStatuses()
+        {
+            return array('ABANDONED');
+        }
+
+        /**
+         * Return the statuses list of payments waiting manual validation from the gateway Back Office.
+         * @return array
+         */
+        public static function getToValidateStatuses()
+        {
+            return array('WAITING_AUTHORISATION_TO_VALIDATE', 'AUTHORISED_TO_VALIDATE');
+        }
+
+        /**
          * Compute the signature. Parameters must be in UTF-8.
          *
          * @param array[string][string] $parameters payment gateway request/response parameters

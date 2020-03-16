@@ -94,7 +94,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
             'type' => 'select',
             'default' => 'DEFAULT',
             'options' => array(
-                'DEFAULT' => __('On payment gateway', 'woo-payzen-payment'),
+                'DEFAULT'  => __('On payment gateway', 'woo-payzen-payment'),
                 'MERCHANT' => __('On merchant site', 'woo-payzen-payment')
             ),
             'description' =>sprintf(__('Select where card type will be selected by buyer.', 'woo-payzen-payment'), self::GATEWAY_NAME),
@@ -350,10 +350,10 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $options = $this->get_available_options();
         $option = $options[$_POST['payzenmulti_option']];
 
-        // Save selected payment option into session.
+        // Save selected payment option into session...
         set_transient('payzenmulti_option_' . $order_id, $option);
 
-        // ... and into DB
+        // ... and into DB.
         $order = new WC_Order($order_id);
         update_post_meta($this->get_order_property($order, 'id'), '_payment_method_title', $this->get_order_property($order, 'payment_method_title') . " ({$option['count']} x)");
 

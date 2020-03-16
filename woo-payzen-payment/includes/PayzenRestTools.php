@@ -73,7 +73,7 @@ class PayzenRestTools
             $response['vads_warranty_result'] = self::getProperty($transactionDetails, 'liabilityShift');
 
             if ($cardDetails = self::getProperty($transactionDetails, 'cardDetails')) {
-                $response['vads_trans_id'] = self::getProperty($cardDetails, 'legacyTransId'); // Deprecated
+                $response['vads_trans_id'] = self::getProperty($cardDetails, 'legacyTransId'); // Deprecated.
                 $response['vads_presentation_date'] = self::getProperty($cardDetails, 'expectedCaptureDate');
 
                 $response['vads_card_brand'] = self::getProperty($cardDetails, 'effectiveBrand');

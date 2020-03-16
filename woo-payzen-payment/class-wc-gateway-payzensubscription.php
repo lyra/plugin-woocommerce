@@ -76,7 +76,6 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
     {
         parent::init_form_fields();
 
-        //unset($this->form_fields['payment_cards']);
         unset($this->form_fields['advanced_options']);
         unset($this->form_fields['payment_by_token']);
         if (isset($this->form_fields['card_data_mode']['options']['REST'])) {
@@ -87,7 +86,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $this->form_fields['enabled']['default'] = 'no';
         $this->form_fields['enabled']['description'] = __('Enables / disables payment by Subscription.', 'woo-payzen-payment');
 
-        // Add subscription payment fields
+        // Add subscription payment fields.
         $this->form_fields['subscriptions'] = array(
             'title' => __('Subscriptions management', 'woo-payzen-payment'),
             'type' => 'select',

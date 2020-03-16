@@ -78,8 +78,8 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
 
         $this->form_fields['title']['default'] = __('Other payment means', 'woo-payzen-payment');
 
-        // If WooCommecre Multilingual is not available (or installed version not allow gateways UI translation)
-        // let's suggest our translation feature.
+        // If WooCommecre Multilingual is not available (or installed version not allow gateways UI translation).
+        // Let's suggest our translation feature.
         if (! class_exists('WCML_WC_Gateways')) {
             $this->form_fields['title']['default'] = array(
                 'en_US' => 'Other payment means',
@@ -142,7 +142,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         );
 
         $columns['capture_delay'] = array(
-            'title' => __('Capture delay', 'woo-payzen-payment'),
+            'title' => __('Capture delay ', 'woo-payzen-payment'),
             'width' => '92px',
         );
 
@@ -207,6 +207,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                             optionLine +='<?php foreach ($this->get_supported_card_types() as $key => $value) {
                                                     echo '<option value="' . $key . '">' . $value . '</option>';
                                                 } ?>';
+
                             optionLine = optionLine.replace('<option value="'+value+'"', '<option value="'+value+'" selected');
                             break;
 
@@ -229,6 +230,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                                                 if (labelValue == '') {
                                                     labelValue = '<?php echo __('Click to add countries.', 'woo-payzen-payment')?>';
                                                 }
+
                             optionLine += '</select><label style="width:100%;" id="label_' + inputName + '" onclick="javascript:payzenDisplayMultiSelect(\'' + inputName + '\');" >' + labelValue + '</label></div>';
                             break;
 
@@ -246,6 +248,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                                                 foreach ($options as $key => $value) {
                                                     echo '<option value="' . $key . '">' . $value . '</option>';
                                                 } ?>';
+
                             optionLine = optionLine.replace('<option value="'+value+'"', '<option value="'+value+'" selected');
                             break;
 
@@ -272,7 +275,6 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
             }
 
             function payzenDisplayMultiSelect(selectId) {
-
                 var select = document.getElementById(selectId);
                 var label = document.getElementById('label_' + selectId);
                 select.style.display = '';
@@ -291,7 +293,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
             function getLabelText(select) {
                 var labelText = '', option;
 
-                for (var i=0, len=select.options.length; i<len; i++) {
+                for (var i = 0, len = select.options.length; i < len; i++) {
                     option = select.options[i];
 
                     if ( option.selected ) {
@@ -300,7 +302,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                 }
 
                 labelText = labelText.substring(0, labelText.length - 2);
-                if (labelText == '') {
+                if (! labelText) {
                     labelText = '<?php echo __('Click to add countries.', 'woo-payzen-payment')?>';
                 }
 

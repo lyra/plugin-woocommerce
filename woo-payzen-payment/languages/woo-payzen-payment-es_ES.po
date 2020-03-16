@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce PayZen payment "
-"1.8.1\n"
+"1.8.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-21 14:51+0100\n"
-"PO-Revision-Date: 2019-12-09 17:28+0100\n"
+"PO-Revision-Date: 2020-03-16 13:56+0100\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <support@payzen.eu>\n"
 "Language: es_ES\n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 2.2.3\n"
+"X-Generator: Poedit 1.8.7.1\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SearchPath-0: ..\n"
 
@@ -225,10 +225,12 @@ msgstr ""
 "Idiomas disponibles en la página de pago. Si no selecciona ninguno, todos "
 "los idiomas compatibles estarán disponibles."
 
-#: ../class-wc-gateway-payzen.php:404
-#: ../class-wc-gateway-payzenregroupedother.php:145
-#: ../class-wc-gateway-payzenstd.php:325
+#: ../class-wc-gateway-payzen.php:404 ../class-wc-gateway-payzenstd.php:325
 msgid "Capture delay"
+msgstr "Plazo de captura"
+
+#: ../class-wc-gateway-payzenregroupedother.php:145
+msgid "Capture delay "
 msgstr "Plazo de captura"
 
 #: ../class-wc-gateway-payzen.php:407
