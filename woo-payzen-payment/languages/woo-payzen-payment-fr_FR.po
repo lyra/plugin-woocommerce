@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce PayZen Payment 1.8.2\n"
+"Project-Id-Version: WooCommerce PayZen Payment 1.8.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-21 14:48+0100\n"
-"PO-Revision-Date: 2020-03-16 14:38+0100\n"
+"PO-Revision-Date: 2020-05-14 14:50+0100\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <support@payzen.eu>\n"
 "Language: fr_FR\n"
@@ -940,6 +940,15 @@ msgstr "Date d'expiration"
 #: ../class-wc-gateway-payzenstd.php:580
 msgid "CVV"
 msgstr "CVV"
+
+#: ../class-wc-gateway-payzenstd.php:743
+#, php-format
+msgid ""
+"The \"Payment by token\" option should be enabled on your %s store to use this feature.\\n"
+"\\nAre you sure you want to enable this feature?"
+msgstr ""
+"L\\'option \"Paiement par alias\" doit être activée sur votre boutique %s pour utiliser "
+"cette fonctionnalité.\\n\\nÊtes-vous sûr de vouloir activer cette fonctionnalité?"
 
 #: ../class-wc-gateway-payzenstd.php:1074 ../class-wc-gateway-payzensubscription.php:133
 #, php-format

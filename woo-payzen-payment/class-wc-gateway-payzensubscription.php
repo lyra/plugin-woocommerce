@@ -122,8 +122,11 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         return true;
     }
 
-    protected function display_payment_by_alias_interface($cust_id)
+    protected function payment_by_alias_view($html)
     {
+        global $woocommerce;
+
+        $cust_id = $this->get_customer_property($woocommerce->customer, 'id');
         $saved_subsc_masked_pan = get_user_meta((int) $cust_id, $this->id . '_masked_pan', true);
 
         echo '<div id="' . $this->id . '_payment_by_token_description">
@@ -206,6 +209,6 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             return $this->subscriptions_handler && $this->subscriptions_handler->cart_contains_subscription($woocommerce->cart);
         }
 
-        return parent::payzen_order_needs_payment($is_active, $order);
+        return $is_active;
     }
 }

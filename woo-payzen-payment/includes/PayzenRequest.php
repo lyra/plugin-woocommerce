@@ -394,12 +394,12 @@ if (! class_exists('PayzenRequest', false)) {
         /**
          * Enable/disable vads_redirect_* parameters.
          *
-         * @param mixed $enabled false, 0, null, negative integer or 'false' to disable
+         * @param mixed $enabled false, 0, null or 'false' to disable
          * @return boolean
          */
         public function setRedirectEnabled($enabled)
         {
-            $this->redirectEnabled = ($enabled && $enabled != '0' && strtolower($enabled) != 'false');
+            $this->redirectEnabled = ($enabled && (! is_string($enabled) || strtolower($enabled) !== 'false'));
             return true;
         }
 

@@ -1,3 +1,9 @@
+1.8.3, 2020-05-21:
+- [embedded] Bug fix: Payment by embedded fields error relative to new JavaScript client library.
+- [embedded] Bug fix: Manage new metadata field format returned in REST API IPN.
+- [subscr] Bug fix: Fatal error in subscription submodule before redirection.
+- [alias] Display confirmation message on payment by token enabling.
+
 1.8.2, 2020-03-16:
 - Bug fix: Manage products with zero amount in tax calculation.
 - [alias] Bug fix: Payment by alias available only for logged in users.
