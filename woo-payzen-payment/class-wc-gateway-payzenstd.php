@@ -293,7 +293,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             ),
             'allows_specific' => array(
                 'custom_attributes' => array(
-                    'onchange' => 'payzenUpdateSpecificCountriesDisplay()',
+                    'onchange' => 'payzenUpdateSpecificCountriesDisplay()'
                 ),
                 'title' => __('Restrict to some countries', 'woo-payzen-payment'),
                 'type' => 'select',
@@ -360,7 +360,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             ),
             'card_data_mode' => array(
                 'custom_attributes' => array(
-                    'onchange' => 'payzenUpdateRestFieldDisplay()',
+                    'onchange' => 'payzenUpdateRestFieldDisplay()'
                 ),
                 'title' => __('Card data entry mode', 'woo-payzen-payment'),
                 'type' => 'select',
@@ -383,6 +383,9 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         // Add payment by token fields.
         $this->form_fields['payment_by_token'] = array(
+            'custom_attributes' => array(
+                'onchange' => 'payzenUpdatePaymentByTokenField()',
+            ),
             'title' => __('Payment by token', 'woo-payzen-payment'),
             'type' => 'select',
             'default' => '0',
@@ -423,7 +426,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $this->form_fields['rest_settings'] = array(
             'title' => __('REST API keys', 'woo-payzen-payment'),
             'type' => 'title',
-            'description' => sprintf(__('REST API keys are available in your store Back Office %s (menu: Settings > Shops > REST API keys).', 'woo-payzen-payment'), 'PayZen'),
+            'description' => sprintf(__('REST API keys are available in your store Back Office %s (menu: Settings > Shops > REST API keys).', 'woo-payzen-payment'), 'PayZen')
         );
 
         $this->form_fields['test_private_key'] = array(
@@ -479,7 +482,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         $this->form_fields['rest_customization'] = array(
             'title' => __('CUSTOMIZATION', 'woo-payzen-payment'),
-            'type' => 'title',
+            'type' => 'title'
         );
 
         $this->form_fields['rest_display_mode'] = array(
@@ -568,7 +571,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $html .= '<td class="forminp">' . "\n";
         $html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post($data['title']) . '</span></legend>' . "\n";
 
-        $html .= '<table id="' . $field_name . '_table" class="'. esc_attr($data['class']) . '" cellpadding="10" cellspacing="0" >';
+        $html .= '<table id="' . $field_name . '_table" class="' . esc_attr($data['class']) . '" cellpadding="10" cellspacing="0" >';
 
         $html .= '<tbody>';
 
@@ -731,6 +734,15 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                     customizationTable.find('tr:nth-child(2)').hide();
                     customizationTable.find('tr:nth-child(3)').hide();
                     customizationTable.find('tr:nth-child(4)').hide();
+                }
+            }
+
+            function payzenUpdatePaymentByTokenField() {
+                var isPaymentByTokenEnabled = jQuery('#<?php echo esc_attr($this->get_field_key('payment_by_token')); ?> option:selected').val() == '1';
+
+                if (isPaymentByTokenEnabled && ! confirm('<?php echo sprintf(__('The "Payment by token" option should be enabled on your %s store to use this feature.\n\nAre you sure you want to enable this feature?', 'woo-payzen-payment'), self::GATEWAY_NAME) ?>')) {
+                    jQuery('#<?php echo esc_attr($this->get_field_key('payment_by_token')); ?>').val('0');
+                    jQuery('#<?php echo esc_attr($this->get_field_key('payment_by_token')); ?>').trigger('change');
                 }
             }
         //-->
@@ -897,7 +909,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                          </iframe>';
 
                 $html .= "\n".'<script type="text/javascript">';
-                $html .= "\njQuery('form.checkout').on('checkout_place_order_". $this->id . "', function() {
+                $html .= "\njQuery('form.checkout').on('checkout_place_order_" . $this->id . "', function() {
                                 jQuery('form.checkout').removeClass('processing').unblock();
 
                                 jQuery.ajaxPrefilter(function(options, originalOptions, jqXHR) {
@@ -1089,7 +1101,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         return $saved_identifier;
     }
 
-    private function payment_by_alias_view($payment_fields)
+    protected function payment_by_alias_view($payment_fields)
     {
         global $woocommerce;
 
@@ -1227,14 +1239,21 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                             formToken = IDENTIFIER_FORM_TOKEN;
                         }
 
-                        if(window.KR && KR.vueReady) {
-                            // Form already loaded
+                        if (window.KR && KR.vueReady) {
+                            // Form already loaded.
                             KR.removeForms().then(({ KR }) => {
-                                return payzenDrawRestPaymentFields(formToken);
-                            });
+                                payzenDrawRestPaymentFields(formToken);
+                                return {KR};
+                            })
+                            .then(({KR}) => KR.attachForm("#payzenstd_rest_wrapper"))
+                            .then(({KR, result}) => {
+                                KR.setFormToken(formToken);
+                                return {KR, result};
+                            })
+                            .then(({KR, result}) => KR.showForm(result.formId))
+                        } else {
+                            payzenDrawRestPaymentFields(formToken);
                         }
-
-                        payzenDrawRestPaymentFields(formToken)
                     };
 
                     var useIdentifier = typeof IDENTIFIER_FORM_TOKEN !== "undefined";
