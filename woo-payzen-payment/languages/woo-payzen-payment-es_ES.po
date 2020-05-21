@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce PayZen payment "
-"1.8.2\n"
+"1.8.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-21 14:51+0100\n"
-"PO-Revision-Date: 2020-03-16 13:56+0100\n"
+"PO-Revision-Date: 2020-05-14 14:49+0100\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <support@payzen.eu>\n"
 "Language: es_ES\n"
@@ -998,6 +998,15 @@ msgstr "Fecha de expiración"
 #: ../class-wc-gateway-payzenstd.php:580
 msgid "CVV"
 msgstr "CVV"
+
+#: ../class-wc-gateway-payzenstd.php:743
+#, php-format
+msgid ""
+"The \"Payment by token\" option should be enabled on your %s store to use "
+"this feature.\\n\\nAre you sure you want to enable this feature?"
+msgstr ""
+"La opción \\\"Pago por token\\\" debe estar habilitada en su tienda %s para "
+"usar esta función.\\n\\n¿Está seguro de que desea habilitar esta función?"
 
 #: ../class-wc-gateway-payzenstd.php:1074
 #: ../class-wc-gateway-payzensubscription.php:133

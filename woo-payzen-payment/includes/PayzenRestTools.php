@@ -52,7 +52,9 @@ class PayzenRestTools
             $response['vads_order_id'] = self::getProperty($orderDetails, 'orderId');
         }
 
-        if (($metadata = self::getProperty($transaction, 'metadata')) && ($orderInfo = self::getProperty($metadata, 'orderInfo'))) {
+        if ($metadata = self::getProperty($transaction, 'metadata')) {
+            $orderInfo = key_exists('orderInfo', $metadata) ? self::getProperty($metadata, 'orderInfo') :
+                self::getProperty($metadata, 'info');
             $response['vads_order_info'] = $orderInfo;
         }
 

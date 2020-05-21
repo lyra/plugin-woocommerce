@@ -84,10 +84,10 @@ class PayzenRest
         /* we disable SSL validation for test key because there is
          * lot of wamp installation that does not handle certificates well
          */
-        if (strpos($this->privateKey, 'testpassword_') !== false) {
+        /*if (strpos($this->privateKey, 'testpassword_') !== false) {
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-        }
+        }*/
 
         if ($this->proxyHost && $this->proxyPort) {
             curl_setopt($curl, CURLOPT_PROXY, $this->proxyHost);
