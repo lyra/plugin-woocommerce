@@ -15,7 +15,6 @@ if (! defined('ABSPATH')) {
 
 interface Payzen_Subscriptions_Handler_Interface
 {
-
     /**
      * Return true if cart contains a subscription product.
      *

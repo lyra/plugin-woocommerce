@@ -15,7 +15,6 @@ if (! defined('ABSPATH')) {
 
 class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_Handler_Interface
 {
-
     /**
      * {@inheritDoc}
      * @see Payzen_Subscriptions_Handler_Interface::cart_contains_subscription()

@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.8.3
+ * Version: 1.8.4
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
  * Tested up to: 5.4
  * WC requires at least: 2.0
- * WC tested up to: 4.0
+ * WC tested up to: 4.2
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -44,7 +44,6 @@ $payzen_plugin_features = array(
     'subscr' => false,
 
     'multi' => true,
-    'choozeo' => false,
     'klarna' => true
 );
 
@@ -76,7 +75,6 @@ function woocommerce_payzen_uninstallation()
     delete_option('woocommerce_payzen_settings');
     delete_option('woocommerce_payzenstd_settings');
     delete_option('woocommerce_payzenmulti_settings');
-    delete_option('woocommerce_payzenchoozeo_settings');
     delete_option('woocommerce_payzenklarna_settings');
     delete_option('woocommerce_payzenregroupedother_settings');
     delete_option('woocommerce_payzensubscription_settings');
@@ -105,10 +103,6 @@ function woocommerce_payzen_init()
 
     if ($payzen_plugin_features['multi'] && ! class_exists('WC_Gateway_PayzenMulti')) {
         require_once 'class-wc-gateway-payzenmulti.php';
-    }
-
-    if ($payzen_plugin_features['choozeo'] && ! class_exists('WC_Gateway_PayzenChoozeo')) {
-        require_once 'class-wc-gateway-payzenchoozeo.php';
     }
 
     if ($payzen_plugin_features['klarna'] && ! class_exists('WC_Gateway_PayzenKlarna')) {
@@ -144,10 +138,6 @@ function woocommerce_payzen_add_method($methods)
 
     if ($payzen_plugin_features['multi']) {
         $methods[] = 'WC_Gateway_PayzenMulti';
-    }
-
-    if ($payzen_plugin_features['choozeo']) {
-        $methods[] = 'WC_Gateway_PayzenChoozeo';
     }
 
     if ($payzen_plugin_features['klarna']) {
