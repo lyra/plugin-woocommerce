@@ -81,13 +81,13 @@ class PayzenRest
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->connectionTimeout);
         curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 
-        /* we disable SSL validation for test key because there is
-         * lot of wamp installation that does not handle certificates well
+        /* We disable SSL validation for test key because there is
+         * a lot of wamp installations that do not handle certificates well.
          */
-        /*if (strpos($this->privateKey, 'testpassword_') !== false) {
+        if (strpos($this->privateKey, 'testpassword_') !== false) {
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-        }*/
+        }
 
         if ($this->proxyHost && $this->proxyPort) {
             curl_setopt($curl, CURLOPT_PROXY, $this->proxyHost);
@@ -95,22 +95,43 @@ class PayzenRest
         }
 
         $raw_response = curl_exec($curl);
-        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-        if (!in_array($status, array(200, 401))) {
+        $info = curl_getinfo($curl);
+        if (!in_array($info['http_code'], array(200, 401))) {
+            $error = curl_error($curl);
+            $errno = curl_errno($curl);
             curl_close($curl);
 
-            throw new \Exception("Error: call to URL $url failed with unexpected status $status, response $raw_response.");
+            $msg = "Call to URL $url failed with unexpected status: {$info['http_code']}";
+
+            if ($raw_response) {
+                $msg .= ", raw response: $raw_response";
+            }
+
+            if ($errno) {
+                $msg .= ", cURL error: $error ($errno)";
+            }
+
+            $msg .= ", cURL info: " . print_r($info, true);
+
+            throw new \Exception($msg, '-1');
         }
 
         $response = json_decode($raw_response, true);
         if (!is_array($response)) {
             $error = curl_error($curl);
             $errno = curl_errno($curl);
-
             curl_close($curl);
 
-            throw new \Exception("Error: call to URL $url failed, response $raw_response, curl_error $error, curl_errno $errno.");
+            $msg = "Call to URL $url returned an unexpected response, raw response: $raw_response";
+
+            if ($errno) {
+                $msg .= ", cURL error: $error ($errno)";
+            }
+
+            $msg .= ", cURL info: " . print_r($info, true);
+
+            throw new \Exception($msg, '-1');
         }
 
         curl_close($curl);
@@ -145,12 +166,12 @@ class PayzenRest
         $raw_response = file_get_contents($url, false, $context);
 
         if (!$raw_response) {
-            throw new \Exception("Error: call to URL $url failed.");
+            throw new \Exception("Error: call to URL $url failed.", '-1');
         }
 
         $response = json_decode($raw_response, true);
         if (!is_array($response)) {
-            throw new \Exception("Error: call to URL $url failed, response $raw_response.");
+            throw new \Exception("Error: call to URL $url failed, response $raw_response.", '-1');
         }
 
         return $response;

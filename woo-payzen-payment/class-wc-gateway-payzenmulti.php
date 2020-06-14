@@ -15,7 +15,6 @@ if (! defined('ABSPATH')) {
 
 class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 {
-
     public function __construct()
     {
         global $payzen_plugin_features;
@@ -107,7 +106,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         );
 
         // Multiple payment options.
-        $descr = __('Click on "Add" button to configure one or more payment options. <br /><b>Label : </b>The option label to display on the frontend. <br /><b>Min amount : </b>Minimum amount to enable the payment option. <br /><b>Max amount : </b>Maximum amount to enable the payment option. <br /><b>Count : </b>Total number of payments. <br /><b>Period : </b>Delay (in days) between payments. <br /><b>1st payment : </b>Amount of first payment, in percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do not forget to click on "Save" button to save your modifications.</b>', 'woo-payzen-payment');
+        $descr = __('Click on "Add" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </b>Minimum amount to enable the payment option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Count: </b>Total number of payments.<br /><b>Period: </b>Delay (in days) between payments.<br /><b>1st payment: </b>Amount of first payment, in percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do not forget to click on "Save" button to save your modifications.</b>', 'woo-payzen-payment');
 
         $cards = $this->get_supported_card_types();
 
@@ -133,7 +132,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
                 'width' => '74px'
             );
 
-            $descr = __('Click on "Add" button to configure one or more payment options. <br /><b>Label : </b>The option label to display on the frontend. <br /><b>Min amount : </b>Minimum amount to enable the payment option. <br /><b>Max amount : </b>Maximum amount to enable the payment option. <br /><b>Contract : </b>ID of the contract to use with the option (leave blank preferably). <br /><b>Count : </b>Total number of payments. <br /><b>Period : </b>Delay (in days) between payments. <br /><b>1st payment : </b>Amount of first payment, in percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do not forget to click on "Save" button to save your modifications.</b>', 'woo-payzen-payment');
+            $descr = __('Click on "Add" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </b>Minimum amount to enable the payment option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Contract: </b>ID of the contract to use with the option (leave blank preferably).<br /><b>Count: </b>Total number of payments.<br /><b>Period: </b>Delay (in days) between payments.<br /><b>1st payment: </b>Amount of first payment, in percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do not forget to click on "Save" button to save your modifications.</b>', 'woo-payzen-payment');
         }
 
         $columns['count'] = array(

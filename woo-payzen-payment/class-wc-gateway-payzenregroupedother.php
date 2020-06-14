@@ -164,6 +164,16 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         // REST API fields are not available for this payment.
     }
 
+    protected function get_method_title_field_description()
+    {
+        return __('Method title to display on payment means page. Used only if &laquo; Regroup payment means &raquo; option is enabled.', 'woo-payzen-payment');
+    }
+
+    protected function get_method_description_field_description()
+    {
+        return __('This controls the description which the user sees during checkout. Used only if &laquo; Regroup payment means &raquo; option is enabled.', 'woo-payzen-payment');
+    }
+
     public function payzen_admin_head_script()
     {
         parent::payzen_admin_head_script();
