@@ -275,13 +275,13 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             'title' => array(
                 'title' => __('Title', 'woo-payzen-payment'),
                 'type' => 'text',
-                'description' => __('This controls the title which the user sees during checkout.', 'woo-payzen-payment'),
+                'description' => $this->get_method_title_field_description(),
                 'default' => __('Payment by credit card', 'woo-payzen-payment')
             ),
             'description' => array(
                 'title' => __('Description', 'woo-payzen-payment'),
                 'type' => 'textarea',
-                'description' => __('This controls the description which the user sees during checkout.', 'woo-payzen-payment'),
+                'description' => $this->get_method_description_field_description(),
                 'default' => __('You will be redirected to payment page after order confirmation.', 'woo-payzen-payment'),
                 'css' => 'width: 35em;'
             ),
@@ -523,7 +523,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $this->form_fields['rest_attempts'] = array(
             'title' => __('Payment attempts number', 'woo-payzen-payment'),
             'type' => 'text',
-            'description' => __('Maximum number of payment retries after a failed payment (between 0 and 10). Leave blank to use gateway configuration.', 'woo-payzen-payment')
+            'description' => __('Maximum number of payment retries after a failed payment (between 0 and 9). If blank, the gateway default value is 3.', 'woo-payzen-payment')
         );
     }
 
@@ -1114,7 +1114,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         echo '<ul class="' . $this->id . '-view-top" style="margin-left: 0;">
                   <li class="block ' . $this->id . '-id-block">
                       <input id="payzen_use_identifier" type="hidden" value="true" name="payzen_use_identifier" />
-                      <span>' . sprintf(__('You will pay with your registered means of payment%s. No data entry is needed.', 'woo-payzen-payment'), $saved_masked_pan) . '</span>
+                      <span>' . sprintf(__('You will pay with your registered means of payment %s. No data entry is needed.', 'woo-payzen-payment'), $saved_masked_pan) . '</span>
                   </li>
 
                   <li class="block ' . $this->id . '-cc-block">';

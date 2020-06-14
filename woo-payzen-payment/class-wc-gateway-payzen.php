@@ -30,7 +30,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-4.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.8.3';
+    const PLUGIN_VERSION = '1.8.4';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -219,6 +219,16 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return $modes;
     }
 
+    protected function get_method_title_field_description()
+    {
+        return __('Method title to display on payment means page.', 'woo-payzen-payment');
+    }
+
+    protected function get_method_description_field_description()
+    {
+        return __('This controls the description which the user sees during checkout.', 'woo-payzen-payment');
+    }
+
     /**
      * Initialise gateway settings form fields.
      */
@@ -260,7 +270,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 // Complete when other languages are managed.
             );
 
-            $docs = __('Click to view the module configuration documentation :', 'woo-payzen-payment');
+            $docs = __('Click to view the module configuration documentation: ', 'woo-payzen-payment');
 
             foreach ($filenames as $filename) {
                 $base_filename = basename($filename, '.pdf');
