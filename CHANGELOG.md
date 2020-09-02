@@ -1,3 +1,9 @@
+= 1.8.5, 2020-09-02 =
+* [embedded] Bug fix: Error 500 due to riskControl modified format in REST response.
+* [embedded] Bug fix: Compatibility of payment with embedded fields with Internet Explorer 11.
+* [embedded] Bug fix: Error due to strongAuthenticationState field renaming in REST token creation.
+* Update payment means logos.
+
 = 1.8.4, 2020-06-14 =
 * Improve plugin translations.
 

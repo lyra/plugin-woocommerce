@@ -98,8 +98,8 @@ class PayzenRestTools
                 if ($riskControl = self::getProperty($fraudManagement, 'riskControl')) {
                     $response['vads_risk_control'] = '';
 
-                    foreach ($riskControl as $key => $value) {
-                        $response['vads_risk_control'] .= "$key=$value;";
+                    foreach ($riskControl as $value) {
+                        $response['vads_risk_control'] .= "{$value['name']}={$value['result']};";
                     }
                 }
 

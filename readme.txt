@@ -4,8 +4,8 @@ Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
 Tested up to: 5.4
 WC requires at least: 2.0
-WC tested up to: 4.2
-Stable tag: 1.8.4
+WC tested up to: 4.3
+Stable tag: 1.8.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,12 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.8.5, 2020-09-02 =
+* [embedded] Bug fix: Error 500 due to riskControl modified format in REST response.
+* [embedded] Bug fix: Compatibility of payment with embedded fields with Internet Explorer 11.
+* [embedded] Bug fix: Error due to strongAuthenticationState field renaming in REST token creation.
+* Update payment means logos.
 
 = 1.8.4, 2020-06-14 =
 * Improve plugin translations.
