@@ -28,7 +28,7 @@ var PAYZEN_RECOVERABLE_ERRORS = [
     'PSP_003', 'PSP_108', 'ACQ_001'
 ];
 
-var payzenInitRestEvents = function() {
+var payzenInitRestEvents = function(KR) {
     KR.onError(function(e) {
         jQuery('#payzenstd_rest_processing').css('display', 'none');
         jQuery('form.checkout').removeClass('processing').unblock();
@@ -42,7 +42,10 @@ var payzenInitRestEvents = function() {
 
         var msg = '';
         if (PAYZEN_DFAULT_MESSAGES.indexOf(e.errorCode) > -1) {
-            msg = e.errorMessage + (e.errorMessage.endsWith('.') ? '' : '.');
+            msg = e.errorMessage;
+            var endsWithDot = (msg.lastIndexOf('.') == (msg.length - 1) && msg.lastIndexOf('.') >= 0);
+
+            msg += (endsWithDot ? '' : '.');
         } else {
             msg = payzenTranslate(e.errorCode);
         }

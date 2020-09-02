@@ -342,7 +342,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                 } else {
                     $used_cards[] = $option['payment_mean'];
                     if (! $option['label']) {
-                        $cards = $this->get_supported_card_types();
+                        $cards = PayzenApi::getSupportedCardTypes();
                         $value[$code]['label'] = sprintf(__('Payment with %s', 'woo-payzen-payment'), $cards[$option['payment_mean']]);
                     }
 
