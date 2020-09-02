@@ -76,7 +76,7 @@ class WC_Gateway_PayzenOther extends WC_Gateway_PayzenStd
         $title = $this->payment_title;
 
         if (! $title) {
-            $cards = $this->get_supported_card_types();
+            $cards = PayzenApi::getSupportedCardTypes();
             $title = sprintf(__('Payment with %s', 'woo-payzen-payment'), $cards[$this->payment_code]);
         }
 

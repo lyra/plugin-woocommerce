@@ -677,7 +677,12 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
     protected function get_supported_card_types()
     {
-        return PayzenApi::getSupportedCardTypes();
+        $cards = PayzenApi::getSupportedCardTypes();
+        foreach ($cards as $code => $label) {
+            $cards[$code] = $code . " - " . $label;
+        }
+
+        return $cards;
     }
 
     public function payzen_admin_head_script()
@@ -852,7 +857,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         switch ($this->get_option('card_data_mode')) {
             case 'MERCHANT':
                 $card_keys = $this->get_option('payment_cards');
-                $all_supported_cards = $this->get_supported_card_types();
+                $all_supported_cards = PayzenApi::getSupportedCardTypes();
 
                 if (! is_array($card_keys) || in_array('', $card_keys)) {
                     $cards = $all_supported_cards;
@@ -1030,10 +1035,10 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                                         if (savedData && (newData === savedData)) {
                                             // Data in checkout page has not changed no need to calculate token again.
                                             if (popin) {
-                                                jQuery('button.kr-popin-button').click();
+                                                KR.openPopin();
                                                 jQuery('form.checkout').removeClass('processing').unblock();
                                             } else {
-                                                jQuery('button.kr-payment-button').click();
+                                                KR.submit();
                                             }
                                         } else {
                                             // Data in checkout page has changed we need to calculate token again to have correct information.
@@ -1045,16 +1050,16 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                                                 'data': { 'use_identifier': useIdentifier },
                                                 'success': function (data) {
                                                     var parsed = JSON.parse(data);
-                                                    KR.setFormToken(parsed.formToken).then(({ KR }) => {
+                                                    KR.setFormToken(parsed.formToken).then(function(v) {
                                                         if (registerCard) {
                                                             jQuery('input[name=\"kr-do-register\"]').attr('checked','checked');
                                                         }
 
                                                         if (popin) {
-                                                            jQuery('button.kr-popin-button').click();
+                                                            KR.openPopin();
                                                             jQuery('form.checkout').removeClass('processing').unblock();
                                                         } else {
-                                                            jQuery('button.kr-payment-button').click();
+                                                            KR.submit();
                                                         }
                                                     });
                                                 }
@@ -1225,8 +1230,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                         jQuery("#payzenstd_rest_wrapper").html(fields);
 
                         setTimeout(function () {
-                            KR.setFormConfig({ language: PAYZEN_LANGUAGE, formToken: formToken }).then(({ KR }) => {
-                                payzenInitRestEvents();
+                            KR.setFormConfig({ language: PAYZEN_LANGUAGE, formToken: formToken }).then(function(v) {
+                                payzenInitRestEvents(v.KR);
                             });
                         }, 300);
                     };
@@ -1241,16 +1246,23 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
                         if (window.KR && KR.vueReady) {
                             // Form already loaded.
-                            KR.removeForms().then(({ KR }) => {
+                            KR.removeForms().then(function(v) {
                                 payzenDrawRestPaymentFields(formToken);
-                                return {KR};
-                            })
-                            .then(({KR}) => KR.attachForm("#payzenstd_rest_wrapper"))
-                            .then(({KR, result}) => {
+                                return v;
+                            }).then(function(v) {
+                                var KR = v.KR;
+                                return KR.attachForm("#payzenstd_rest_wrapper");
+                            }).then(function(v) {
+                                KR = v.KR;
                                 KR.setFormToken(formToken);
-                                return {KR, result};
+
+                                return {KR: KR, result: v.result};
+                            }).then(function(v) {
+                                KR = v.KR;
+                                var result = v.result;
+
+                                KR.showForm(result.formId);
                             })
-                            .then(({KR, result}) => KR.showForm(result.formId))
                         } else {
                             payzenDrawRestPaymentFields(formToken);
                         }
@@ -1280,12 +1292,13 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                                 }
 
                                 event.preventDefault();
-                                KR.validateForm().then(({KR, result}) => {
+                                KR.validateForm().then(function(v) {
                                     // There is no errors.
                                     formIsValidated = true;
                                     jQuery("#place_order").click();
-                                }).catch(({ KR, result }) => {
+                                }).catch(function(v) {
                                     // Display error message.
+                                    var result = v.result;
                                     return result.doOnError();
                                 });
                             }
@@ -1395,8 +1408,11 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                     'manualValidation' => ($this->get_escaped_var($this->payzen_request, 'validation_mode') == '1') ? 'YES' : 'NO',
                     'paymentSource' => 'EC'
                 )
-            ), 'contrib' => $this->get_escaped_var($this->payzen_request, 'contrib'), 'strongAuthenticationState' => $strong_auth,
-            'currency' => $currency->getAlpha3(), 'amount' => $this->get_escaped_var($this->payzen_request, 'amount'),
+            ),
+            'contrib' => $this->get_escaped_var($this->payzen_request, 'contrib'),
+            'strongAuthentication' => $strong_auth,
+            'currency' => $currency->getAlpha3(),
+            'amount' => $this->get_escaped_var($this->payzen_request, 'amount'),
             'metadata' => array(
                 'orderInfo' => 'order_key=' . $this->get_order_property($order, 'order_key') . '&blog_id=' . $wpdb->blogid
             )
