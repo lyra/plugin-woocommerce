@@ -2,10 +2,10 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 5.4
+Tested up to: 5.5
 WC requires at least: 2.0
-WC tested up to: 4.3
-Stable tag: 1.8.5
+WC tested up to: 4.5
+Stable tag: 1.8.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.8.6, 2020-10-12 =
+* Bug fix: Fix IPN management on cancellation notification for orders in on-hold status.
 
 = 1.8.5, 2020-09-02 =
 * [embedded] Bug fix: Error 500 due to riskControl modified format in REST response.

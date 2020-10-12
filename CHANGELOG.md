@@ -1,3 +1,6 @@
+= 1.8.6, 2020-10-12 =
+* Bug fix: Fix IPN management on cancellation notification for orders in on-hold status.
+
 = 1.8.5, 2020-09-02 =
 * [embedded] Bug fix: Error 500 due to riskControl modified format in REST response.
 * [embedded] Bug fix: Compatibility of payment with embedded fields with Internet Explorer 11.
