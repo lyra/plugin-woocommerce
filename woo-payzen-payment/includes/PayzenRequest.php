@@ -122,6 +122,7 @@ if (! class_exists('PayzenRequest', false)) {
             // Defining all parameters and setting formats and default values.
             $this->addField('signature', 'Signature', '#^[0-9a-f]{40}$#u', true);
 
+            $this->addField('vads_acquirer_transient_data', 'Acquirer transient data', $ans255);
             $this->addField('vads_action_mode', 'Action mode', '#^INTERACTIVE|SILENT$#u', true, 11);
             $this->addField('vads_amount', 'Amount', '#^' . $supzero . '$#u', true);
             $this->addField('vads_available_languages', 'Available languages', '#^(|[A-Za-z]{2}(;[A-Za-z]{2})*)$#u', false, 2);
