@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce PayZen payment "
-"1.8.5\n"
+"1.8.6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-06-10 16:11+0100\n"
-"PO-Revision-Date: 2020-06-10 16:56+0100\n"
+"PO-Revision-Date: 2020-10-06 13:07+0200\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <support@payzen.eu>\n"
 "Language: es\n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: ..\n"
 
@@ -451,6 +451,59 @@ msgstr "Completo"
 msgid "Default"
 msgstr "Por defecto"
 
+#: ../class-wc-gateway-payzenchoozeo.php:27 ../woo-payzen-payment.php:195
+msgid "Choozeo payment"
+msgstr "Pago Choozeo"
+
+#: ../class-wc-gateway-payzenchoozeo.php:77
+msgid "Enables / disables Choozeo payment."
+msgstr "Habilita/deshabilita el pago con Choozeo."
+
+#: ../class-wc-gateway-payzenchoozeo.php:79
+msgid "Payment with Choozeo without fees"
+msgstr "Pago con Choozeo sin gastos"
+
+#: ../class-wc-gateway-payzenchoozeo.php:98
+msgid "CHOOZEO PAYMENT OPTIONS"
+msgstr "OPCIONES DE PAGO CON CHOOZEO"
+
+#: ../class-wc-gateway-payzenchoozeo.php:104
+#: ../class-wc-gateway-payzenmulti.php:115
+#: ../class-wc-gateway-payzenregroupedother.php:115
+msgid "Label"
+msgstr "Etiqueta"
+
+#: ../class-wc-gateway-payzenchoozeo.php:109
+#: ../class-wc-gateway-payzenmulti.php:120
+#: ../class-wc-gateway-payzenregroupedother.php:125
+msgid "Min amount"
+msgstr "Monto mínimo"
+
+#: ../class-wc-gateway-payzenchoozeo.php:114
+#: ../class-wc-gateway-payzenmulti.php:125
+#: ../class-wc-gateway-payzenregroupedother.php:130
+msgid "Max amount"
+msgstr "Monto máximo"
+
+#: ../class-wc-gateway-payzenchoozeo.php:119
+#: ../class-wc-gateway-payzenmulti.php:154
+msgid "Payment options"
+msgstr "Opciones de pago"
+
+#: ../class-wc-gateway-payzenchoozeo.php:126
+msgid "Define amount restriction for each card."
+msgstr "Defina la restricción del monto para cada tarjeta."
+
+#: ../class-wc-gateway-payzenchoozeo.php:318
+#: ../class-wc-gateway-payzenmulti.php:318
+msgid "Your payment option"
+msgstr "Su opción de pago"
+
+#: ../class-wc-gateway-payzenchoozeo.php:320
+#: ../class-wc-gateway-payzenmulti.php:325
+msgid "Choose your payment option"
+msgstr "Elija su opción de pago"
+
 #: ../class-wc-gateway-payzenklarna.php:25
 msgid "Klarna payment"
 msgstr "Pago Klarna"
@@ -535,21 +588,6 @@ msgstr ""
 "><b>No olvide hacer clic en el botón \"Guardar\" para guardar sus "
 "modificaciones.</b>"
 
-#: ../class-wc-gateway-payzenmulti.php:115
-#: ../class-wc-gateway-payzenregroupedother.php:115
-msgid "Label"
-msgstr "Etiqueta"
-
-#: ../class-wc-gateway-payzenmulti.php:120
-#: ../class-wc-gateway-payzenregroupedother.php:125
-msgid "Min amount"
-msgstr "Monto mínimo"
-
-#: ../class-wc-gateway-payzenmulti.php:125
-#: ../class-wc-gateway-payzenregroupedother.php:130
-msgid "Max amount"
-msgstr "Monto máximo"
-
 #: ../class-wc-gateway-payzenmulti.php:131
 msgid "Contract"
 msgstr "Afiliación"
@@ -589,22 +627,10 @@ msgstr "Periodo"
 msgid "1st payment"
 msgstr "Primer pago"
 
-#: ../class-wc-gateway-payzenmulti.php:154
-msgid "Payment options"
-msgstr "Medios de pago"
-
 #: ../class-wc-gateway-payzenmulti.php:211
 #: ../class-wc-gateway-payzenregroupedother.php:272
 msgid "Delete"
 msgstr "Eliminar"
-
-#: ../class-wc-gateway-payzenmulti.php:318
-msgid "Your payment option"
-msgstr "Agrupar los medios de pago"
-
-#: ../class-wc-gateway-payzenmulti.php:325
-msgid "Choose your payment option"
-msgstr "Escoja su medio de pago"
 
 #: ../class-wc-gateway-payzenother.php:80
 #: ../class-wc-gateway-payzenregroupedother.php:346

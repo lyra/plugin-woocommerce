@@ -30,7 +30,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-4.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.8.5';
+    const PLUGIN_VERSION = '1.8.6';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -1086,8 +1086,12 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
             if ($from_server && ($this->get_order_property($order, 'status') === 'on-hold')) {
                 switch (true) {
+                    case $payzen_response->isCancelledPayment():
+                        $this->log("Order #$order_id is in a pending status and payment is cancelled. It may be a payment expiration. Do nothing.");
+                        echo($payzen_response->getOutputForGateway('payment_ko_already_done'));
+                        break;
                     case $payzen_response->isPendingPayment():
-                        $this->log("Order #$order_id is in a pending status and stay in the same status.");
+                        $this->log("Order #$order_id is in a pending status and stays in the same status. Do nothing.");
                         echo($payzen_response->getOutputForGateway('payment_ok_already_done'));
                         break;
                     case self::is_successful_action($payzen_response):
