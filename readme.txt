@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 5.5
 WC requires at least: 2.0
 WC tested up to: 4.5
-Stable tag: 1.8.6
+Stable tag: 1.8.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,11 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.8.7, 2020-10-30 =
+* [embedded] Bug fix: Force redirection when there is an error in payment form token creation.
+* [embedded] Bug fix: Embedded payment fields not correctly displayed since the last gateway JS library delivery.
+* Fix standard payment description management.
 
 = 1.8.6, 2020-10-12 =
 * Bug fix: Fix IPN management on cancellation notification for orders in on-hold status.
