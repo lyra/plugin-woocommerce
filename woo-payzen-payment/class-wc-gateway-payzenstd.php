@@ -218,13 +218,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 return __('You will enter payment data after order confirmation.', 'woo-payzen-payment');
 
             default:
-                $description = $this->get_option('description');
-
-                if (is_array($description)) {
-                    $description = isset($description[get_locale()]) && $description[get_locale()] ? $description[get_locale()] : $description['en_US'];
-                }
-
-                return apply_filters('woocommerce_gateway_description', $description, $this->id);
+                return parent::get_description();
         }
     }
 
@@ -854,6 +848,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $can_pay_by_alias = $this->can_use_alias($cust_id) && $this->get_cust_identifier($cust_id);
 
         $html = '';
+        $force_redir = false;
         switch ($this->get_option('card_data_mode')) {
             case 'MERCHANT':
                 $card_keys = $this->get_option('payment_cards');
@@ -975,12 +970,14 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             case 'REST':
                 $html .= $this->rest_payment_fields_view($can_pay_by_alias);
                 if (! $html) {
+                    // Force payment by redirection.
+                    $force_redir = true;
                     break;
                 }
 
                 $form_token_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Form_Token', home_url('/'));
 
-                $html .= "\n".'<script type="text/javascript">';
+                $html .= "\n" . '<script type="text/javascript">';
                 $html .= "\n  var savedData = false;";
 
                 $html .= "\n  jQuery('form.checkout').on('checkout_place_order_payzenstd', function() {
@@ -1050,7 +1047,11 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                                                 'data': { 'use_identifier': useIdentifier },
                                                 'success': function (data) {
                                                     var parsed = JSON.parse(data);
-                                                    KR.setFormToken(parsed.formToken).then(function(v) {
+                                                    KR.setFormConfig({
+                                                        language: PAYZEN_LANGUAGE,
+                                                        formToken: parsed.formToken
+                                                    }).then(function(v) {
+                                                        var KR = v.KR;
                                                         if (registerCard) {
                                                             jQuery('input[name=\"kr-do-register\"]').attr('checked','checked');
                                                         }
@@ -1079,11 +1080,17 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         if ($can_pay_by_alias) {
             // Display specific description for payment by token if enabled.
-            $this->payment_by_alias_view($html);
+            $this->payment_by_alias_view($html, $force_redir);
         } else {
-            parent::payment_fields();
-
-            echo $html;
+            if ($force_redir) {
+                echo '<div>' . wpautop(wptexturize(parent::get_description())) . '</div>';
+                echo '<input type="hidden" name="payzen_force_redir" value="true">';
+            } else {
+                echo '<div>';
+                parent::payment_fields();
+                echo '</div>';
+                echo $html;
+            }
         }
     }
 
@@ -1106,43 +1113,53 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         return $saved_identifier;
     }
 
-    protected function payment_by_alias_view($payment_fields)
+    protected function payment_by_alias_view($payment_fields, $force_redir)
     {
         global $woocommerce;
 
-        $embdded = in_array($this->get_option('card_data_mode'), array('REST', 'IFRAME'));
-        $embedded_fields = ($this->get_option('card_data_mode') === 'REST') && ($this->settings['rest_display_mode'] === 'embedded');
+        $embdded = in_array($this->get_option('card_data_mode'), array('REST', 'IFRAME')) && ! empty($payment_fields);
+        $embedded_fields = ($this->get_option('card_data_mode') === 'REST') && ($this->settings['rest_display_mode'] === 'embedded') && ! empty($payment_fields);
 
         $cust_id = $this->get_customer_property($woocommerce->customer, 'id');
         $saved_masked_pan = $embedded_fields ? '' : ' <b>' . get_user_meta((int) $cust_id, $this->id . '_masked_pan', true) . '</b>';
 
-        echo '<ul class="' . $this->id . '-view-top" style="margin-left: 0;">
+        echo '<ul class="' . $this->id . '-view-top" style="margin-left: 0; margin-top: 0;">
+                   <li class="block ' . $this->id . '-cc-block">';
+
+        if ($force_redir) {
+            echo wpautop(wptexturize(parent::get_description()));
+            echo '<input type="hidden" name="payzen_force_redir" value="true">';
+        } else {
+            parent::payment_fields(); // Display method description.
+        }
+
+        echo '    </li>
+
                   <li class="block ' . $this->id . '-id-block">
-                      <input id="payzen_use_identifier" type="hidden" value="true" name="payzen_use_identifier" />
+                      <input id="payzen_use_identifier" type="hidden" value="true" name="payzen_use_identifier">
                       <span>' . sprintf(__('You will pay with your registered means of payment %s. No data entry is needed.', 'woo-payzen-payment'), $saved_masked_pan) . '</span>
+                  </li>';
+
+        if (! empty($payment_fields)) { // There is extra HTML/JS to display.
+            echo '<li' . ($embdded ? '' : ' class="block ' . $this->id . '-cc-block"') . '>';
+            echo $payment_fields;
+            echo '</li>';
+        }
+
+        echo '</ul>
+
+              <ul class="payzenstd-view-bottom" style="margin-left: 0; margin-top: 0;">
+                  <li style="margin: 15px 0px;" class="block ' . $this->id . '-cc-block ' . $this->id . '-id-block">
+                      <span>' . __('OR', 'woo-payzen-payment') . '</span>
                   </li>
 
-                  <li class="block ' . $this->id . '-cc-block">';
-        parent::payment_fields(); // Display method description.
-        echo '    </li>
-
-                  <li' . ($embdded ? '' : ' class="block ' . $this->id . '-cc-block"') . '>';
-        echo $payment_fields;
-        echo '    </li>
-
-              </ul>
-              <ul class="payzenstd-view-bottom" style="margin-left: 0;">
-                    <li style="margin: 15px 0px;" class="block ' . $this->id . '-cc-block ' . $this->id . '-id-block">
-                       <span>' . __('OR', 'woo-payzen-payment') . '</span>
-                    </li>
-
-                    <li class="block ' . $this->id . '-cc-block">
+                  <li class="block ' . $this->id . '-cc-block">
                       <a href="javascript: void(0);" onclick="payzenUpdatePaymentBlock(true)">' . __('Click here to pay with your registered means of payment.', 'woo-payzen-payment') . '</a>
-                    </li>
+                  </li>
 
-                    <li class="block ' . $this->id . '-id-block">
+                  <li class="block ' . $this->id . '-id-block">
                       <a href="javascript: void(0);" onclick="payzenUpdatePaymentBlock(false)">' . __('Click here to pay with another means of payment.', 'woo-payzen-payment') . '</a>
-                    </li>
+                  </li>
               </ul>';
 
         echo '<script type="text/javascript">
@@ -1165,23 +1182,23 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
     }
 
     /**
-     * Since Woocommerce 3.9.0, no extra update order AJAX request on checkout page load.
+     * Return true if fields are loaded by AJAX call.
      *
      * @access private
      * @return boolean
      */
     private function load_by_ajax_call()
     {
-        global $woocommerce;
-        return ! empty($_GET['wc-ajax']) || version_compare($woocommerce->version, '3.9.0', '>=');
+        return ! empty($_GET['wc-ajax']);
     }
 
     private function rest_payment_fields_view($use_identifier)
     {
-        if (! $this->load_by_ajax_call()) {
-            // Interface is loaded by ajax calls.
-            return '';
-        }
+        // Disable this patch and load JS fields always, this is safer.
+        // if (! $this->load_by_ajax_call()) {
+        //     // Interface is loaded by ajax calls.
+        //     return '';
+        // }
 
         $form_token = $this->get_temporary_form_token();
         if (! $form_token) {
@@ -1201,7 +1218,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             $button_elt = '<button class="kr-payment-button"></button>';
         }
 
-         $html .= '<div id="payzenstd_rest_wrapper"></div>';
+        $html .= '<div id="payzenstd_rest_wrapper"></div>';
 
         $html .= '<script type="text/javascript">';
         $html .= "\n" . 'window.FORM_TOKEN = "' . $form_token . '";';
@@ -1212,7 +1229,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
 
         $html .= "\n" . '
-                    var payzenDrawRestPaymentFields = function(formToken) {
+                    var payzenDrawRestPaymentFields = function(formToken, first) {
                         var fields = \'<div class="kr-embedded" '. $popin_attr . '>\' +
                                      \'    <div class="kr-pan"></div>\' +
                                      \'    <div class="kr-expiry"></div>\' +
@@ -1230,8 +1247,14 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                         jQuery("#payzenstd_rest_wrapper").html(fields);
 
                         setTimeout(function () {
-                            KR.setFormConfig({ language: PAYZEN_LANGUAGE, formToken: formToken }).then(function(v) {
-                                payzenInitRestEvents(v.KR);
+                            KR.removeForms();
+                            KR.setFormConfig({
+                                language: PAYZEN_LANGUAGE,
+                                formToken: formToken
+                            }).then(function(v) {
+                                if (first) {
+                                    payzenInitRestEvents(v.KR);
+                                }
                             });
                         }, 300);
                     };
@@ -1244,28 +1267,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                             formToken = IDENTIFIER_FORM_TOKEN;
                         }
 
-                        if (window.KR && KR.vueReady) {
-                            // Form already loaded.
-                            KR.removeForms().then(function(v) {
-                                payzenDrawRestPaymentFields(formToken);
-                                return v;
-                            }).then(function(v) {
-                                var KR = v.KR;
-                                return KR.attachForm("#payzenstd_rest_wrapper");
-                            }).then(function(v) {
-                                KR = v.KR;
-                                KR.setFormToken(formToken);
-
-                                return {KR: KR, result: v.result};
-                            }).then(function(v) {
-                                KR = v.KR;
-                                var result = v.result;
-
-                                KR.showForm(result.formId);
-                            })
-                        } else {
-                            payzenDrawRestPaymentFields(formToken);
-                        }
+                        payzenDrawRestPaymentFields(formToken, ! KR || ! KR.vueReady);
                     };
 
                     var useIdentifier = typeof IDENTIFIER_FORM_TOKEN !== "undefined";
@@ -1515,7 +1517,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         $order = new WC_Order($order_id);
 
-        if ($this->get_option('card_data_mode') === 'REST') {
+        // If $_POST['payzen_force_redir'] is set, force payment by redirection.
+        if (($this->get_option('card_data_mode') === 'REST') && ! isset($_POST['payzen_force_redir'])) {
             return array(
                 'result' => 'success'
             );

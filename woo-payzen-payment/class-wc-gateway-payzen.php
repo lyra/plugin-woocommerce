@@ -30,7 +30,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-4.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.8.6';
+    const PLUGIN_VERSION = '1.8.7';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -227,6 +227,24 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     protected function get_method_description_field_description()
     {
         return __('This controls the description which the user sees during checkout.', 'woo-payzen-payment');
+    }
+
+    /**
+     * Get description function.
+     *
+     * @access public
+     * @return string
+     */
+
+    public function get_description()
+    {
+        $description = $this->get_option('description');
+
+        if (is_array($description)) {
+            $description = isset($description[get_locale()]) && $description[get_locale()] ? $description[get_locale()] : $description['en_US'];
+        }
+
+        return apply_filters('woocommerce_gateway_description', $description, $this->id);
     }
 
     /**

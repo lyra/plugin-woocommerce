@@ -1,3 +1,8 @@
+= 1.8.7, 2020-10-30 =
+* [embedded] Bug fix: Force redirection when there is an error in payment form token creation.
+* [embedded] Bug fix: Embedded payment fields not correctly displayed since the last gateway JS library delivery.
+* Fix standard payment description management.
+
 = 1.8.6, 2020-10-12 =
 * Bug fix: Fix IPN management on cancellation notification for orders in on-hold status.
 
