@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 5.5
 WC requires at least: 2.0
 WC tested up to: 4.5
-Stable tag: 1.8.7
+Stable tag: 1.8.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.8.8, 2020-12-16 =
+* Bug fix: Error 500 due to obsolete function (get_magic_quotes_gpc) in PHP 7.4.
 
 = 1.8.7, 2020-10-30 =
 * [embedded] Bug fix: Force redirection when there is an error in payment form token creation.

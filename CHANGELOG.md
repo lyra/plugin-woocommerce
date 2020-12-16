@@ -1,3 +1,6 @@
+= 1.8.8, 2020-12-16 =
+* Bug fix: Error 500 due to obsolete function (get_magic_quotes_gpc) in PHP 7.4.
+
 = 1.8.7, 2020-10-30 =
 * [embedded] Bug fix: Force redirection when there is an error in payment form token creation.
 * [embedded] Bug fix: Embedded payment fields not correctly displayed since the last gateway JS library delivery.

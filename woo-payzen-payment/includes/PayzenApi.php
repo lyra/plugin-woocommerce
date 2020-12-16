@@ -329,28 +329,5 @@ if (! class_exists('PayzenApi', false)) {
                     throw new \InvalidArgumentException("Unsupported algorithm passed : {$algo}.");
             }
         }
-
-        /**
-         * PHP is not yet a sufficiently advanced technology to be indistinguishable from magic...
-         * so don't use magic_quotes, they mess up with the gateway response analysis.
-         *
-         * @param array $potentially_quoted_data
-         * @return mixed
-         */
-        public static function uncharm($potentially_quoted_data)
-        {
-            if (get_magic_quotes_gpc()) {
-                $sane = array();
-                foreach ($potentially_quoted_data as $k => $v) {
-                    $sane_key = stripslashes($k);
-                    $sane_value = is_array($v) ? self::uncharm($v) : stripslashes($v);
-                    $sane[$sane_key] = $sane_value;
-                }
-            } else {
-                $sane = $potentially_quoted_data;
-            }
-
-            return $sane;
-        }
     }
 }
