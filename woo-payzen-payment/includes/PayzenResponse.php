@@ -94,7 +94,7 @@ if (! class_exists('PayzenResponse', false)) {
          */
         public function __construct($params, $ctx_mode, $key_test, $key_prod, $algo = PayzenApi::ALGO_SHA1)
         {
-            $this->rawResponse = PayzenApi::uncharm($params);
+            $this->rawResponse = $params;
             $this->certificate = trim(($ctx_mode == 'PRODUCTION') ? $key_prod : $key_test);
 
             if (in_array($algo, PayzenApi::$SUPPORTED_ALGOS)) {

@@ -509,16 +509,16 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         $option = $this->get_mean($selected_card);
 
         // Check if capture_delay and validation_mode are overriden.
-        if (is_numeric($option['capture_delay'])) {
+        if (isset($option['capture_delay']) && is_numeric($option['capture_delay'])) {
             $this->payzen_request->set('capture_delay', $option['capture_delay']);
         }
 
-        if ($option['validation_mode'] !== '-1') {
+        if (isset($option['validation_mode']) && ($option['validation_mode'] !== '-1')) {
             $this->payzen_request->set('validation_mode', $option['validation_mode']);
         }
 
         // Add cart data.
-        if ($option['send_cart_data'] === 'y') {
+        if (isset($option['send_cart_data']) && ($option['send_cart_data'] === 'y')) {
             $this->send_cart_data($order);
         }
 
