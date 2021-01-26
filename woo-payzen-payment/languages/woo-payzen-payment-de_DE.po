@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce PayZen Payment "
-"1.8.8\n"
+"1.8.9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-10 16:03+0100\n"
-"PO-Revision-Date: 2020-10-06 13:07+0200\n"
+"POT-Creation-Date: 2020-12-17 10:42+0100\n"
+"PO-Revision-Date: 2020-12-22 15:48+0100\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <support@payzen.eu>\n"
 "Language: de\n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 1.8.7.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: ..\n"
 
@@ -28,18 +28,15 @@ msgid "Gateway disabled"
 msgstr "Deaktiviertes Platform"
 
 #: ../class-wc-gateway-payzen.php:145
-#, php-format
 msgid "%s does not support your store currency."
 msgstr "%s unterstützt nicht die Devise Ihres Geschäfts."
 
 #: ../class-wc-gateway-payzen.php:151
-#, php-format
 msgid "Your %s module configuration is successfully reset."
 msgstr ""
 "Der Reset der Einstellungen Ihres %s Moduls wurde erfolgreich durchgeführt."
 
 #: ../class-wc-gateway-payzen.php:157
-#, php-format
 msgid ""
 "The module works by sending users to %s in order to select their payment "
 "mean and enter their payment information."
@@ -52,12 +49,10 @@ msgid "Reset configuration"
 msgstr "Starten Sie das Modul neu"
 
 #: ../class-wc-gateway-payzen.php:209
-#, php-format
 msgid "%s general configuration"
 msgstr "%s allgemeine Konfiguration"
 
 #: ../class-wc-gateway-payzen.php:210
-#, php-format
 msgid "%s Back Office configuration"
 msgstr "%s Back Office Konfiguration"
 
@@ -116,7 +111,6 @@ msgid "Enable / disable"
 msgstr "Logdateien des Moduls aktivieren"
 
 #: ../class-wc-gateway-payzen.php:330
-#, php-format
 msgid ""
 "Enable / disable module logs. The log file will be inside <code>%s</code>."
 msgstr ""
@@ -132,7 +126,6 @@ msgid "Shop ID"
 msgstr "Shop ID"
 
 #: ../class-wc-gateway-payzen.php:342
-#, php-format
 msgid "The identifier provided by %s."
 msgstr "Der von %s Benutzer."
 
@@ -141,7 +134,6 @@ msgid "Key in test mode"
 msgstr "Schlüssel im Testbetrieb"
 
 #: ../class-wc-gateway-payzen.php:349
-#, php-format
 msgid "Key provided by %s for test mode (available in %s Back Office)."
 msgstr ""
 "Schlüssel, das von %s zu Testzwecken bereitgestellt wird (im %s Back Office "
@@ -152,7 +144,6 @@ msgid "Key in production mode"
 msgstr "Schlüssel im Produktivbetrieb"
 
 #: ../class-wc-gateway-payzen.php:356
-#, php-format
 msgid ""
 "Key provided by %s (available in %s Back Office after enabling production "
 "mode)."
@@ -181,7 +172,6 @@ msgid "Signature algorithm"
 msgstr "Signaturalgorithmus"
 
 #: ../class-wc-gateway-payzen.php:378
-#, php-format
 msgid ""
 "Algorithm used to compute the payment form signature. Selected algorithm "
 "must be the same as one configured in the %s Back Office.<br /><b>The HMAC-"
@@ -198,7 +188,6 @@ msgid "Instant Payment Notification URL"
 msgstr "Benachrichtigung-URL"
 
 #: ../class-wc-gateway-payzen.php:385
-#, php-format
 msgid "URL to copy into your %s Back Office > Settings > Notification rules."
 msgstr ""
 "URL, die Sie in Ihre %s Back Office kopieren sollen > Einstellung > Regeln "
@@ -241,7 +230,6 @@ msgid "Capture delay"
 msgstr "Einzugsfrist"
 
 #: ../class-wc-gateway-payzen.php:421
-#, php-format
 msgid ""
 "The number of days before the bank capture (adjustable in your %s Back "
 "Office)."
@@ -256,7 +244,6 @@ msgid "Validation mode"
 msgstr "Bestätigungsmodus"
 
 #: ../class-wc-gateway-payzen.php:428 ../class-wc-gateway-payzenstd.php:344
-#, php-format
 msgid ""
 "If manual is selected, you will have to confirm payments manually in your %s "
 "Back Office."
@@ -370,14 +357,14 @@ msgstr ""
 msgid "Add"
 msgstr "Hinzufügen"
 
-#: ../class-wc-gateway-payzen.php:905 ../class-wc-gateway-payzen.php:951
-#: ../class-wc-gateway-payzen.php:1151 ../class-wc-gateway-payzenstd.php:1829
-#: ../class-wc-gateway-payzenstd.php:1853
-#: ../class-wc-gateway-payzenstd.php:1871
+#: ../class-wc-gateway-payzen.php:931 ../class-wc-gateway-payzen.php:976
+#: ../class-wc-gateway-payzen.php:1180 ../class-wc-gateway-payzenstd.php:1846
+#: ../class-wc-gateway-payzenstd.php:1870
+#: ../class-wc-gateway-payzenstd.php:1888
 msgid "An error has occurred in the payment process."
 msgstr "Ein Fehler ist während dem Zahlungsvorgang unterlaufen."
 
-#: ../class-wc-gateway-payzen.php:959
+#: ../class-wc-gateway-payzen.php:984
 msgid ""
 "<p><u>GOING INTO PRODUCTION</u></p>You want to know how to put your shop "
 "into production mode, please read chapters « Proceeding to test phase » and "
@@ -388,8 +375,7 @@ msgstr ""
 "zur Testphase » und « Verschieben des Shops in den Produktionsumfeld » in "
 "der Dokumentation des Moduls."
 
-#: ../class-wc-gateway-payzen.php:1034
-#, php-format
+#: ../class-wc-gateway-payzen.php:1059
 msgid ""
 "The automatic validation has not worked. Have you correctly set up the "
 "notification URL in the %s Back Office?"
@@ -398,7 +384,7 @@ msgstr ""
 "Sie, ob die Benachrichtigung-URL in Ihrem %s Back Office korrekt "
 "eingerichtet ist?"
 
-#: ../class-wc-gateway-payzen.php:1036
+#: ../class-wc-gateway-payzen.php:1061
 msgid ""
 "For understanding the problem, please read the documentation of the module : "
 "<br />&nbsp;&nbsp;&nbsp;- Chapter &laquo; To read carefully before going "
@@ -410,51 +396,48 @@ msgstr ""
 "Weiterlesen aufmerksam lesen &raquo;<br />&nbsp;&nbsp;&nbsp;- Kapitel "
 "&laquo; Benachrichtigung-URL Einstellungen &raquo;"
 
-#: ../class-wc-gateway-payzen.php:1060 ../class-wc-gateway-payzen.php:1135
+#: ../class-wc-gateway-payzen.php:1085 ../class-wc-gateway-payzen.php:1164
 msgid "Your payment was not accepted. Please, try to re-order."
 msgstr ""
 "Ihre Bezhalung wurde verweigert. Bitte tragen Sie eine neue Bestellung ein."
 
-#: ../class-wc-gateway-payzen.php:1246 ../class-wc-gateway-payzen.php:1248
+#: ../class-wc-gateway-payzen.php:1275 ../class-wc-gateway-payzen.php:1277
 msgid "Payment"
 msgstr "Zahlung"
 
-#: ../class-wc-gateway-payzen.php:1330
+#: ../class-wc-gateway-payzen.php:1359
 msgid "Card brand chosen by buyer."
 msgstr "Kartenmarke von Käufer gewählt."
 
-#: ../class-wc-gateway-payzen.php:1332
+#: ../class-wc-gateway-payzen.php:1361
 msgid "Default card brand used."
 msgstr "Standard-Kartenmarke verwendet."
 
-#: ../class-wc-gateway-payzen.php:1342
-#, php-format
+#: ../class-wc-gateway-payzen.php:1371
 msgid "Transaction ID: %s."
 msgstr "Transaktionsnummer: %s."
 
-#: ../class-wc-gateway-payzen.php:1346
-#, php-format
+#: ../class-wc-gateway-payzen.php:1375
 msgid "Transaction UUID: %s."
 msgstr "Transaktions-UUID: %s."
 
-#: ../class-wc-gateway-payzen.php:1352
-#, php-format
+#: ../class-wc-gateway-payzen.php:1381
 msgid "Transaction status: %s."
 msgstr "Status der Transaktion: %s."
 
-#: ../class-wc-gateway-payzen.php:1396
+#: ../class-wc-gateway-payzen.php:1425
 msgid "On Hold"
 msgstr "In Erwartung"
 
-#: ../class-wc-gateway-payzen.php:1397
+#: ../class-wc-gateway-payzen.php:1426
 msgid "Processing"
 msgstr "Laufend"
 
-#: ../class-wc-gateway-payzen.php:1398
+#: ../class-wc-gateway-payzen.php:1427
 msgid "Complete"
 msgstr "Fertig"
 
-#: ../class-wc-gateway-payzen.php:1403
+#: ../class-wc-gateway-payzen.php:1432
 msgid "Default"
 msgstr "Als Default"
 
@@ -642,7 +625,6 @@ msgstr "Löschen"
 
 #: ../class-wc-gateway-payzenother.php:80
 #: ../class-wc-gateway-payzenregroupedother.php:346
-#, php-format
 msgid "Payment with %s"
 msgstr "Zahlung mit %s"
 
@@ -672,7 +654,6 @@ msgstr ""
 "be displayed within the same payment submodule."
 
 #: ../class-wc-gateway-payzenregroupedother.php:110
-#, php-format
 msgid ""
 "Click on « Add » button to configure one or more payment means.<br /"
 "><b>Label: </b>The label of the means of payment to display on your site."
@@ -836,7 +817,6 @@ msgid "Maximum amount to activate this payment method."
 msgstr "Maximale Anzahl dieser Zahlungsmethode verfügbar."
 
 #: ../class-wc-gateway-payzenstd.php:337
-#, php-format
 msgid ""
 "The number of days before the bank capture. Enter value only if different "
 "from %s general configuration."
@@ -894,7 +874,6 @@ msgid "Payment by token"
 msgstr "Zahlung per Alias"
 
 #: ../class-wc-gateway-payzenstd.php:396
-#, php-format
 msgid ""
 "The payment by token allows to pay orders without re-entering bank data at "
 "each payment. The \"Payment by token\" option should be enabled on your %s "
@@ -909,7 +888,6 @@ msgid "REST API keys"
 msgstr "REST-API-Schlüssel"
 
 #: ../class-wc-gateway-payzenstd.php:429
-#, php-format
 msgid ""
 "REST API keys are available in your store Back Office %s (menu: Settings > "
 "Shops > REST API keys)."
@@ -946,7 +924,6 @@ msgid "API REST Notification URL"
 msgstr "API REST Benachrichtigung-URL"
 
 #: ../class-wc-gateway-payzenstd.php:479
-#, php-format
 msgid ""
 "URL to copy into your %s Back Office > Settings > Notification rules.<br>In "
 "multistore mode, notification URL is the same for all the stores."
@@ -1019,8 +996,15 @@ msgstr "Verfallsdatum"
 msgid "CVV"
 msgstr "CVV"
 
-#: ../class-wc-gateway-payzenstd.php:743
-#, php-format
+#: ../class-wc-gateway-payzenstd.php:725
+msgid ""
+"Warning, some payment means are not compatible with an integration by "
+"iframe. Please consult the documentation for more details."
+msgstr ""
+"Warning, some payment means are not compatible with an integration by "
+"iframe. Please consult the documentation for more details."
+
+#: ../class-wc-gateway-payzenstd.php:736
 msgid ""
 "The \"Payment by token\" option should be enabled on your %s store to use "
 "this feature.\\n\\nAre you sure you want to enable this feature?"
@@ -1028,9 +1012,8 @@ msgstr ""
 "The \"Payment by token\" option should be enabled on your %s store to use "
 "this feature.\\n\\nAre you sure you want to enable this feature?"
 
-#: ../class-wc-gateway-payzenstd.php:1117
-#: ../class-wc-gateway-payzensubscription.php:135
-#, php-format
+#: ../class-wc-gateway-payzenstd.php:1135
+#: ../class-wc-gateway-payzensubscription.php:139
 msgid ""
 "You will pay with your registered means of payment %s. No data entry is "
 "needed."
@@ -1038,39 +1021,37 @@ msgstr ""
 "Sie werden mit Ihrer registrierten Zahlungsmittel %s bezahlen. Keine "
 "Dateneingabe ist erforderlich."
 
-#: ../class-wc-gateway-payzenstd.php:1131
+#: ../class-wc-gateway-payzenstd.php:1148
 msgid "OR"
 msgstr "ODER"
 
-#: ../class-wc-gateway-payzenstd.php:1135
+#: ../class-wc-gateway-payzenstd.php:1152
 msgid "Click here to pay with your registered means of payment."
 msgstr "Klicken Sie hier mit Ihrer registrierten Zahlungsmittel zu bezahlen."
 
-#: ../class-wc-gateway-payzenstd.php:1139
+#: ../class-wc-gateway-payzenstd.php:1156
 msgid "Click here to pay with another means of payment."
 msgstr "Klicken Sie hier mit einem anderen Zahlungsmittel zu zahlen."
 
-#: ../class-wc-gateway-payzenstd.php:1542
+#: ../class-wc-gateway-payzenstd.php:1557
 msgid "Please wait, you will be redirected to the payment gateway."
 msgstr "Bitte warten, Sie werden auf die Zahlungsplattform weitergeleitet."
 
-#: ../class-wc-gateway-payzenstd.php:1545
+#: ../class-wc-gateway-payzenstd.php:1560
 msgid "If nothing happens in 10 seconds, please click the button below."
 msgstr ""
 "Wenn Sie innerhalb von 10 Sekunden nicht umgeleitet werden, klicken Sie "
 "bitte auf diese Schaltfläche."
 
-#: ../class-wc-gateway-payzenstd.php:1554
-#, php-format
+#: ../class-wc-gateway-payzenstd.php:1569
 msgid "Pay via %s"
 msgstr "Bezahlen durch %s"
 
-#: ../class-wc-gateway-payzenstd.php:1555
+#: ../class-wc-gateway-payzenstd.php:1570
 msgid "Cancel order &amp; restore cart"
 msgstr "Bestellung &amp; stornieren wiederherstellen Warenkorb"
 
-#: ../class-wc-gateway-payzenstd.php:1636
-#, php-format
+#: ../class-wc-gateway-payzenstd.php:1651
 msgid "The store currency (%s) is not supported by %s."
 msgstr "Die Währung Ihres Stores (%s) wurde nicht von %s unterstützt."
 
@@ -1111,7 +1092,6 @@ msgstr ""
 "plugin."
 
 #: ../woo-payzen-payment.php:66
-#, php-format
 msgid ""
 "Sorry ! In order to use WooCommerce %s Payment plugin, you need to install "
 "and activate the WooCommerce plugin."
@@ -1166,7 +1146,6 @@ msgstr ""
 msgid "This controls the title which the user sees during checkout."
 msgstr "Dieser steuert den Titel , der die Benutzer bei der Kasse sehen."
 
-#, php-format
 msgid ""
 "You will pay with your registered means of payment%s. No data entry is "
 "needed."

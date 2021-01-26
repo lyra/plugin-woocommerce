@@ -354,7 +354,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             ),
             'card_data_mode' => array(
                 'custom_attributes' => array(
-                    'onchange' => 'payzenUpdateRestFieldDisplay()'
+                    'onchange' => 'payzenUpdateRestFieldDisplay(false)'
                 ),
                 'title' => __('Card data entry mode', 'woo-payzen-payment'),
                 'type' => 'select',
@@ -705,15 +705,15 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 payzenUpdateRestFieldDisplay();
             });
 
-            function payzenUpdateRestFieldDisplay() {
-                var isKrypton = jQuery('#<?php echo esc_attr($this->get_field_key('card_data_mode')); ?> option:selected').val() == 'REST';
+            function payzenUpdateRestFieldDisplay(ignoreIframe = true) {
+                var cardDataMode = jQuery('#<?php echo esc_attr($this->get_field_key('card_data_mode')); ?> option:selected').val();
                 var title = jQuery('#<?php echo esc_attr($this->get_field_key('rest_settings')); ?> ');
                 var titleDescription = title.next();
                 var table = titleDescription.next();
                 var moduleDescription = jQuery('#<?php echo esc_attr($this->get_field_key('module_settings')); ?>').next().find('tr:nth-child(4)');
                 var customizationTitle = jQuery('#<?php echo esc_attr($this->get_field_key('rest_customization')); ?>');
                 var customizationTable = customizationTitle.next();
-                if (isKrypton) {
+                if (jQuery.inArray(cardDataMode, ['REST', 'POPIN']) != -1) {
                     moduleDescription.hide();
                     title.show();
                     titleDescription.show();
@@ -733,6 +733,13 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                     customizationTable.find('tr:nth-child(2)').hide();
                     customizationTable.find('tr:nth-child(3)').hide();
                     customizationTable.find('tr:nth-child(4)').hide();
+
+                    if (! ignoreIframe) {
+                        if ((cardDataMode === 'IFRAME') && ! confirm('<?php echo __('Warning, some payment means are not compatible with an integration by iframe. Please consult the documentation for more details.', 'woo-payzen-payment')?>')) {
+                            jQuery('#<?php echo esc_attr($this->get_field_key('card_data_mode')); ?>').val("<?php echo esc_attr($this->get_option('card_data_mode')); ?>");
+                            jQuery('#<?php echo esc_attr($this->get_field_key('card_data_mode')); ?>').trigger('change');
+                        }
+                    }
                 }
             }
 
@@ -1316,11 +1323,12 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         global $woocommerce;
 
         $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
+        $email = method_exists($woocommerce->customer, 'get_billing_email') ? $woocommerce->customer->get_billing_email() : $woocommerce->customer->user_email;
         $params = array(
             'amount' => $currency->convertAmountToInteger($woocommerce->cart->total),
             'currency' => $currency->getAlpha3(),
             'customer' => array(
-                'email' => $woocommerce->customer->get_billing_email()
+                'email' => $email
             )
         );
 
@@ -1349,7 +1357,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 }
             } else {
                 // Payment form token created successfully.
-                $this->log("Form token created successfully for current cart for user: {$woocommerce->customer->get_billing_email()}.");
+                $this->log("Form token created successfully for current cart for user: {$email}.");
                 $return = $result['answer']['formToken'];
             }
         } catch (Exception $e) {

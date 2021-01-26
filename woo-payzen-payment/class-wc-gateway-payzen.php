@@ -30,7 +30,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-4.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.8.8';
+    const PLUGIN_VERSION = '1.8.9';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -1377,7 +1377,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $order->add_order_note($note);
     }
 
-    public function payzen_notices($template_name, $template_path, $located, $args)
+    public function payzen_notices($template_name, $template_path, $located, $args = array())
     {
         global $woocommerce;
 
