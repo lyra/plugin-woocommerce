@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.8.8
+ * Version: 1.8.9
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 5.5
+ * Tested up to: 5.6
  * WC requires at least: 2.0
- * WC tested up to: 4.5
+ * WC tested up to: 4.8
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -212,6 +212,56 @@ function payzen_admin_url($id)
 
     return admin_url($base_url . $section);
 }
+
+function woocommerce_payzen_order_payment_gateways($available_gateways)
+{
+    global $woocommerce;
+    $index_other_not_grouped_gateways_ids = array();
+    $index_other_grouped_gateway_id = null;
+    $gateways_ids = array();
+    $index_gateways_ids = 0;
+    foreach ($woocommerce->payment_gateways()->payment_gateways as $gateway) {
+        if ($gateway->id === 'payzenregroupedother') {
+            $index_other_grouped_gateway_id = $index_gateways_ids;
+        } elseif (strpos($gateway->id, 'payzenother_') === 0) {
+            $index_other_not_grouped_gateways_ids[] = $index_gateways_ids;
+        }
+
+        $gateways_ids[] = $gateway->id;
+        $index_gateways_ids ++;
+    }
+
+    // User created payzen not grouped other payment means lets reorder payment gatways as they appear in woocommerce backend.
+    // And if only they are not already in last position.
+    if (! empty($index_other_not_grouped_gateways_ids) && ($index_other_grouped_gateway_id !== reset($index_other_not_grouped_gateways_ids) - 1)) {
+        $ordered_gateways_ids = array();
+        for ($i = 0; $i < $index_other_grouped_gateway_id; $i++) {
+            $ordered_gateways_ids[] = $gateways_ids[$i];
+        }
+
+        foreach ($index_other_not_grouped_gateways_ids as $index_not_grouped_other_id) {
+            $ordered_gateways_ids[] = $gateways_ids[$index_not_grouped_other_id];
+        }
+
+        for ($i = $index_other_grouped_gateway_id + 1; $i < count($gateways_ids); $i++) {
+            if (! in_array($i, $index_other_not_grouped_gateways_ids)) {
+                $ordered_gateways_ids[] = $gateways_ids[$i];
+            }
+        }
+
+        $ordered_gateways = array();
+        foreach ($ordered_gateways_ids as $gateway_id) {
+            if (isset($available_gateways[$gateway_id])) {
+                $ordered_gateways[$gateway_id] = $available_gateways[$gateway_id];
+            }
+        }
+
+        return $ordered_gateways;
+    }
+
+    return $available_gateways;
+}
+add_filter('woocommerce_available_payment_gateways', 'woocommerce_payzen_order_payment_gateways');
 
 /* Retrieve blog_id from post when this is an IPN URL call. */
 if (is_multisite() && key_exists('vads_hash', $_POST) && $_POST['vads_hash']
