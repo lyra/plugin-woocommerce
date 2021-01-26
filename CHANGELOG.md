@@ -1,3 +1,8 @@
+= 1.8.9, 2020-12-23 =
+* Bug fix: Reorder dynamically added payment means wehen not grouped.
+* Restore compatibility with WooCommerce 2.x versions.
+* Display warning message on payment in iframe mode enabling.
+
 = 1.8.8, 2020-12-16 =
 * Bug fix: Error 500 due to obsolete function (get_magic_quotes_gpc) in PHP 7.4.
 
