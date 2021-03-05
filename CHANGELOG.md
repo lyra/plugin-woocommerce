@@ -1,3 +1,7 @@
+= 1.8.10, 2021-03-05 =
+* Save 3DS authentication status and certificate as an order note.
+* Use online payment means logos.
+
 = 1.8.9, 2020-12-23 =
 * Bug fix: Reorder dynamically added payment means wehen not grouped.
 * Restore compatibility with WooCommerce 2.x versions.
