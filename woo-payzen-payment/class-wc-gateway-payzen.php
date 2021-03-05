@@ -20,7 +20,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     const BACKOFFICE_NAME = 'PayZen';
     const GATEWAY_URL = 'https://secure.payzen.eu/vads-payment/';
     const REST_URL = 'https://api.payzen.eu/api-payment/';
-    const STATIC_URL = 'https://api.payzen.eu/static/';
+    const STATIC_URL = 'https://static.payzen.eu/static/';
+    const LOGO_URL = 'https://secure.payzen.eu/static/latest/images/type-carte/';
     const SITE_ID = '12345678';
     const KEY_TEST = '1111111111111111';
     const KEY_PROD = '2222222222222222';
@@ -30,7 +31,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-4.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.8.9';
+    const PLUGIN_VERSION = '1.8.10';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -1359,6 +1360,26 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         $order->add_order_note($note);
 
+        // 3DS extra message.
+        $note = __('3DS authentication: ', 'woo-payzen-payment');
+        if ($status = $payzen_response->get('threeds_status')) {
+            $note .= self::get_threeds_status($status);
+
+            if ($threeds_cavv = $payzen_response->get('threeds_cavv')) {
+                $note .= "\n";
+                $note .= __('3DS certificate: ', 'woo-payzen-payment') . $threeds_cavv;
+            }
+
+            if ($threeds_auth_type = $payzen_response->get('threeds_auth_type')) {
+                $note .= "\n";
+                $note .= __('Authentication type: ', 'woo-payzen-payment') . $threeds_auth_type;
+            }
+        } else {
+            $note .= 'UNAVAILABLE';
+        }
+
+        $order->add_order_note($note);
+
         $note = '';
         if (! $payzen_response->isCancelledPayment()) {
             $note .= sprintf(__('Transaction ID: %s.', 'woo-payzen-payment'), $payzen_response->get('trans_id'));
@@ -1375,6 +1396,26 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         $order->add_order_note($note);
+    }
+
+    private static function get_threeds_status($status)
+    {
+        switch ($status) {
+            case 'Y':
+                return 'SUCCESS';
+
+            case 'N':
+                return 'FAILED';
+
+            case 'U':
+                return 'UNAVAILABLE';
+
+            case 'A':
+                return 'ATTEMPT';
+
+            default :
+                return $status;
+        }
     }
 
     public function payzen_notices($template_name, $template_path, $located, $args = array())

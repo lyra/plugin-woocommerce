@@ -669,11 +669,11 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         return $new_value;
     }
 
-    protected function get_supported_card_types()
+    protected function get_supported_card_types($codeInLabel = true)
     {
         $cards = PayzenApi::getSupportedCardTypes();
         foreach ($cards as $code => $label) {
-            $cards[$code] = $code . " - " . $label;
+            $cards[$code] = ($codeInLabel ? $code . ' - ' : '') . $label;
         }
 
         return $cards;
@@ -859,7 +859,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         switch ($this->get_option('card_data_mode')) {
             case 'MERCHANT':
                 $card_keys = $this->get_option('payment_cards');
-                $all_supported_cards = PayzenApi::getSupportedCardTypes();
+                $all_supported_cards = $this->get_supported_card_types(false);
 
                 if (! is_array($card_keys) || in_array('', $card_keys)) {
                     $cards = $all_supported_cards;
@@ -873,34 +873,31 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 reset($cards);
                 $selected_value = key($cards);
 
-                $html .='<div style="margin-top: 15px;">';
+                $html .= '<div style="margin-top: 15px;">';
                 foreach ($cards as $key => $value) {
                     $lower_key = strtolower($key);
 
-                    $html .='<div style="display: inline-block;">';
+                    $html .= '<div style="display: inline-block; margin: 10px;">';
                     if (count($cards) == 1) {
-                        $html .='<input type="hidden" id="' . $this->id . '_' . $lower_key . '" name="' . $this->id . '_card_type" value="' . $key . '">';
+                        $html .= '<input type="hidden" id="' . $this->id . '_' . $lower_key . '" name="' . $this->id . '_card_type" value="' . $key . '">';
                     } else {
-                        $html .='<input type="radio" id="' . $this->id . '_' . $lower_key . '" name="' . $this->id . '_card_type" value="' . $key . '" style="vertical-align: middle;" '
+                        $html .= '<input type="radio" id="' . $this->id . '_' . $lower_key . '" name="' . $this->id . '_card_type" value="' . $key . '" style="vertical-align: middle;" '
                             . checked($key, $selected_value, false) . '>';
                     }
 
-                    $html .='<label for="' . $this->id . '_' . $lower_key . '" style="display: inline;">';
+                    $html .= '<label for="' . $this->id . '_' . $lower_key . '" style="display: inline;">';
 
-                    if (file_exists(dirname(__FILE__) . '/assets/images/' . $lower_key . '.png')) {
-                        $html .='<img src="' . WC_PAYZEN_PLUGIN_URL . '/assets/images/' . $lower_key . '.png"
-                                   alt="' . $value . '"
-                                   title="' . $value . '"
-                                   style="vertical-align: middle; margin: 0 10px 0 5px; max-height: 35px; display: unset;">';
-                    } else {
-                        $html .='<span style="vertical-align: middle; margin: 0 10px 0 5px; height: 35px;">' . $value . '</span>';
-                    }
+                    $remote_logo = self::LOGO_URL . $lower_key . '.png';
+                    $html .= '<img src="' . $remote_logo . '"
+                               alt="' . $key . '"
+                               title="' . $value . '"
+                               style="vertical-align: middle; margin-left: 5px; max-height: 35px; display: unset;">';
 
-                    $html .='</label>';
-                    $html .='</div>';
+                    $html .= '</label>';
+                    $html .= '</div>';
                 }
 
-                $html .='</div>';
+                $html .= '</div>';
                 break;
 
             case 'IFRAME':

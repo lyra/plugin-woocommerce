@@ -324,7 +324,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
 
         $first = true;
         foreach ($options as $key => $option) {
-            echo '<div style="display: inline-block;">';
+            echo '<div style="display: inline-block; margin: 10px;">';
 
             if (count($options) == 1) {
                 echo '<input type="hidden"
@@ -344,10 +344,10 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
             }
 
             echo '<label for="payzenchoozeo_option_' . $key . '" style="display: inline;">' . '
-                      <img src="' . WC_PAYZEN_PLUGIN_URL . 'assets/images/' . strtolower($key) . '.png"
-                           alt="' . $option['label'] . '"
+                      <img src="' . self::LOGO_URL . strtolower($key) . '.png"
+                           alt="' . $key . '"
                            title="' . $option['label'] . '"
-                           style="vertical-align: middle; margin: 0 10px 0 5px; max-height: 35px; display: unset;">
+                           style="vertical-align: middle; margin-left: 5px; max-height: 35px; display: unset;">
                   </label>
               </div>';
         }

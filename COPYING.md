@@ -1,4 +1,4 @@
-Copyright © 2013-2019 Lyra Network and contributors.
+Copyright © 2013-2021 Lyra Network and contributors.
 
 PayZen plugin for WooCommerce is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
