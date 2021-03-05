@@ -29,9 +29,7 @@ class WC_Gateway_PayzenOther extends WC_Gateway_PayzenStd
 
         $code = strtolower($this->payment_code);
         $this->id = 'payzenother_' . $code;
-        if (file_exists(__DIR__ . '/assets/images/'. $code . '.png')) {
-            $this->icon = apply_filters('woocommerce_' . $this->id . '_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/'. $code . '.png');
-        }
+        $this->icon = apply_filters('woocommerce_' . $this->id . '_icon', self::LOGO_URL . $code . '.png');
 
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME . ' - ' . $this->payment_title;

@@ -163,9 +163,9 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         // REST API fields are not available for this payment.
     }
 
-    protected function get_supported_card_types()
+    protected function get_supported_card_types($codeInLabel = true)
     {
-        $cards = parent::get_supported_card_types();
+        $cards = parent::get_supported_card_types($codeInLabel);
 
         $multi_cards_keys = array(
             'AMEX', 'CB', 'DINERS', 'DISCOVER', 'E-CARTEBLEUE', 'JCB', 'MASTERCARD',

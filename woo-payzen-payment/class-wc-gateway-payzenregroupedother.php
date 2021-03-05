@@ -214,7 +214,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                     switch (attr) {
                         case 'payment_mean':
                             optionLine += '<select style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '">';
-                            optionLine +='<?php foreach ($this->get_supported_card_types() as $key => $value) {
+                            optionLine += '<?php foreach ($this->get_supported_card_types() as $key => $value) {
                                                     echo '<option value="' . $key . '">' . $value . '</option>';
                                                 } ?>';
 
@@ -246,7 +246,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
 
                         case 'validation_mode':
                             optionLine += '<select style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '">';
-                            optionLine +='<?php foreach ($this->get_validation_modes() as $key => $value) {
+                            optionLine += '<?php foreach ($this->get_validation_modes() as $key => $value) {
                                                     echo '<option value="' . $key . '">' . $value . '</option>';
                                                 } ?>';
                             optionLine = optionLine.replace('<option value="'+value+'"', '<option value="'+value+'" selected');
@@ -254,7 +254,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
 
                         case 'send_cart_data':
                             optionLine += '<select style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '">';
-                            optionLine +='<?php $options = array('n' => __('No', 'woo-payzen-payment'), 'y' => __('Yes', 'woo-payzen-payment'));
+                            optionLine += '<?php $options = array('n' => __('No', 'woo-payzen-payment'), 'y' => __('Yes', 'woo-payzen-payment'));
                                                 foreach ($options as $key => $value) {
                                                     echo '<option value="' . $key . '">' . $value . '</option>';
                                                 } ?>';
@@ -445,7 +445,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         foreach ($available_options as $code => $option) {
             $lower_payment_code = strtolower($option['payment_mean']);
 
-            echo '<div style="display: inline-block;">';
+            echo '<div style="display: inline-block; margin: 10px;">';
             if (count($available_options) == 1) {
                 echo '<input type="hidden" id="' . $this->id . '_' . $lower_payment_code . '" name="' . $this->id . '_card_type" value="' . $option['payment_mean'] . '">';
             } else {
@@ -455,14 +455,11 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
 
             echo '<label for="' . $this->id . '_' . $lower_payment_code . '" style="display: inline;">';
 
-            if (file_exists(dirname(__FILE__) . '/assets/images/' . $lower_payment_code . '.png')) {
-                echo '<img src="' . WC_PAYZEN_PLUGIN_URL . '/assets/images/' . $lower_payment_code . '.png"
-                           alt="' . $option['label']. '"
-                           title="' . $option['label']. '"
-                           style="vertical-align: middle; margin: 0 10px 0 5px; max-height: 35px; display: unset;">';
-            } else {
-                echo '<span style="vertical-align: middle; margin: 0 10px 0 5px; height: 35px;">' . $option['label']. '</span>';
-            }
+            $remote_logo = self::LOGO_URL . $lower_payment_code . '.png';
+            echo '<img src="' . $remote_logo . '"
+                       alt="' . $option['payment_mean']. '"
+                       title="' . $option['label']. '"
+                       style="vertical-align: middle; margin-left: 5px; max-height: 35px; display: unset;">';
 
             echo '</label>';
             echo '</div>';

@@ -4,8 +4,8 @@ Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
 Tested up to: 5.6
 WC requires at least: 2.0
-WC tested up to: 4.8
-Stable tag: 1.8.9
+WC tested up to: 5.0
+Stable tag: 1.8.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,10 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.8.10, 2021-03-05 =
+* Save 3DS authentication status and certificate as an order note.
+* Use online payment means logos.
 
 = 1.8.9, 2020-12-23 =
 * Bug fix: Reorder dynamically added payment means wehen not grouped.
