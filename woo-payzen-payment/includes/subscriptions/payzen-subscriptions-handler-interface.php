@@ -16,6 +16,11 @@ if (! defined('ABSPATH')) {
 interface Payzen_Subscriptions_Handler_Interface
 {
     /**
+     * Init necessary hooks to update or cancel subscription.
+     */
+    public function init_hooks();
+
+    /**
      * Return true if cart contains a subscription product.
      *
      * @param $cart the WooCommerce shopping cart
@@ -60,13 +65,17 @@ interface Payzen_Subscriptions_Handler_Interface
      * @param $order the WooCommerce order
      * @param $response the gateway response
      */
-    public function update_subscription($order, $response);
+    public function process_subscription_renewal($order, $response);
 
     /**
-     * Called when a subscription is cancelled on the gateway or from WS.
-     *
-     * @param $order the WooCommerce order
-     * @param $data Data identifying the subscription to cancel.
+     * Should be called from a hook triggered by the subscriptions solution when updating suscriptions. Use init_hooks()
+     * function to define the necessary hooks.
      */
-    public function cancel_subscription($order, $data);
+    public function update_subscription();
+
+    /**
+     * Should be called from a hook triggered by the subscriptions solution when cancelling suscriptions. Use init_hooks()
+     * function to define the necessary hooks.
+     */
+    public function cancel_subscription();
 }

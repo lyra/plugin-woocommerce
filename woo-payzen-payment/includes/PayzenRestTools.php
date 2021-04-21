@@ -53,9 +53,9 @@ class PayzenRestTools
         }
 
         if ($metadata = self::getProperty($transaction, 'metadata')) {
-            $orderInfo = key_exists('orderInfo', $metadata) ? self::getProperty($metadata, 'orderInfo') :
-                self::getProperty($metadata, 'info');
-            $response['vads_order_info'] = $orderInfo;
+            foreach ($metadata as $key => $value) {
+                $response['vads_ext_info_' . $key] = $value;
+            }
         }
 
         if ($transactionDetails = self::getProperty($transaction, 'transactionDetails')) {
@@ -122,7 +122,7 @@ class PayzenRestTools
         return new PayzenResponse($response, null, null, null);
     }
 
-    private static function getProperty($array, $key)
+    public static function getProperty($array, $key)
     {
         if (isset($array[$key])) {
             return $array[$key];
@@ -152,5 +152,25 @@ class PayzenRestTools
     public static function checkResponse($data)
     {
         return isset($data['kr-hash']) && isset($data['kr-hash-algorithm']) && isset($data['kr-answer']);
+    }
+
+    // Check REST WS response.
+    public static function checkResult($response, $expectedStatuses = array())
+    {
+        $answer = $response['answer'];
+
+        if ($response['status'] != 'SUCCESS') {
+            $errorMessage = $answer['errorMessage'] . ' (' . $answer['errorCode'] . ').';
+
+            if (isset($answer['detailedErrorMessage']) && ! empty($answer['detailedErrorMessage'])) {
+                $errorMessage .= ' Detailed message: ' . $answer['detailedErrorMessage'] . ($answer['detailedErrorCode'] ?
+                    ' (' . $answer['detailedErrorCode'] . ').' : '');
+            }
+
+            require_once 'PayzenRestException.php';
+            throw new PayzenRestException($errorMessage, $answer['errorCode']);
+        } elseif (! empty($expectedStatuses) && ! in_array($answer['detailedStatus'], $expectedStatuses)) {
+            throw new Exception(sprintf(__('Unexpected transaction type received (%s).', 'woo-payzen-payment'), $answer['detailedStatus']));
+        }
     }
 }

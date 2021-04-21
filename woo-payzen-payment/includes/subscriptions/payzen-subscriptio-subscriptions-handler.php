@@ -17,6 +17,14 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
 {
     /**
      * {@inheritDoc}
+     * @see Payzen_Subscriptions_Handler_Interface::init_hooks()
+     */
+    public function init_hooks()
+    {
+    }
+
+    /**
+     * {@inheritDoc}
      * @see Payzen_Subscriptions_Handler_Interface::cart_contains_subscription()
      */
     public function cart_contains_subscription($cart)
@@ -78,7 +86,7 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
         $time_value = (int) $subscription->free_trial_time_value;
 
         if (! $time_unit || ! $time_value) {
-            // No trial, start subscription on 2e recurrence because the 1st recurrence is paid with the initial cart.
+            // No trial, start subscription on 2nd recurrence because the 1st recurrence is paid with the initial cart.
             $time_unit = $subscription->price_time_unit;
             $time_value = (int) $subscription->price_time_value;
         }
@@ -107,9 +115,9 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
 
         if ($time_unit && $time_value) {
             return date('Ymd', strtotime("+{$time_value}{$time_unit}"));
-        } else {
-            return null; // Subscription in unlimited.
         }
+
+        return null; // Subscription in unlimited.
     }
 
     /**
@@ -125,7 +133,7 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
      * {@inheritDoc}
      * @see Payzen_Subscriptions_Handler_Interface::update_subscription()
      */
-    public function update_subscription($order, $response)
+    public function process_subscription_renewal($order, $response)
     {
         $order_id = RightPress_WC_Legacy::order_get_id($order);
 
@@ -140,11 +148,11 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
             $currency_code = $response->get('currency');
 
             delete_post_meta($renewal_order_id, 'Subscription ID');
-            delete_post_meta($renewal_order_id, 'Amount');
+            delete_post_meta($renewal_order_id, 'Subscription amount');
             delete_post_meta($renewal_order_id, 'Recurrence number');
 
             update_post_meta($renewal_order_id, 'Subscription ID', $response->get('subscription'));
-            update_post_meta($renewal_order_id, 'Amount', WC_Gateway_Payzen::display_amount($response->get('amount'), $currency_code));
+            update_post_meta($renewal_order_id, 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('sub_amount'), $currency_code));
             update_post_meta($renewal_order_id, 'Recurrence number', $response->get('recurrence_number'));
 
             if ($response->isPendingPayment()) {
@@ -164,8 +172,17 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
      * {@inheritDoc}
      * @see Payzen_Subscriptions_Handler_Interface::cancel_subscription()
      */
-    public function cancel_subscription($order, $data)
+    public function cancel_subscription()
     {
-        // Not implemented yet.
+        // Not implemented.
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see Payzen_Subscriptions_Handler_Interface::update_subscription()
+     */
+    public function update_subscription()
+    {
+        // Not implemented.
     }
 }

@@ -10,17 +10,17 @@
  */
 
 /**
- * Plugin Name: WooCommerce PayZen Payment
+ * Plugin Name: PayZen for WooCommerce
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.8.10
+ * Version: 1.9.0
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 5.6
+ * Tested up to: 5.7
  * WC requires at least: 2.0
- * WC tested up to: 5.0
+ * WC tested up to: 5.2
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -41,11 +41,12 @@ $payzen_plugin_features = array(
     'restrictmulti' => false,
     'shatwo' => true,
     'embedded' => true,
-    'subscr' => false,
+    'subscr' => true,
 
     'multi' => true,
     'choozeo' => false,
-    'klarna' => true
+    'klarna' => true,
+    'franfinance' => true
 );
 
 /* Check requirements. */
@@ -65,7 +66,7 @@ function woocommerce_payzen_activation()
         load_plugin_textdomain('woo-payzen-payment', false, plugin_basename(dirname(__FILE__)) . '/languages');
 
         $message = sprintf(__('Sorry ! In order to use WooCommerce %s Payment plugin, you need to install and activate the WooCommerce plugin.', 'woo-payzen-payment'), 'PayZen');
-        wp_die($message, 'WooCommerce PayZen Payment', array('back_link' => true));
+        wp_die($message, 'PayZen for WooCommerce', array('back_link' => true));
     }
 }
 register_activation_hook(__FILE__, 'woocommerce_payzen_activation');
@@ -78,6 +79,7 @@ function woocommerce_payzen_uninstallation()
     delete_option('woocommerce_payzenmulti_settings');
     delete_option('woocommerce_payzenchoozeo_settings');
     delete_option('woocommerce_payzenklarna_settings');
+    delete_option('woocommerce_payzenfranfinance_settings');
     delete_option('woocommerce_payzenregroupedother_settings');
     delete_option('woocommerce_payzensubscription_settings');
 }
@@ -115,6 +117,10 @@ function woocommerce_payzen_init()
         require_once 'class-wc-gateway-payzenklarna.php';
     }
 
+    if ($payzen_plugin_features['franfinance'] && ! class_exists('WC_Gateway_PayzenFranfinance')) {
+        require_once 'class-wc-gateway-payzenfranfinance.php';
+    }
+
     if (! class_exists('WC_Gateway_PayzenRegroupedOther')) {
         require_once 'class-wc-gateway-payzenregroupedother.php';
     }
@@ -131,6 +137,7 @@ function woocommerce_payzen_init()
     require_once 'includes/PayzenResponse.php';
     require_once 'includes/PayzenRest.php';
     require_once 'includes/PayzenRestTools.php';
+    require_once 'includes/PayzenTools.php';
 }
 add_action('woocommerce_init', 'woocommerce_payzen_init');
 
@@ -154,6 +161,14 @@ function woocommerce_payzen_add_method($methods)
         $methods[] = 'WC_Gateway_PayzenKlarna';
     }
 
+    if ($payzen_plugin_features['franfinance']) {
+        $methods[] = 'WC_Gateway_PayzenFranfinance';
+    }
+
+    if ($payzen_plugin_features['subscr']) {
+        $methods[] = 'WC_Gateway_PayzenSubscription';
+    }
+
     $methods[] = 'WC_Gateway_PayzenRegroupedOther';
 
     // Since 2.3.0, we can display other payment means as submodules.
@@ -168,10 +183,6 @@ function woocommerce_payzen_add_method($methods)
                 }
             }
         }
-    }
-
-    if ($payzen_plugin_features['subscr']) {
-        $methods[] = 'WC_Gateway_PayzenSubscription';
     }
 
     return $methods;
@@ -263,16 +274,281 @@ function woocommerce_payzen_order_payment_gateways($available_gateways)
 }
 add_filter('woocommerce_available_payment_gateways', 'woocommerce_payzen_order_payment_gateways');
 
+if (! function_exists('ly_saved_cards_link')) {
+    function ly_saved_cards_link($menu_links)
+    {
+        // Add "My payment means".
+        $menu_links = array_slice($menu_links, 0, count($menu_links) - 1, true)
+        + array('ly_saved_cards' => __('My payment means', 'woo-payzen-payment'))
+        + array_slice($menu_links, count($menu_links) - 1, NULL, true);
+
+        return $menu_links;
+    }
+    add_filter('woocommerce_account_menu_items', 'ly_saved_cards_link', 40);
+}
+
+if (! function_exists('ly_add_saved_cards_endpoint_query_vars')) {
+    function ly_add_saved_cards_endpoint_query_vars($query_vars)
+    {
+        $query_vars['ly_saved_cards'] = 'ly_saved_cards';
+
+        return $query_vars;
+    }
+    add_filter('woocommerce_get_query_vars', 'ly_add_saved_cards_endpoint_query_vars');
+}
+
+if (! function_exists('ly_change_saved_cards_title')) {
+    function ly_change_saved_cards_title($title)
+    {
+        return __('My payment means', 'woo-payzen-payment');
+    }
+    add_filter('woocommerce_endpoint_ly_saved_cards_title', 'ly_change_saved_cards_title');
+}
+
+if (! function_exists('ly_add_saved_cards_endpoint')) {
+    function ly_add_saved_cards_endpoint()
+    {
+        // Add "ly_saved_cards" endpoint.
+        add_rewrite_endpoint('ly_saved_cards', EP_ROOT | EP_PAGES);
+    }
+    add_action('init', 'ly_add_saved_cards_endpoint');
+}
+
+function payzen_my_account_endpoint_content()
+{
+    global $woocommerce;
+
+    $WC_Gateway_Payzen = new WC_Gateway_Payzen();
+    $cust_id = $WC_Gateway_Payzen->get_customer_property($woocommerce->customer, 'id');
+
+    $sub_module_saving_cards_ids = array('payzenstd', 'payzensubscription');
+
+    $customer_saved_cards = array();
+    $column_card_brand =  false;
+    foreach ($sub_module_saving_cards_ids as $id) {
+        $saved_masked_pan = get_user_meta((int) $cust_id, $id.'_masked_pan', true);
+        if ($saved_masked_pan) {
+            $card_brand_pos = strpos($saved_masked_pan, '|');
+            if ($card_brand_pos) {
+                $column_card_brand = true;
+                $customer_saved_cards[$id]['card_brand'] = substr($saved_masked_pan, 0, strpos($saved_masked_pan, '|'));
+            }
+
+            $expiry_start_pos = strpos($saved_masked_pan, '(');
+            $expiry_end_pos = strpos($saved_masked_pan, ')');
+            $customer_saved_cards[$id]['card_number'] = substr($saved_masked_pan, $card_brand_pos + 1, $expiry_start_pos - $card_brand_pos - 2);
+            $customer_saved_cards[$id]['expiry'] = substr($saved_masked_pan, $expiry_start_pos + 1, $expiry_end_pos - $expiry_start_pos -1);
+        }
+    }
+
+    if (! empty($customer_saved_cards)) {
+        wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), WC_Gateway_Payzen::PLUGIN_VERSION);
+        wp_enqueue_style('payzen');
+
+        echo '<table id="ly_cards_table" class="shop_table" id ="payzen-customer-card" style="display:none">
+                <thead>
+                  <tr>';
+        if ($column_card_brand) {
+            echo '<th>' . __('Type', 'woo-payzen-payment') . '</th>';
+        }
+
+        echo      '<th>' . __('Means of payment', 'woo-payzen-payment') . '</th>
+                  <th>' . __('Action', 'woo-payzen-payment') . '</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>';
+
+        $table_body = '';
+        foreach ($customer_saved_cards as $id => $card) {
+            $table_body .= '<tr>';
+            if ($column_card_brand) {
+                $card_brand_logo = $card['card_brand'];
+                $remote_logo = WC_Gateway_Payzen::LOGO_URL . strtolower($card['card_brand']) . '.png';
+                if ($card['card_brand']) {
+                    $card_brand_logo = '<img src=\"' . $remote_logo. '\""
+                           + "alt=\"' . $card['card_brand'] . '\""
+                           + "title=\"' . $card['card_brand'] . '\""
+                           + "style=\"vertical-align: middle; margin: 0 10px 0 5px; max-height: 30px; display: unset;\">';
+                }
+
+                $table_body .= '<td>' . $card_brand_logo . '</td>';
+            }
+
+            $table_body .= '<td>' . $card['card_number'] . ' - ' . $card['expiry'] . '</td>';
+            $table_body .= '<td><a href=\"javascript: void(0);\" onclick=\"payzenConfirmDelete(\'' . $id . '\')\">' . __('Delete', 'woo-payzen-payment') . '</a></td></tr>';
+        }
+
+        $delete_card_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Delete_Saved_Card', home_url('/'));
+
+        echo '<script>
+                  jQuery(document).ready(function(){
+                      if (jQuery("table[id=\'ly_cards_table\']").length == 2) {
+                          jQuery("table[id=\'ly_cards_table\']:last").remove();
+                      }
+
+                      if (jQuery("#ly_empty_cards_message").length) {
+                          jQuery("#ly_empty_cards_message").remove();
+                      }
+
+                      jQuery("#ly_cards_table > tbody:last").append("' . $table_body . '");
+                      jQuery("#ly_cards_table").show();
+                  });
+
+                  function payzenConfirmDelete(id) {
+                      if (confirm("' . __('Are you sure you want to delete your saved means of payment? This action is not reversible!', 'woo-payzen-payment') . '")) {
+                          jQuery("body").block({
+                             message: null,
+                             overlayCSS: {
+                                 background: "#fff",
+                                 opacity: 0.5
+                             }
+                          });
+
+                          jQuery("div.blockUI.blockOverlay").css("cursor", "default");
+
+                          jQuery.ajax({
+                              method: "POST",
+                              url: "' . $delete_card_url . '",
+                              data: { "id": id },
+                              success: function() {
+                                  location.reload();
+                              }
+                          });
+                      }
+                  }
+              </script>';
+    } else {
+        echo '<div id="ly_empty_cards_message" class="woocommerce-Message woocommerce-Message--info woocommerce-info" style="display:none">'
+                  . __('You have no stored payment means.', 'woo-payzen-payment') .
+             '</div>
+             <script>
+                 jQuery(document).ready(function(){
+                     if (jQuery("#ly_cards_table").length || jQuery("div[id=\'ly_empty_cards_message\']").length == 2) {
+                         jQuery("#ly_empty_cards_message").remove();
+                     }
+
+                     if (! jQuery("#ly_cards_table").length) {
+                         jQuery("#ly_empty_cards_message").show();
+                     }
+                 });
+             </script>';
+    }
+}
+add_action('woocommerce_account_ly_saved_cards_endpoint', 'payzen_my_account_endpoint_content');
+
+function payzen_send_support_email_on_order($order)
+{
+    $std_payment_method = new WC_Gateway_PayzenStd();
+    if (substr($std_payment_method->get_order_property($order, 'payment_method'), 0, strlen('payzen')) === 'payzen') {
+        $user_info = get_userdata(1);
+        $send_email_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Send_Email', home_url('/'));
+
+        $payzen_email_send_msg = get_transient('payzen_email_send_msg');
+        if ($payzen_email_send_msg) {
+            echo $payzen_email_send_msg;
+
+            delete_transient('payzen_email_send_msg');
+        }
+        ?>
+        <script type="text/javascript" src="<?php echo WC_PAYZEN_PLUGIN_URL; ?>/assets/js/support.js"></script>
+        <contact-support
+            shop-id="<?php echo $std_payment_method->get_general_option('site_id'); ?>"
+            context-mode="<?php echo $std_payment_method->get_general_option('ctx_mode'); ?>"
+            sign-algo="<?php echo $std_payment_method->get_general_option('sign_algo'); ?>"
+            contrib="<?php echo PayzenTools::get_contrib(); ?>"
+            integration-mode="<?php echo PayzenTools::get_integration_mode(); ?>"
+            plugins="<?php echo PayzenTools::get_active_plugins(); ?>"
+            title=""
+            first-name="<?php echo $user_info->first_name; ?>"
+            last-name="<?php echo $user_info->last_name; ?>"
+            from-email="<?php echo get_option('admin_email'); ?>"
+            to-email="<?php echo WC_Gateway_Payzen::SUPPORT_EMAIL; ?>"
+            cc-emails=""
+            phone-number=""
+            language="<?php echo PayzenTools::get_support_component_language(); ?>"
+            is-order="true"
+            transaction-uuid="<?php echo PayzenTools::get_transaction_uuid($order); ?>"
+            order-id="<?php echo $std_payment_method->get_order_property($order, 'id'); ?>"
+            order-number="<?php echo $std_payment_method->get_order_property($order, 'id'); ?>"
+            order-status=<?php echo $std_payment_method->get_order_property($order, 'status'); ?>
+            order-date="<?php echo $std_payment_method->get_order_property($order, 'date_created'); ?>"
+            order-amount="<?php echo $std_payment_method->get_order_property($order, 'total') . ' ' . $std_payment_method->get_order_property($order, 'currency'); ?>"
+            cart-amount=""
+            shipping-fees="<?php echo $std_payment_method->get_order_property($order, 'shipping_total') . ' ' . $std_payment_method->get_order_property($order, 'currency'); ?>"
+            order-discounts="<?php echo PayzenTools::get_used_discounts($order); ?>"
+            order-carrier="<?php echo $std_payment_method->get_order_property($order, 'shipping_method'); ?>"></contact-support>
+        <?php
+        // Load css and add spinner.
+        wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), '1.9.0');
+        wp_enqueue_style('payzen');
+        ?>
+        <script type="text/javascript">
+            jQuery(document).ready(function() {
+                jQuery('contact-support').on('sendmail', function(e) {
+                    jQuery('body').block({
+                        message: null,
+                        overlayCSS: {
+                            background: '#fff',
+                            opacity: 0.5
+                        }
+                    });
+
+                    jQuery('div.blockUI.blockOverlay').css('cursor', 'default');
+
+                    jQuery.ajax({
+                        method: 'POST',
+                        url: '<?php echo $send_email_url; ?>',
+                        data: e.originalEvent.detail,
+                        success: function(data) {
+                            location.reload();
+                        }
+                    });
+                });
+            });
+        </script>
+        <?php
+    }
+}
+// Add contact support link to order details page.
+add_action('woocommerce_admin_order_data_after_billing_address', 'payzen_send_support_email_on_order');
+
+function payzen_send_email()
+{
+    if (isset($_POST['submitter']) && $_POST['submitter'] === 'payzen_send_support') {
+        $msg = '';
+        if (isset($_POST['sender']) && isset($_POST['subject']) && isset($_POST['message'])) {
+            $recipient = WC_Gateway_Payzen::SUPPORT_EMAIL;
+            $subject = $_POST['subject'];
+            $content = $_POST['message'];
+            $headers = array('Content-Type: text/html; charset=UTF-8');
+
+            if (wp_mail($recipient, $subject, $content, $headers)) {
+                $msg = '<div class="inline updated"><p><strong>' . __('Thank you for contacting us. Your email has been successfully sent.', 'woo-payzen-payment') . '</strong></p></div>';
+            } else {
+                $msg = '<div class="inline error"><p><strong>' . __('An error has occurred. Your email was not sent.', 'woo-payzen-payment') . '</strong></p></div>';
+            }
+        } else {
+            $msg = '<div class="inline error"><p><strong>' . __('Please make sure to configure all required fields.', 'woo-payzen-payment') . '</strong></p></div>';
+        }
+
+        set_transient('payzen_email_send_msg', $msg);
+    }
+
+    echo json_encode(array('success' => true));
+    die();
+}
+// Send support email.
+add_action('woocommerce_api_wc_gateway_payzen_send_email', 'payzen_send_email');
+
 /* Retrieve blog_id from post when this is an IPN URL call. */
 if (is_multisite() && key_exists('vads_hash', $_POST) && $_POST['vads_hash']
-    && key_exists('vads_order_info', $_POST) && $_POST['vads_order_info']) {
+    && key_exists('vads_ext_info_blog_id', $_POST) && $_POST['vads_ext_info_blog_id']) {
     global $wpdb, $current_blog, $current_site;
 
-    // Parse order_info parameter.
-    $parts = explode('&', $_POST['vads_order_info']);
-
-    $blog = substr($parts[1], strlen('blog_id='));
-    switch_to_blog((int)$blog);
+    $blog = $_POST['vads_ext_info_blog_id'];
+    switch_to_blog((int) $blog);
 
     // Set current_blog global var.
     $current_blog = $wpdb->get_row(

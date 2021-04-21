@@ -113,7 +113,8 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
      **/
     protected function payzen_fill_request($order)
     {
-        parent::payzen_fill_request($order, true);
+        parent::payzen_fill_request($order);
+
         $this->send_cart_data($order);
 
         // Specific fields for klarna payment.

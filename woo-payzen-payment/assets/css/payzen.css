@@ -7,3 +7,15 @@
     border: 0 none;
     margin-bottom: 0 !important;
 }
+
+.blockUI::before {
+    content: '';
+    background: url("../images/loading.gif");
+    animation: '';
+    width: 24px;
+    height: 24px;
+    cursor: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+}

@@ -16,14 +16,19 @@ if (! defined('ABSPATH')) {
 class Payzen_Subscriptions_Loader
 {
     private static $handlers = array(
-        'disabled' => 'Payzen_Disabled_Subscriptions_Handler',
+        'wc-subscriptions' => 'Payzen_WC_Subscriptions_Subscriptions_Handler',
         'subscriptio' => 'Payzen_Subscriptio_Subscriptions_Handler'
     );
 
     public static function getInstance($handler)
     {
-        if (! key_exists($handler, self::$handlers)) {
-            throw new \InvalidArgumentException("\" $handler \" is not a valid subscriptions handler identifier.");
+        if (! key_exists($handler, self::$handlers)) { // No valid subscriptions handler provided
+            if ($handler === 'disabled') {
+                // Removed handler provided, force using WC Subscriptions.
+                $handler = 'wc-subscriptions';
+            } else {
+                throw new \InvalidArgumentException("\" $handler \" is not a valid subscriptions handler identifier.");
+            }
         }
 
         include_once 'payzen-subscriptions-handler-interface.php';
