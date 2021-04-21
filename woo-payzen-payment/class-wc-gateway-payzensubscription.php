@@ -15,8 +15,7 @@ if (! defined('ABSPATH')) {
 
 class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 {
-    const SUBSCRIPTIONS_HANDLER = 'disabled';
-
+    const SUBSCRIPTIONS_HANDLER = 'wc-subscriptions';
     protected $subscriptions_handler;
 
     public function __construct()
@@ -25,6 +24,16 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $this->icon = apply_filters('woocommerce_payzensubscription_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/payzen.png');
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME. ' - ' . __('Subscription payment', 'woo-payzen-payment');
+
+        $this->supports = array(
+            'subscriptions',
+            'subscription_cancellation',
+            'subscription_payment_method_change',
+            'subscription_amount_changes',
+            'subscription_date_changes',
+            'subscription_payment_method_change_customer',
+            'gateway_scheduled_payments'
+        );
 
         // Init common vars.
         $this->payzen_init();
@@ -67,6 +76,8 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         // Order needs payment filter.
         add_filter('woocommerce_order_needs_payment', array($this, 'payzen_order_needs_payment'), 10, 2);
+
+        $this->subscriptions_handler->init_hooks();
     }
 
     /**
@@ -76,11 +87,9 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
     {
         parent::init_form_fields();
 
-        unset($this->form_fields['advanced_options']);
+        unset($this->form_fields['payment_cards']);
+        unset($this->form_fields['card_data_mode']);
         unset($this->form_fields['payment_by_token']);
-        if (isset($this->form_fields['card_data_mode']['options']['REST'])) {
-            unset($this->form_fields['card_data_mode']['options']['REST']);
-        }
 
         // By default, disable Subscription payment submodule.
         $this->form_fields['enabled']['default'] = 'no';
@@ -90,15 +99,15 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $this->form_fields['subscriptions'] = array(
             'title' => __('Subscriptions management', 'woo-payzen-payment'),
             'type' => 'select',
-            'default' => 'disabled',
+            'default' => 'wc-subscriptions',
             'options' => array(
-                'disabled' => __('Disabled', 'woo-payzen-payment'),
-                'subscriptio' => __('Subscriptio', 'woo-payzen-payment'),
+                'wc-subscriptions' => 'WooCommerce Subscriptions',
+                'subscriptio' => 'Subscriptio 2.x',
                 'custom' => __('Custom', 'woo-payzen-payment')
             ),
-            'description' => __('If you buy subscriptions on your site, choose the solution you use to manage them. At this time only Subscriptio plugin is supported. If you choose "Custom", your developper may develop a subscriptions adapter for our plugin.', 'woo-payzen-payment'),
+            'description' => __('If you buy subscriptions on your site, choose the solution you use to manage them. If you choose "Custom", your developper may develop a subscriptions adapter for our plugin.', 'woo-payzen-payment'),
             'class' => 'wc-enhanced-select'
-        );
+       );
     }
 
     protected function get_rest_fields()
@@ -115,30 +124,52 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             return false;
         }
 
-        if ($this->subscriptions_handler && ($this->subscriptions_handler->cart_contains_multiple_subscriptions($woocommerce->cart) || ! $this->subscriptions_handler->cart_contains_subscription($woocommerce->cart))) {
+        if ($this->subscriptions_handler
+            && ($this->subscriptions_handler->cart_contains_multiple_subscriptions($woocommerce->cart)
+                || ! $this->subscriptions_handler->cart_contains_subscription($woocommerce->cart))) {
             return false;
         }
 
         return true;
     }
 
-    protected function payment_by_alias_view($html)
+    protected function payment_by_alias_view($html, $force_redir = true)
     {
         global $woocommerce;
 
         $cust_id = $this->get_customer_property($woocommerce->customer, 'id');
         $saved_subsc_masked_pan = get_user_meta((int) $cust_id, $this->id . '_masked_pan', true);
 
+        // Recover card brand if saved with masked pan and check if logo exists.
+        $card_brand = '';
+        $card_brand_logo = '';
+        if (strpos($saved_subsc_masked_pan, '|')) {
+            $card_brand = substr($saved_subsc_masked_pan, 0, strpos($saved_subsc_masked_pan, '|'));
+            $remote_logo = self::LOGO_URL . strtolower($card_brand) . '.png';
+            if ($card_brand) {
+                $card_brand_logo = '<img src="' . $remote_logo . '"
+                       alt="' . $card_brand . '"
+                       title="' . $card_brand . '"
+                       style="vertical-align: middle; margin: 0 10px 0 5px; max-height: 20px; display: unset;">';
+            }
+        }
+
+        $saved_subsc_masked_pan = $card_brand_logo ? $card_brand_logo . '<b style="vertical-align: middle;">' . substr($saved_subsc_masked_pan, strpos($saved_subsc_masked_pan, '|') + 1) . '</b>'
+            : ' <b>' . str_replace('|',' ', $saved_subsc_masked_pan) . '</b>';
+
         echo '<div id="' . $this->id . '_payment_by_token_description">
                   <ul>
                       <li>
-                          <span>' . sprintf(__('You will pay with your registered means of payment %s. No data entry is needed.', 'woo-payzen-payment'), '<b>' . $saved_subsc_masked_pan . '</b>') . '</span>
+                          <span>' .
+                              sprintf(__('You will pay with your stored means of payment %s', 'woo-payzen-payment'), $saved_subsc_masked_pan)
+                              . ' (<a href="' . esc_url(wc_get_account_endpoint_url($this->get_option('woocommerce_saved_cards_endpoint', 'ly_saved_cards'))) . '">' . __('manage your payment means', 'woo-payzen-payment') . '</a>).
+                          </span>
                       </li>
                   </ul>
               </div>';
     }
 
-    protected function can_use_alias($cust_id)
+    protected function can_use_alias($cust_id, $verify_identifier = false)
     {
         global $woocommerce;
 
@@ -146,8 +177,8 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             return false;
         }
 
-        $amount = $woocommerce->cart->total;
-        if ($amount <= 0) {
+        $amount = $woocommerce->cart ? $woocommerce->cart->total : 0;
+        if (($amount <= 0) && (! $verify_identifier || (! empty($_GET['wc-ajax']) && $this->check_identifier($cust_id, $this->id)))) {
             return true;
         }
 
@@ -159,13 +190,11 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
      **/
     protected function payzen_fill_request($order)
     {
-        global $woocommerce;
-
         parent::payzen_fill_request($order);
 
-        if ($this->subscriptions_handler && $this->subscriptions_handler->cart_contains_subscription($woocommerce->cart)
-            && ($info = $this->subscriptions_handler->subscription_info($order))) {
+        $info = $this->subscriptions_handler->subscription_info($order);
 
+        if (is_array($info) && ! empty($info)) {
             $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
             $cust_id = $this->get_order_property($order, 'user_id');
 
@@ -191,7 +220,9 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
                 $this->payzen_request->set('page_action', 'REGISTER_PAY_SUBSCRIBE');
             } else {
                 // Only subscriptions.
-                if ($saved_identifier = $this->get_cust_identifier($cust_id)) {
+                $saved_identifier = $this->get_cust_identifier($cust_id);
+                $is_identifier_active = $this->is_cust_identifier_active($cust_id);
+                if ($saved_identifier && $is_identifier_active) {
                     $this->payzen_request->set('identifier', $saved_identifier);
                     $this->payzen_request->set('page_action', 'SUBSCRIBE');
                 } else {
@@ -199,6 +230,185 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
                 }
             }
         }
+    }
+
+    public function cancel_online_subscription($subscription_id, $order_id)
+    {
+        $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
+        if (! $key) {
+            $this->log("Subscription #{$subscription_id} cannot be cancelled on gateway for order #$order_id: private key is not configured.");
+            return;
+        }
+
+        $this->log("Cancelling subscription #{$subscription_id} for order #$order_id.");
+
+        $order = new WC_Order((int) $order_id);
+
+        $cust_id = $this->get_order_property($order, 'user_id');
+        $saved_identifier = $this->get_cust_identifier($cust_id);
+
+        $params = array(
+            'subscriptionId' => get_post_meta($order_id, 'Subscription ID', true),
+            'paymentMethodToken' => $saved_identifier
+        );
+
+        try {
+            $client = new PayzenRest(
+                $this->get_general_option('rest_url'),
+                $this->get_general_option('site_id'),
+                $key
+            );
+
+            $result = $client->post('V4/Subscription/Cancel', json_encode($params));
+            PayzenRestTools::checkResult($result);
+
+            //Subscription cancelled successfully.
+            $this->log("Subscription #{$subscription_id} cancelled successfully for order #$order_id.");
+
+            // Cancel running subscriptions.
+            $transactions = $this->get_order_details($order_id);
+
+            foreach ($transactions as $transaction) {
+                $this->cancel_transaction($transaction);
+            }
+        } catch (Exception $e) {
+            $this->log("Subscription cancel exception for order #$order_id with code {$e->getCode()}: {$e->getMessage()}.");
+        }
+    }
+
+    private function cancel_transaction($transaction)
+    {
+        if ($transaction['status'] !== 'RUNNING' ){
+            return;
+        }
+
+        $order_id =  $transaction['orderDetails']['orderId'];
+
+        $this->log("Cancelling transaction with UUID #{$transaction['uuid']} for order #$order_id.");
+
+        $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
+        if (! $key) {
+            $this->log("Transaction with UUID #{$transaction['uuid']} cannot be cancelled on gateway for order #$order_id: private key is not configured.");
+            return;
+        }
+
+        try {
+            $params = array(
+                'uuid' => $transaction['uuid'],
+                'resolutionMode' => 'CANCELLATION_ONLY'
+            );
+
+            $client = new PayzenRest(
+                $this->get_general_option('rest_url'),
+                $this->get_general_option('site_id'),
+                $key
+            );
+
+            $result = $client->post('V4/Transaction/Cancel', json_encode($params));
+            PayzenRestTools::checkResult($result, 'CANCELLED');
+        } catch (Exception $e) {
+            $this->log("Transaction cancel exception for order #$order_id with code {$e->getCode()}: {$e->getMessage()}.");
+        }
+    }
+
+    public function update_online_subscription($subscription_id, $order_id)
+    {
+        $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
+        if (! $key) {
+            $this->log("Subscription #{$subscription_id} for order #$order_id cannot be updated on gateway: private key is not configured.");
+            return;
+        }
+
+        $this->log("Updating subscription #{$subscription_id} for order #$order_id.");
+
+        $order = new WC_Order((int) $order_id);
+
+        $cust_id = $this->get_order_property($order, 'user_id');
+        $saved_identifier = $this->get_cust_identifier($cust_id);
+
+        // Re-generate subscriptions data from updated order.
+        $info = $this->subscriptions_handler->subscription_info($order);
+        if (! is_array($info) || empty($info)) {
+            $this->log("Empty subscription info returned for order #$order_id. Cannot update subscription #{$subscription_id}.");
+            return;
+        }
+
+        // Get subscription effect date in ISO8601 format.
+        $date_time = strtotime($info['effect_date']);
+        if ($date_time < time()) {
+            $this->log("Cannot update subscription #{$subscription_id} for order #$order_id. Effect date has passed.");
+            return;
+        }
+
+        // Compute new rrule.
+        $desc = 'RRULE:FREQ=' . $info['frequency']. ';INTERVAL=' . $info['interval'];
+        if (isset($info['end_date']) && $info['end_date']) {
+            $desc .= ';UNTIL=' . $info['end_date'];
+        }
+
+        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
+
+        $params = array(
+            'subscriptionId' => get_post_meta($order_id, 'Subscription ID', true),
+            'paymentMethodToken' => $saved_identifier,
+            'amount' => $currency->convertAmountToInteger($info['amount']),
+            'currency' => $currency->getAlpha3(),
+            'effectDate' => date(DateTime::ATOM, $date_time),
+            'rrule' => $desc
+        );
+
+        // Initial amount.
+        if (isset($info['init_amount']) && $info['init_amount'] && isset($info['init_number']) && $info['init_number']) {
+            $params['initialAmount'] = $currency->convertAmountToInteger($info['init_amount']);
+            $params['initialAmountNumber'] = $info['init_number'];
+        }
+
+        try {
+            $client = new PayzenRest(
+                $this->get_general_option('rest_url'),
+                $this->get_general_option('site_id'),
+                $key
+            );
+
+            $result = $client->post('V4/Subscription/Update', json_encode($params));
+            PayzenRestTools::checkResult($result);
+
+            //Subscription cancelled successfully.
+            $this->log("Subscription #{$subscription_id} updated successfully for order #$order_id.");
+        } catch (Exception $e) {
+            $this->log("Subscription update exception for order #$order_id with code {$e->getCode()}: {$e->getMessage()}");
+        }
+    }
+
+    private function get_order_details($order_id)
+    {
+        $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
+        $client = new PayzenRest(
+            $this->get_general_option('rest_url'),
+            $this->get_general_option('site_id'),
+            $key
+        );
+
+        $params = array(
+            'orderId' => $order_id,
+            'operationType' => 'DEBIT'
+        );
+
+        $get_order_response = $client->post('V4/Order/Get', json_encode($params));
+        PayzenRestTools::checkResult($get_order_response);
+
+        // Order transactions organized by sequence numbers.
+        $trans_by_sequence = array();
+        foreach ($get_order_response['answer']['transactions'] as $transaction) {
+            $sequence_number = $transaction['transactionDetails']['sequenceNumber'];
+            // Unpaid transactions are not considered.
+            if ($transaction['status'] !== 'UNPAID') {
+                $trans_by_sequence[$sequence_number] = $transaction;
+            }
+        }
+
+        ksort($trans_by_sequence);
+        return array_reverse($trans_by_sequence);
     }
 
     public function payzen_order_needs_payment($is_active, $order)

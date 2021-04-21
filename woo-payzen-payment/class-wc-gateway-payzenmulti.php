@@ -93,7 +93,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
             'type' => 'select',
             'default' => 'DEFAULT',
             'options' => array(
-                'DEFAULT'  => __('On payment gateway', 'woo-payzen-payment'),
+                'DEFAULT' => __('On payment gateway', 'woo-payzen-payment'),
                 'MERCHANT' => __('On merchant site', 'woo-payzen-payment')
             ),
             'description' =>sprintf(__('Select where card type will be selected by buyer.', 'woo-payzen-payment'), self::GATEWAY_NAME),

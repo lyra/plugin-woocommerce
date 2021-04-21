@@ -29,9 +29,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     const SIGN_ALGO = 'SHA-256';
     const LANGUAGE = 'fr';
 
-    const CMS_IDENTIFIER = 'WooCommerce_2.x-4.x';
+    const CMS_IDENTIFIER = 'WooCommerce_2.x-5.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.8.10';
+    const PLUGIN_VERSION = '1.9.0';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -69,6 +69,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             // Adding style to admin form action.
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_style'));
 
+            // Adding JS to admin form action.
+            add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_script'));
+
             // Update admin form action.
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         }
@@ -84,6 +87,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         // Print our notices when payment was sucessful.
         add_action('woocommerce_before_template_part', array($this, 'payzen_notices'), 10, 4);
+
+        // Delete saved means of payment and saved identifier.
+        add_action('woocommerce_api_wc_gateway_payzen_delete_saved_card', array($this, 'payzen_delete_saved_card'));
     }
 
     protected function payzen_is_section_loaded()
@@ -133,7 +139,46 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 vertical-align: middle;
                 margin-right: 5px;
             }
+
+            #woocommerce_payzen_rest_check_url + p.description span.url {
+                color: #23282d !important;
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            #woocommerce_payzen_rest_check_url + p.description span.desc {
+                color: red !important;
+                display: inline-block;
+            }
+
+            #woocommerce_payzen_rest_check_url + p.description img {
+                margin-right: 5px;
+            }
         </style>
+        <?php
+    }
+
+    public function payzen_admin_head_script()
+    {
+        ?>
+        <script type="text/javascript">
+        //<!--
+            jQuery(function() {
+                payzenUpdateCategoryDisplay();
+            });
+
+            function payzenUpdateCategoryDisplay() {
+                var commonCategory = jQuery('#<?php echo esc_attr($this->get_field_key('common_category')); ?> option:selected').val();
+                var categoryMapping = jQuery('#<?php echo esc_attr($this->get_field_key('additional_options')); ?>').next().next().find('tr:nth-child(2)');
+
+                if (commonCategory === 'CUSTOM_MAPPING') {
+                    categoryMapping.show();
+                } else {
+                    categoryMapping.hide();
+                }
+            }
+        //-->
+        </script>
         <?php
     }
 
@@ -151,8 +196,16 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
             echo '<div class="inline updated"><p><strong>' . sprintf(__('Your %s module configuration is successfully reset.', 'woo-payzen-payment'), self::GATEWAY_NAME) . '</strong></p></div>';
         }
+
+        $payzen_email_send_msg = get_transient('payzen_email_send_msg');
+        if ($payzen_email_send_msg) {
+            echo $payzen_email_send_msg;
+
+            delete_transient('payzen_email_send_msg');
+        }
         ?>
 
+        <script type="text/javascript" src="<?php echo WC_PAYZEN_PLUGIN_URL . '/assets/js/support.js' ?>"></script>
         <br />
         <h3><?php echo self::GATEWAY_NAME; ?></h3>
         <p><?php echo sprintf(__('The module works by sending users to %s in order to select their payment mean and enter their payment information.', 'woo-payzen-payment'), self::GATEWAY_NAME); ?></p>
@@ -208,9 +261,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     {
         $modes = array(
             '-1' => sprintf(__('%s general configuration', 'woo-payzen-payment'), self::GATEWAY_NAME),
-            ' '  => sprintf(__('%s Back Office configuration', 'woo-payzen-payment'), self::BACKOFFICE_NAME),
-            '0'  => __('Automatic', 'woo-payzen-payment'),
-            '1'  => __('Manual', 'woo-payzen-payment')
+            ' ' => sprintf(__('%s Back Office configuration', 'woo-payzen-payment'), self::BACKOFFICE_NAME),
+            '0' => __('Automatic', 'woo-payzen-payment'),
+            '1' => __('Manual', 'woo-payzen-payment')
         );
 
         if ($is_general_settings) {
@@ -218,6 +271,40 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         return $modes;
+    }
+
+    protected function get_gateway_categories($no_select_opt = true)
+    {
+        $categories = array(
+            'FOOD_AND_GROCERY' => __('Food and grocery', 'woo-payzen-payment'),
+            'AUTOMOTIVE' => __('Automotive', 'woo-payzen-payment'),
+            'ENTERTAINMENT' => __('Entertainment', 'woo-payzen-payment'),
+            'HOME_AND_GARDEN' => __('Home and garden', 'woo-payzen-payment'),
+            'HOME_APPLIANCE' => __('Home appliance', 'woo-payzen-payment'),
+            'AUCTION_AND_GROUP_BUYING' => __('Auction and group buying', 'woo-payzen-payment'),
+            'FLOWERS_AND_GIFTS' => __('Flowers and gifts', 'woo-payzen-payment'),
+            'COMPUTER_AND_SOFTWARE' => __('Computer and software', 'woo-payzen-payment'),
+            'HEALTH_AND_BEAUTY' => __('Health and beauty', 'woo-payzen-payment'),
+            'SERVICE_FOR_INDIVIDUAL' => __('Service for individual', 'woo-payzen-payment'),
+            'SERVICE_FOR_BUSINESS' => __('Service for business', 'woo-payzen-payment'),
+            'SPORTS' => __('Sports', 'woo-payzen-payment'),
+            'CLOTHING_AND_ACCESSORIES' => __('Clothing and accessories', 'woo-payzen-payment'),
+            'TRAVEL' => __('Travel', 'woo-payzen-payment'),
+            'HOME_AUDIO_PHOTO_VIDEO' => __('Home audio, photo, video', 'woo-payzen-payment'),
+            'TELEPHONY' => __('Telephony', 'woo-payzen-payment')
+        );
+
+        if ($no_select_opt) {
+            return $categories;
+        } else {
+            return array_merge(
+                array(
+                    '' => '---',
+                    'CUSTOM_MAPPING' => __('(Use category mapping below)', 'woo-payzen-payment'),
+                ),
+                $categories
+            );
+        }
     }
 
     protected function get_method_title_field_description()
@@ -280,7 +367,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $doc_pattern .= self::GATEWAY_CODE . '_' . self::CMS_IDENTIFIER . '_v' . $minor . '*.pdf';
         $filenames = glob($doc_pattern);
 
-        if(! empty($filenames)) {
+        if (! empty($filenames)) {
             $languages = array(
                 'fr' => 'Français',
                 'en' => 'English',
@@ -299,7 +386,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 . 'installation_doc/' . $base_filename . '.pdf" target="_blank">' . $languages[$lang] . '</a>';
             }
         }
-
 
         $this->form_fields = array(
             // Module information.
@@ -335,6 +421,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'title' => $docs,
                 'type' => 'label',
                 'css' => 'font-weight: bold; color: red; cursor: auto !important; text-transform: uppercase;'
+            ),
+            'support_component' => array(
+                'type' => 'support_component'
             ),
 
             'base_settings' => array(
@@ -412,6 +501,74 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'css' => 'width: 350px;'
             ),
 
+            // Add REST API key fields.
+            'rest_settings' => array(
+                'title' => __('REST API keys', 'woo-payzen-payment'),
+                'type' => 'title',
+                'description' => sprintf(__('REST API keys are available in your %s Back Office (menu: Settings > Shops > REST API keys).<br><br>Configure this section if you are using order operations from WooCommerce Back Office or if you are using embedded payment fields or popin modes.', 'woo-payzen-payment'), self::BACKOFFICE_NAME)
+             ),
+             'test_private_key' => array(
+                 'title' => __('Test password', 'woo-payzen-payment'),
+                 'type' => 'password',
+                 'default' => '',
+                 'custom_attributes' => array('autocomplete' => 'off')
+             ),
+             'prod_private_key' => array(
+                 'title' => __('Production password', 'woo-payzen-payment'),
+                 'type' => 'password',
+                 'default' => '',
+                 'custom_attributes' => array('autocomplete' => 'off')
+             ),
+             'rest_url' => array(
+                'title' => __('API REST server URL', 'woo-payzen-payment'),
+                'type' => 'text',
+                'default' => self::REST_URL,
+                'css' => 'width: 350px;'
+             ),
+            'embedded_fields_keys_settings' => array(
+                'title' => '',
+                'type' => 'title',
+                'description' => sprintf(__('Configure this section only if you are using embedded payment fields or popin modes.', 'woo-payzen-payment'), self::BACKOFFICE_NAME)
+            ),
+             'test_public_key' => array(
+                 'title' => __('Public test key', 'woo-payzen-payment'),
+                 'type' => 'text',
+                 'default' => '',
+                 'custom_attributes' => array('autocomplete' => 'off')
+             ),
+             'prod_public_key' => array(
+                 'title' => __('Public production key', 'woo-payzen-payment'),
+                 'type' => 'text',
+                 'default' => '',
+                 'custom_attributes' => array('autocomplete' => 'off')
+             ),
+             'test_return_key' => array(
+                 'title' => __('HMAC-SHA-256 test key', 'woo-payzen-payment'),
+                 'type' => 'password',
+                 'default' => '',
+                 'custom_attributes' => array('autocomplete' => 'off')
+             ),
+             'prod_return_key' => array(
+                 'title' => __('HMAC-SHA-256 production key', 'woo-payzen-payment'),
+                 'type' => 'password',
+                 'default' => '',
+                 'custom_attributes' => array('autocomplete' => 'off')
+             ),
+            'static_url' => array(
+                'title' => __('JavaScript client URL', 'woo-payzen-payment'),
+                'type' => 'text',
+                'default' => self::STATIC_URL,
+                'css' => 'width: 350px;'
+            ),
+            'rest_check_url' => array(
+                'title' => __('API REST Notification URL', 'woo-payzen-payment'),
+                'type' => 'text',
+                'default' => '',
+                'description' => '<span class="url">' . add_query_arg('wc-api', 'WC_Gateway_Payzen_Notify_Rest', network_home_url('/')). '</span><br />' .
+                '<img src="' . esc_url(WC_PAYZEN_PLUGIN_URL . 'assets/images/warn.png') . '"><span class="desc">' . sprintf(__('URL to copy into your %s Back Office > Settings > Notification rules.<br>In multistore mode, notification URL is the same for all the stores.', 'woo-payzen-payment'), self::GATEWAY_NAME). '</span>',
+                'css' => 'display: none;'
+            ),
+
             // Payment page params.
             'payment_page' => array(
                 'title' => __('PAYMENT PAGE', 'woo-payzen-payment'),
@@ -450,14 +607,14 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
             // Selective 3DS.
             'selective_3ds' => array(
-                'title' => __('SELECTIVE 3DS', 'woo-payzen-payment'),
+                'title' => __('CUSTOM 3DS', 'woo-payzen-payment'),
                 'type' => 'title'
             ),
             '3ds_min_amount' => array(
-                'title' => __('Disable 3DS', 'woo-payzen-payment'),
+                'title' => __('Manage 3DS', 'woo-payzen-payment'),
                 'type' => 'text',
                 'default' => '',
-                'description' => __('Amount below which 3DS will be disabled. Needs subscription to selective 3DS option. For more information, refer to the module documentation.', 'woo-payzen-payment')
+                'description' => __('Amount below which customer could be exempt from strong authentication. Needs subscription to «Selective 3DS1» or «Frictionless 3DS2» options. For more information, refer to the module documentation.', 'woo-payzen-payment')
             ),
 
             // Return to store params.
@@ -528,7 +685,41 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'options' => self::get_success_order_statuses(true),
                 'description' => __('Defines the status of orders paid with this payment mode.', 'woo-payzen-payment'),
                 'class' => 'wc-enhanced-select'
-            )
+            ),
+
+            // Additional options.
+            'additional_options' => array(
+                'title' => __('ADDITIONAL OPTIONS', 'woo-payzen-payment'),
+                'type' => 'title',
+                'description' => __('Configure this section if you are using advanced risk assessment module or if you are proposing payment means requiring cart data (Franfinance or Klarna).', 'woo-payzen-payment')
+            ),
+            'common_category' => array(
+                'custom_attributes' => array(
+                    'onchange' => 'payzenUpdateCategoryDisplay()'
+                ),
+                'title' => __('Category mapping', 'woo-payzen-payment'),
+                'type' => 'select',
+                'options' => $this->get_gateway_categories(false),
+                'description' => __('Use the same category for all products.', 'woo-payzen-payment'),
+                'default' => '',
+                'class' => 'wc-enhanced-select'
+            ),
+        );
+
+        $columns['label'] = array(
+            'title' => __('Product category', 'woo-payzen-payment'),
+            'width' => '154px'
+        );
+
+        $columns['category'] = array(
+            'title' => sprintf(__('%s category', 'woo-payzen-payment'), self::BACKOFFICE_NAME),
+            'width' => '154px'
+        );
+
+        $this->form_fields['category_mapping'] = array(
+            'type' => 'category_mapping',
+            'columns' => $columns,
+            'description' => sprintf(__('Match each product category with a %s product category. <br /><b>Entries marked with * are newly added and must be configured.</b>', 'woo-payzen-payment'), self::BACKOFFICE_NAME)
         );
 
         if ($payzen_plugin_features['qualif']) {
@@ -542,6 +733,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             // HMAC-SHA-256 already available, update field description.
             $desc = preg_replace('#<br /><b>[^<>]+</b>#', '', $this->form_fields['sign_algo']['description']);
             $this->form_fields['sign_algo']['description'] = $desc;
+        }
+
+        if (! $docs) {
+            unset($this->form_fields['doc_link']);
         }
 
         // Save general form fields.
@@ -564,7 +759,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
     }
 
-    protected function get_general_option($key, $empty_value = null)
+    public function get_general_option($key, $empty_value = null)
     {
         if (empty($this->general_settings)) {
             $this->init_general_settings();
@@ -580,6 +775,68 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         return $this->general_settings[$key];
+    }
+
+    public function generate_support_component_html($key, $data)
+    {
+        $user_info = get_userdata(1);
+        $send_email_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Send_Email', home_url('/'));
+
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc">
+                <contact-support
+                    shop-id="<?php echo $this->get_general_option('site_id'); ?>"
+                    context-mode="<?php echo $this->get_general_option('ctx_mode'); ?>"
+                    sign-algo="<?php echo $this->get_general_option('sign_algo'); ?>"
+                    contrib="<?php echo PayzenTools::get_contrib(); ?>"
+                    integration-mode="<?php echo PayzenTools::get_integration_mode(); ?>"
+                    plugins="<?php echo PayzenTools::get_active_plugins(); ?>"
+                    title=""
+                    first-name="<?php echo $user_info->first_name; ?>"
+                    last-name="<?php echo $user_info->last_name; ?>"
+                    from-email="<?php echo get_option('admin_email'); ?>"
+                    to-email="<?php echo self::SUPPORT_EMAIL; ?>"
+                    cc-emails=""
+                    phone-number=""
+                    language="<?php echo PayzenTools::get_support_component_language(); ?>"></contact-support>
+            </th>
+        </tr>
+
+        <?php
+        // Load css and add spinner.
+        wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), self::PLUGIN_VERSION);
+        wp_enqueue_style('payzen');
+        ?>
+
+        <script type="text/javascript">
+            jQuery(document).ready(function() {
+                jQuery('contact-support').on('sendmail', function(e) {
+                    jQuery('body').block({
+                        message: null,
+                        overlayCSS: {
+                            background: '#fff',
+                            opacity: 0.5
+                        }
+                    });
+
+                    jQuery('div.blockUI.blockOverlay').css('cursor', 'default');
+
+                    jQuery.ajax({
+                        method: 'POST',
+                        url: '<?php echo $send_email_url; ?>',
+                        data: e.originalEvent.detail,
+                        success: function(data) {
+                            location.reload();
+                        }
+                    });
+                });
+            });
+        </script>
+        <?php
+
+        return ob_get_clean();
     }
 
     public function generate_label_html($key, $data)
@@ -632,6 +889,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 $data['default'][$lang] = $data['default']['en_US'];
             }
         }
+
         $field = $this->plugin_id . $this->id . '_' . $key;
         $value = (array) stripslashes_deep($this->get_option($key));
 
@@ -746,6 +1004,14 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         $options = $this->get_option($key);
+        if ($key === 'extra_payment_means' && ! empty($options)) {
+            foreach ($options as $key_card => $option_card) {
+                $cards = PayzenApi::getSupportedCardTypes();
+                if (isset($cards[$option_card['code']])) {
+                    unset($options[$key_card]);
+                }
+            }
+        }
 
         $field_name = esc_attr($this->plugin_id . $this->id . '_' . $key);
 
@@ -792,6 +1058,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 $html .= "\n" . 'payzenAddOption("' . $field_name . '", ' . json_encode($option) . ', "' . $code . '");';
             }
         }
+
         $html .= "\n" . '</script>';
 
         if ($description) {
@@ -824,9 +1091,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             }
 
             return $new_value;
-        } else {
-            return $old_value;
         }
+
+        return $old_value;
     }
 
     /**
@@ -841,9 +1108,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         if (isset($new_value) && is_array($new_value) && in_array('', $new_value)) {
             return array('');
-        } else {
-            return parent::validate_multiselect_field($key, $value);
         }
+
+        return parent::validate_multiselect_field($key, $value);
     }
 
     public function validate_ctx_mode_field($key, $value = null)
@@ -877,6 +1144,135 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return $new_value;
     }
 
+    public function generate_category_mapping_html($key, $data)
+    {
+        global $woocommerce;
+
+        $html = '';
+
+        $data['title'] = isset($data['title']) ? $data['title'] : '';
+        $data['disabled'] = empty($data['disabled']) ? false : true;
+        $data['class'] = isset($data['class']) ? $data['class'] : '';
+        $data['css'] = isset($data['css']) ? $data['css'] : '';
+        $data['placeholder'] = isset($data['placeholder']) ? $data['placeholder'] : '';
+        $data['type'] = isset($data['type']) ? $data['type'] : 'text';
+        $data['desc_tip'] = isset($data['desc_tip']) ? $data['desc_tip'] : false;
+        $data['description'] = isset($data['description']) ? $data['description'] : '';
+        $data['columns'] = isset($data['columns']) ? (array) $data['columns'] : array();
+        $data['default'] = isset($data['default']) ? (array) $data['default'] : array();
+
+        // Description handling.
+        if ($data['desc_tip'] === true) {
+            $description = '';
+            $tip = $data['description'];
+        } elseif (! empty($data['desc_tip'])) {
+            $description = $data['description'];
+            $tip = $data['desc_tip'];
+        } elseif (! empty($data['description'])) {
+            $description = $data['description'];
+            $tip = '';
+        } else {
+            $description = $tip = '';
+        }
+
+        $field_name = esc_attr($this->plugin_id . $this->id . '_' . $key);
+
+        $html .= '<tr valign="top">' . "\n";
+        $html .= '<th scope="row" class="titledesc">';
+        $html .= '<label for="' . esc_attr($this->plugin_id . $this->id . '_' . $key) . '">' . wp_kses_post($data['title']) . '</label>';
+
+        if ($tip) {
+            $html .= '<img class="help_tip" data-tip="' . esc_attr($tip) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+        }
+
+        $html .= '</th>' . "\n";
+        $html .= '<td class="forminp">' . "\n";
+        $html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post($data['title']) . '</span></legend>' . "\n";
+
+        $html .= '<table id="' . $field_name . '_table" class="'. esc_attr($data['class']) . '" cellpadding="10" cellspacing="0" >';
+
+        $html .= '<thead><tr>';
+        foreach ($data['columns'] as $code => $column) {
+            $html .= '<th class="' . $code . '" style="width: ' . $column['width'] . '; padding: 0px;">' . $column['title'] . '</th>';
+        }
+
+        $html .= '<th style="width: auto; padding: 0px;"></th>';
+        $html .= '</tr></thead>';
+
+        $html .= '<tbody>';
+
+        $cat_args = array(
+            'orderby'    => 'id',
+            'order'      => 'asc',
+            'hide_empty' => false,
+        );
+
+        $categories = get_terms('product_cat', $cat_args);
+        $options = $this->get_option($key);
+
+        if (! is_array($options) || empty($options)) {
+            $options = array();
+        }
+
+        foreach ($categories as $category) {
+            if ($category->parent == 0) {
+                $code = $category->term_id;
+
+                if (! isset($options[$code]) || ! is_array($options[$code])) {
+                    $options[$code]['category'] = 'FOOD_AND_GROCERY';
+                    $options[$code]['new'] = true;
+                } else {
+                    $options[$code]['new'] = false;
+                }
+
+                $options[$code]['label'] = $category->name;
+            }
+        }
+
+        foreach ($options as $code => $option) {
+            $html .= '<tr>';
+            $html .= '<td style="padding: 5px;"><label style="display: inline;">';
+            $html .= $option['label'] . ($option['new'] == true ? '<span style="color: red;">*</span> ' : '');
+            $html .= '</label></td>';
+
+            $html .= '<td style="padding: 5px;"><select name="' . $field_name . '[' . $code . '][category]"
+                      value="' . (isset($option['category']) ? $option['category'] : '') .'">';
+            foreach ($this->get_gateway_categories() as $key => $value) {
+                $selected = ($key === $option['category']) ? 'selected="selected"' : '';
+                $html .= '<option value="' . $key . '" ' . $selected . '>' . $value . '</option>';
+            }
+
+            $html .= '</select></td>';
+
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody></table>';
+
+        if ($description) {
+            $html .= ' <p class="description">' . wp_kses_post($description) . '</p>' . "\n";
+        }
+
+        $html .= '</fieldset>';
+        $html .= '</td>' . "\n";
+        $html .= '</tr>' . "\n";
+
+        return $html;
+    }
+
+    public function validate_category_mapping_field($key, $value = null)
+    {
+        $name = $this->plugin_id . $this->id . '_' . $key;
+        $value = $value ? $value : (key_exists($name, $_POST) ? $_POST[$name] : array());
+
+        foreach ($value as $code => $option) {
+            // Clean string.
+            $fnc = function_exists('wc_clean') ? 'wc_clean' : 'woocommerce_clean';
+            $value[$code] = array_map('esc_attr', array_map($fnc, (array) $option));
+        }
+
+        return $value;
+    }
     /**
      * Check if this gateway is available for the current currency.
      */
@@ -953,9 +1349,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         // Cart URL.
         $cart_url = function_exists('wc_get_cart_url') ? wc_get_cart_url() : $woocommerce->cart->get_cart_url();
 
-        // Parse order_info parameter.
-        $parts = explode('&', $payzen_response->get('order_info'));
-        $key = substr($parts[0], strlen('order_key='));
+        // Get ext_info parameter.
+        $key = $payzen_response->getExtInfo('order_key');
 
         $order = new WC_Order((int) $order_id);
         if (! $this->get_order_property($order, 'id') || ($this->get_order_property($order, 'order_key') !== $key)) {
@@ -1090,7 +1485,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 // IPN URL called for each recurrence creation on gateway.
                 $this->log("New recurrence created for order #$order_id. Let subscriptions handler do the work.");
 
-                $subscriptions_handler->update_subscription($order, $payzen_response);
+                $subscriptions_handler->process_subscription_renewal($order, $payzen_response);
 
                 if (self::is_successful_action($payzen_response)) {
                     $this->log("Payment recurrence processed successfully by IPN URL call for order #$order_id.");
@@ -1277,7 +1672,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
      * Get all notes of a specified order.
      * @return array[string]
      */
-    private static function get_order_notes($order_id)
+    public static function get_order_notes($order_id)
     {
         $exclude_fnc = class_exists('WC_Comments') ? array('WC_Comments', 'exclude_order_comments') :
             'woocommerce_exclude_order_comments';
@@ -1296,26 +1691,26 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return $notes;
     }
 
-    protected function get_order_property($order, $property_name)
+    public function get_order_property($order, $property_name)
     {
         $method = 'get_' . $property_name;
 
         if (method_exists($order, $method)) {
             return $order->$method();
-        } else {
-            return isset($order->$property_name) ? $order->$property_name : null;
         }
+
+        return isset($order->$property_name) ? $order->$property_name : null;
     }
 
-    protected function get_customer_property($customer, $property_name)
+    public function get_customer_property($customer, $property_name)
     {
         $method = 'get_' . $property_name;
 
         if (method_exists($customer, $method)) {
             return $customer->$method();
-        } else {
-            return isset($customer->$property_name) ? $customer->$property_name : null;
         }
+
+        return isset($customer->$property_name) ? $customer->$property_name : null;
     }
 
     protected function payzen_redirect($url, $iframe = false)
@@ -1439,7 +1834,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
     }
 
-    private static function get_success_order_statuses($default = false) {
+    private static function get_success_order_statuses($default = false)
+    {
         $statuses = array();
 
         if (function_exists('wc_get_order_statuses')) { // From WooCommerce 2.2.0.
@@ -1469,7 +1865,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return $statuses;
     }
 
-    private static function is_successful_action($payzen_response)
+    public static function is_successful_action($payzen_response)
     {
         if ($payzen_response->isAcceptedPayment()) {
             return true;
@@ -1504,7 +1900,12 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         )) {
             $this->log("Identifier for customer #{$cust_id} successfully created or updated on payment gateway. Let's save it and save masked card and expiry date.");
 
-            update_user_meta((int) $cust_id, $this->get_order_property($order, 'payment_method') . '_identifier', $payzen_response->get('identifier'));
+            $identifier_info = array(
+                'identifier' => $payzen_response->get('identifier'),
+                'active' => true
+            );
+
+            update_user_meta((int) $cust_id, $this->get_order_property($order, 'payment_method') . '_identifier', json_encode($identifier_info));
 
             // Mask all card digits unless the last 4 ones.
             $number = $payzen_response->get('card_number');
@@ -1518,7 +1919,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 $iban = $matches[1];
                 $masked .= substr($iban, 0, 4) . str_repeat('X', strlen($iban) - 8) . substr($iban, - 4);
             } elseif (strlen($number) > 4) {
-                $masked = str_repeat('X', strlen($number) - 4) . substr($number, - 4);
+                $masked = $payzen_response->get('card_brand') . '|' .  str_repeat('X', strlen($number) - 4) . substr($number, - 4);
 
                 if ($payzen_response->get('expiry_month') && $payzen_response->get('expiry_year')) {
                     // Format card expiration data.
@@ -1546,14 +1947,14 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $currency_code = $payzen_response->get('sub_currency');
 
             delete_post_meta($order_id, 'Subscription ID');
-            delete_post_meta($order_id, 'Amount');
+            delete_post_meta($order_id, 'Subscription amount');
             delete_post_meta($order_id, 'Effect date');
             delete_post_meta($order_id, 'Initial amount');
             delete_post_meta($order_id, 'Initial amount count');
 
             // Store subscription details.
             update_post_meta($order_id, 'Subscription ID', $payzen_response->get('subscription'));
-            update_post_meta($order_id, 'Amount', self::display_amount($payzen_response->get('amount'), $currency_code));
+            update_post_meta($order_id, 'Subscription amount', self::display_amount($payzen_response->get('sub_amount'), $currency_code));
             update_post_meta($order_id, 'Effect date', preg_replace('#^(\d{4})(\d{2})(\d{2})$#', '\1-\2-\3', $payzen_response->get('sub_effect_date')));
 
             if ($payzen_response->get('sub_init_amount')) {
@@ -1583,7 +1984,170 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         $settings = get_option('woocommerce_payzensubscription_settings', null);
 
-        $handler = is_array($settings) && isset($settings['subscriptions']) ? $settings['subscriptions'] : WC_Gateway_PayzenSubscription::SUBSCRIPTIONS_HANDLER;
+        $handler = is_array($settings) && isset($settings['subscriptions']) ? $settings['subscriptions'] : null;
         return Payzen_Subscriptions_Loader::getInstance($handler);
+    }
+
+    public function payzen_delete_saved_card()
+    {
+        global $woocommerce;
+
+        // Check if user is connected and user can delete only his own payment means.
+        if (is_user_logged_in() && isset($_POST['id']) && ! empty($_POST['id'])) {
+            $id = $_POST['id'];
+            $cust_id = $this->get_customer_property($woocommerce->customer, 'id');
+
+            if (! $saved_identifier = $this->get_cust_identifier($cust_id, $id)) {
+                $this->log("Error: Customer {$woocommerce->customer->get_billing_email()} doesn't have a saved identifier for \"{$id}\" submodule");
+                return false;
+            }
+
+            try {
+                $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
+                if ($key) {
+                    $request_data = array(
+                        'paymentMethodToken' => $saved_identifier
+                    );
+
+                    $client = new PayzenRest(
+                        self::REST_URL,
+                        $this->get_general_option('site_id'),
+                        $key
+                    );
+
+                    $result = $client->post('V4/Token/Cancel', json_encode($request_data));
+                    PayzenRestTools::checkResult($result);
+
+                    // Payment identifier cancelled successfully.
+                    $this->log("Payment identifier cancelled successfully on payment gateway by user: {$woocommerce->customer->get_billing_email()}, for " . $id . " submodule.");
+                } else {
+                    // Client has not configured private key in module backend.
+                    $this->log("Identifier for customer {$woocommerce->customer->get_billing_email()}, for " . $id . " submodule, cannot be deleted on gateway: private key is not configured. Let's just delete it from WooCommerce.");
+                }
+
+                // Delete identifier from WooCommerce.
+                $this->delete_identifier_attributes($cust_id, $id);
+                return true;
+            } catch (Exception $e) {
+                $invalid_ident_codes = array('PSP_030', 'PSP_031', 'SP_561', 'PSP_607');
+
+                if (in_array($e->getCode(), $invalid_ident_codes)) {
+                    // The identifier is invalid or doesn't exist.
+                    $this->log("Identifier for customer {$woocommerce->customer->get_billing_email()}, for " . $id . " submodule, is invalid or doesn't exist. Let's delete it from WooCommerce");
+
+                    // Delete identifier from WooCommerce.
+                    $this->delete_identifier_attributes($cust_id, $id);
+                    return true;
+                } else {
+                    $this->log("Identifier for customer {$woocommerce->customer->get_billing_email()}, for " . $id . " submodule, couldn't be deleted on gateway. Error occurred: {$e->getMessage()}");
+                    $this->add_notice(__('The stored means of payment could not be deleted.', 'woo-payzen-payment'), 'error');
+                    return false;
+                }
+            }
+        }
+    }
+
+    private function delete_identifier_attributes($cust_id, $id)
+    {
+        global $woocommerce;
+
+        // Delete local saved means of payment and saved identifier.
+        delete_user_meta((int) $cust_id, $id . '_identifier');
+        delete_user_meta((int) $cust_id, $id . '_masked_pan');
+
+        // Payment identifier cancelled successfully.
+        $this->log("Payment identifier and masked card and expiry date were deleted successfully by user: {$woocommerce->customer->get_billing_email()} for " . $id . " submodule.");
+        $this->add_notice(__('The stored means of payment was successfully deleted.', 'woo-payzen-payment'));
+    }
+
+    protected function get_cust_identifier($cust_id, $id = null)
+    {
+        $id = $id ? $id : $this->id;
+        $saved_identifier = get_user_meta((int) $cust_id, $id . '_identifier', true);
+        $saved_identifier_decode = json_decode($saved_identifier, true);
+        if (json_last_error() == JSON_ERROR_NONE) {
+            return $saved_identifier_decode['identifier'];
+        }
+
+        return $saved_identifier;
+    }
+
+    protected function is_cust_identifier_active($cust_id, $id = null)
+    {
+        $id = $id ? $id : $this->id;
+        $saved_identifier = get_user_meta((int) $cust_id, $id . '_identifier', true);
+        $saved_identifier_decode = json_decode($saved_identifier, true);
+        if (json_last_error() == JSON_ERROR_NONE) {
+            return $saved_identifier_decode['active'];
+        }
+
+        return true;
+    }
+
+    protected function update_custidentifier($cust_id, $identifier, $active, $id = null)
+    {
+        $id = $id ? $id : $this->id;
+        $identifier_info = array(
+            'identifier' => $identifier,
+            'active' => $active
+        );
+
+        update_user_meta((int) $cust_id, $id . '_identifier', json_encode($identifier_info));
+    }
+
+    protected function check_identifier($cust_id, $id)
+    {
+        global $woocommerce;
+
+        $identifier = $this->get_cust_identifier($cust_id);
+
+        if (! $identifier) {
+            // Customer has no saved identifier.
+            return false;
+        }
+
+        try {
+            $request_data = array(
+                'paymentMethodToken' => $identifier
+            );
+
+            // Perform REST request to check identifier.
+            $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
+            $client = new PayzenRest(
+                self::REST_URL,
+                $this->get_general_option('site_id'),
+                $key
+            );
+
+            $result = $client->post('V4/Token/Get', json_encode($request_data));
+            PayzenRestTools::checkResult($result);
+
+            $cancellation_date = PayzenRestTools::getProperty($result['answer'], 'cancellationDate');
+            if ($cancellation_date && (strtotime($cancellation_date) <= time())) {
+                $this->log("Identifier for customer {$woocommerce->customer->get_billing_email()}, for {$id} submodule, is expired on payment gateway in date of: {$cancellation_date}.");
+
+                // Update Customer identifier validity.
+                $this->update_custidentifier($cust_id, $identifier, false, $id);
+                return false;
+            }
+
+            // Update Customer identifier validity.
+            $this->update_custidentifier($cust_id, $identifier, true, $id);
+            return true;
+        } catch (Exception $e) {
+            $invalid_ident_codes = array('PSP_030', 'PSP_031', 'PSP_561', 'PSP_607');
+
+            if (in_array($e->getCode(), $invalid_ident_codes, true)) {
+                // The identifier is invalid or doesn't exist.
+                $this->log("Identifier for customer {$woocommerce->customer->get_billing_email()}, for {$id} submodule, is invalid or doesn't exist: {$e->getMessage()}.");
+
+                // Update Customer identifier validity.
+                $this->update_custidentifier($cust_id, $identifier, false, $id);
+                return false;
+            }
+
+            $this->log("Identifier for customer {$woocommerce->customer->get_billing_email()}, for " . $id . " submodule, couldn't be verified on gateway: {$e->getMessage()}.");
+            return true;
+        }
     }
 }

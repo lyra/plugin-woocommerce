@@ -157,6 +157,27 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
             'columns' => $columns,
             'description' => $descr
         );
+
+        $culumns = array();
+        $descr = $descr = sprintf(__('Click on « Add » button to add one or more new payment means.<br /><b>Code: </b>The code of the means of payment as expected by %s gateway.<br /><b>Label: </b>The default label of the means of payment.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>',
+            'woo-payzen-payment'), 'PayZen');
+
+        $culumns['code'] = array(
+            'title' => __('Code', 'woo-payzen-payment'),
+            'width' => '150px'
+        );
+
+        $culumns['title'] = array(
+            'title' => __('Label', 'woo-payzen-payment'),
+            'width' => '300px'
+        );
+
+        $this->form_fields['extra_payment_means'] = array(
+            'title' => __('Add payment means', 'woo-payzen-payment'),
+            'type' => 'table',
+            'columns' => $culumns,
+            'description' => $descr
+        );
     }
 
     protected function get_rest_fields()
@@ -177,6 +198,16 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
     public function payzen_admin_head_script()
     {
         parent::payzen_admin_head_script();
+        $cards = $this->get_supported_card_types();
+        $extra_cards = $this->get_option('extra_payment_means');
+        if (! empty($extra_cards)) {
+            foreach ($extra_cards as $option) {
+                if (! isset($cards[$option['code']])) {
+                    $cards[$option['code']] = $option['code'] . ' - ' . $option['title'];
+                }
+            }
+        }
+
         ?>
         <script type="text/javascript">
         //<!--
@@ -194,16 +225,23 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                 var optionLine = '<tr id="' + fieldName + '_line_' + key + '">';
 
                 // Reorder record elements.
-                var orderedRecord = {
-                    'label': record.label,
-                    'payment_mean': record.payment_mean,
-                    'amount_min': record.amount_min,
-                    'amount_max': record.amount_max,
-                    'countries': record.countries,
-                    'validation_mode': record.validation_mode,
-                    'capture_delay': record.capture_delay ,
-                    'send_cart_data': record.send_cart_data
-                };
+                if (fieldName === '<?php echo esc_attr($this->plugin_id . $this->id . '_extra_payment_means')?>') {
+                    var orderedRecord = {
+                        'code': record.code,
+                        'title': record.title
+                    };
+                } else {
+                    var orderedRecord = {
+                        'label': record.label,
+                        'payment_mean': record.payment_mean,
+                        'amount_min': record.amount_min,
+                        'amount_max': record.amount_max,
+                        'countries': record.countries,
+                        'validation_mode': record.validation_mode,
+                        'capture_delay': record.capture_delay ,
+                        'send_cart_data': record.send_cart_data
+                    };
+                }
 
                 jQuery.each(orderedRecord, function(attr, value) {
                     var width = jQuery('#' + fieldName + '_table thead tr th.' + attr).width() - 8;
@@ -306,7 +344,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                 for (var i = 0, len = select.options.length; i < len; i++) {
                     option = select.options[i];
 
-                    if ( option.selected ) {
+                    if (option.selected) {
                         labelText += option.text + '; ';
                     }
                 }
@@ -318,7 +356,6 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
 
                 return labelText;
             }
-
         //-->
         </script>
 <?php
@@ -343,6 +380,16 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                     $used_cards[] = $option['payment_mean'];
                     if (! $option['label']) {
                         $cards = PayzenApi::getSupportedCardTypes();
+                        // Add extra means of payment to supported payment means.
+                        $extra_cards = $this->get_option('extra_payment_means');
+                        if (! empty($extra_cards)){
+                            foreach ($extra_cards as $option_card) {
+                                if (! isset($cards[$option_card['code']])) {
+                                    $cards[$option_card['code']] = $option_card['title'];
+                                }
+                            }
+                        }
+
                         $value[$code]['label'] = sprintf(__('Payment with %s', 'woo-payzen-payment'), $cards[$option['payment_mean']]);
                     }
 
@@ -363,6 +410,42 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
             }
 
         }
+
+        return $value;
+    }
+
+    public function validate_extra_payment_means_field($key, $value = null)
+    {
+        $name = $this->plugin_id . $this->id . '_' . $key;
+        $value = $value ? $value : (key_exists($name, $_POST) ? $_POST[$name] : array());
+        $used_cards = array_keys(PayzenApi::getSupportedCardTypes());
+
+        foreach ($value as $id => $option) {
+            $code = trim($option['code']);
+            $title = $option['title'];
+            if (empty($code)
+                || ! preg_match('#^[A-Za-z0-9\-_]+$#', $code)
+                || empty($title)
+                || ! preg_match('#^[^<>]*$#', $title)
+                || in_array($code, $used_cards)) {
+                    // Invalid format of code or title, delete this means of payment.
+                    unset($value[$id]);
+                } else {
+                    $used_cards[] = $code;
+                    // Update payment means code (to apply trim).
+                    $value[$id]['code'] = $code;
+                }
+        }
+
+        // Update payment_means (options containing deleted payment means should not appear).
+        $other_payment_means = $this->get_option('payment_means');
+        foreach ($other_payment_means as $key_payment_mean => $option_payment_mean) {
+            if (! in_array($option_payment_mean['payment_mean'], $used_cards)) {
+                unset($other_payment_means[$key_payment_mean]);
+            }
+        }
+
+        $this->update_option('payment_means', $other_payment_means);
 
         return $value;
     }

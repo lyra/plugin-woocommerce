@@ -1,3 +1,19 @@
+= 1.9.0, 2021-04-21=
+* [subscr] Manage subscriptions with WooCommerce Subscriptions (including subscription update and cancellation).
+* [franfinance] Added new Franfinance submodule.
+* Possibility to open support issue from the plugin configuration panel or an order details page.
+* Reorganize plugin settings (REST API keys section moved to general configuration).
+* Possibility to configure REST API URLs.
+* Possibility to add payment means dynamically in "Other payment means" section.
+* [embedded] Add pop-in choice to card data entry mode field.
+* [embedded] Possibility to customize "Register my card" checkbox label.
+* Possibility to configure description for popin and iframe modes.
+* [alias] Display the brand of the registered means of payment in payment by alias.
+* [alias] Added possibility to delete registered payment means.
+* [alias] Check alias validity before proceeding to payment.
+* Do not use vads\_order\_info* gateway parameter (use vads\_ext\_info* instead).
+* Update 3DS management option description.
+
 = 1.8.10, 2021-03-05 =
 * Save 3DS authentication status and certificate as an order note.
 * Use online payment means logos.
@@ -8,7 +24,7 @@
 * Display warning message on payment in iframe mode enabling.
 
 = 1.8.8, 2020-12-16 =
-* Bug fix: Error 500 due to obsolete function (get_magic_quotes_gpc) in PHP 7.4.
+* Bug fix: Error 500 due to obsolete function (get\_magic\_quotes\_gpc) in PHP 7.4.
 
 = 1.8.7, 2020-10-30 =
 * [embedded] Bug fix: Force redirection when there is an error in payment form token creation.
@@ -81,14 +97,14 @@
 
 = 1.6.0, 2018-05-23 =
 * Enable signature algorithm selection (SHA-1 or HMAC-SHA-256).
-* Improve backend configuration screen.
+* Improve plugin configuration screen.
 
 = 1.5.0, 2018-03-26 =
 * Bug fix: error relative to missing shipping phone number.
 * [klarna] New Klarna submodule.
-* Improve dropdown lists in module backend (only in WooCommerce 3.x).
+* Improve dropdown lists in plugin configuration panel (only in WooCommerce 3.x).
 * Added payment in pop-in using iframe mode.
-* Display card brand user choice if any in backend order details.
+* Display card brand user choice if any in WooCommerce Back Office order details.
 * Improve compatibility of plugin with WooCommerce 2.x and 3.x versions.
 * Improve management of fatal errors as wrong signature, order not found and inconsistent statuses.
 * Manage pending payments by putting orders in "On hold" status.
@@ -120,7 +136,7 @@
 * Ability to configure order status on payment success.
 * Replace deprecated code.
 * Remove control over certificate format modified on the gateway.
-* Correction of an error to make module compatible with WooCommerce 2.6.
+* Correction of an error to make plugin compatible with WooCommerce 2.6.
 * Save payment result sent from payment gateway and send it to customer by mail.
 
 = 1.2.4, 2016-06-01 =
@@ -135,7 +151,7 @@
 * Replace deprecated code (that gets redirection to gateway URL) to avoid notices in log file.
 
 = 1.2.1, 2015-05-19 =
-* Not use jquery in frontend to avoid redirection problems in some sites.
+* Not use jQuery in frontend to avoid redirection problems in some sites.
 * Trim spaces from data before sending form to payment gateway.
 
 = 1.2, 2015-02-19 =
@@ -150,11 +166,11 @@
 
 = 1.1, 2013-10-21 =
 * Add the parameter minimum amount to enable selective 3DS.
-* Reorganization of the configuration screen in module backend.
+* Reorganization of the configuration screen in WooCommerce Back Office.
 * [multi] Compatibility with the PayZen multi payment plugin.
 
 = 1.0a, 2013-05-15 =
-* Use hooks to avoid the modification of WooCommerce files on the plugin (re)install.
+* Use hooks to avoid the modification of WooCommerce files on plugin (re)install.
 
 = 1.0, 2013-03-18 =
-* Module creation.
+* Plugin creation.
