@@ -371,10 +371,10 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
 
         // ... and into DB.
         $order = new WC_Order($order_id);
-        update_post_meta($this->get_order_property($order, 'id'), '_payment_method_title', $this->get_order_property($order, 'payment_method_title') . " ({$label})");
+        update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$label})");
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
-            $pay_url = add_query_arg('order', $this->get_order_property($order, 'id'), add_query_arg('key', $this->get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
+            $pay_url = add_query_arg('order', self::get_order_property($order, 'id'), add_query_arg('key', self::get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
         } else {
             $pay_url = $order->get_checkout_payment_url(true);
         }
@@ -392,7 +392,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
     {
         parent::payzen_fill_request($order);
 
-        $option = get_transient('payzenchoozeo_option_' . $this->get_order_property($order, 'id'));
+        $option = get_transient('payzenchoozeo_option_' . self::get_order_property($order, 'id'));
         $this->payzen_request->set('payment_cards', $option);
 
         // By default WooCommerce does not manage customer type.
@@ -404,6 +404,6 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         // Send FR even address is in DOM-TOM unless form is rejected.
         $this->payzen_request->set('cust_country', 'FR');
 
-        delete_transient('payzenchoozeo_option_' . $this->get_order_property($order, 'id'));
+        delete_transient('payzenchoozeo_option_' . self::get_order_property($order, 'id'));
     }
 }

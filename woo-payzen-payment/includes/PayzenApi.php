@@ -329,5 +329,55 @@ if (! class_exists('PayzenApi', false)) {
                     throw new \InvalidArgumentException("Unsupported algorithm passed : {$algo}.");
             }
         }
+
+        /**
+         * Get current PHP version without build info.
+         * @return string
+         */
+        public static function shortPhpVersion()
+        {
+            $version = PHP_VERSION;
+
+            $match = array();
+            if (preg_match('#^\d+(\.\d+)*#', $version, $match) === 1) {
+                $version = $match[0];
+            }
+
+            return $version;
+        }
+
+        /**
+         * Format a given list of e-mails separated by commas and render them as HTML links.
+         * @param string $emails
+         * @return string
+         */
+        public static function formatSupportEmails($emails)
+        {
+            $formatted = '';
+
+            $parts = explode(', ', $emails);
+            foreach ($parts as $part) {
+                $elts = explode(':', $part);
+                if (count($elts) === 2) {
+                    $label = trim($elts[0]) . ': ';
+                    $email = $elts[1];
+                } elseif (count($elts) === 1) {
+                    $label = '';
+                    $email = $elts[0];
+                } else {
+                    throw new \InvalidArgumentException("Invalid support e-mails string passed: {$emails}.");
+                }
+
+                $email = trim($email);
+
+                if (! empty($formatted)) {
+                    $formatted .= '<br />';
+                }
+
+                $formatted .= $label . '<a href="mailto:' . $email . '">' . $email . '</a>';
+            }
+
+            return $formatted;
+        }
     }
 }

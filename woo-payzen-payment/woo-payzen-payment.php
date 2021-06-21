@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.9.0
+ * Version: 1.9.1-beta3
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
  * Tested up to: 5.7
  * WC requires at least: 2.0
- * WC tested up to: 5.2
+ * WC tested up to: 5.4
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -42,6 +42,7 @@ $payzen_plugin_features = array(
     'shatwo' => true,
     'embedded' => true,
     'subscr' => true,
+    'support' => true,
 
     'multi' => true,
     'choozeo' => false,
@@ -318,8 +319,7 @@ function payzen_my_account_endpoint_content()
 {
     global $woocommerce;
 
-    $WC_Gateway_Payzen = new WC_Gateway_Payzen();
-    $cust_id = $WC_Gateway_Payzen->get_customer_property($woocommerce->customer, 'id');
+    $cust_id = WC_Gateway_Payzen::get_customer_property($woocommerce->customer, 'id');
 
     $sub_module_saving_cards_ids = array('payzenstd', 'payzensubscription');
 
@@ -440,8 +440,10 @@ add_action('woocommerce_account_ly_saved_cards_endpoint', 'payzen_my_account_end
 
 function payzen_send_support_email_on_order($order)
 {
+    global $payzen_plugin_features;
+
     $std_payment_method = new WC_Gateway_PayzenStd();
-    if (substr($std_payment_method->get_order_property($order, 'payment_method'), 0, strlen('payzen')) === 'payzen') {
+    if (substr(WC_Gateway_PayzenStd::get_order_property($order, 'payment_method'), 0, strlen('payzen')) === 'payzen') {
         $user_info = get_userdata(1);
         $send_email_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Send_Email', home_url('/'));
 
@@ -451,6 +453,10 @@ function payzen_send_support_email_on_order($order)
 
             delete_transient('payzen_email_send_msg');
         }
+
+        $payzen_update_subscription_error_msg = get_transient('payzen_update_subscription_error_msg');
+
+        if ($payzen_plugin_features['support']) {
         ?>
         <script type="text/javascript" src="<?php echo WC_PAYZEN_PLUGIN_URL; ?>/assets/js/support.js"></script>
         <contact-support
@@ -470,22 +476,24 @@ function payzen_send_support_email_on_order($order)
             language="<?php echo PayzenTools::get_support_component_language(); ?>"
             is-order="true"
             transaction-uuid="<?php echo PayzenTools::get_transaction_uuid($order); ?>"
-            order-id="<?php echo $std_payment_method->get_order_property($order, 'id'); ?>"
-            order-number="<?php echo $std_payment_method->get_order_property($order, 'id'); ?>"
-            order-status=<?php echo $std_payment_method->get_order_property($order, 'status'); ?>
-            order-date="<?php echo $std_payment_method->get_order_property($order, 'date_created'); ?>"
-            order-amount="<?php echo $std_payment_method->get_order_property($order, 'total') . ' ' . $std_payment_method->get_order_property($order, 'currency'); ?>"
+            order-id="<?php echo WC_Gateway_PayzenStd::get_order_property($order, 'id'); ?>"
+            order-number="<?php echo WC_Gateway_PayzenStd::get_order_property($order, 'id'); ?>"
+            order-status=<?php echo WC_Gateway_PayzenStd::get_order_property($order, 'status'); ?>
+            order-date="<?php echo WC_Gateway_PayzenStd::get_order_property($order, 'date_created'); ?>"
+            order-amount="<?php echo WC_Gateway_PayzenStd::get_order_property($order, 'total') . ' ' . WC_Gateway_PayzenStd::get_order_property($order, 'currency'); ?>"
             cart-amount=""
-            shipping-fees="<?php echo $std_payment_method->get_order_property($order, 'shipping_total') . ' ' . $std_payment_method->get_order_property($order, 'currency'); ?>"
+            shipping-fees="<?php echo WC_Gateway_PayzenStd::get_order_property($order, 'shipping_total') . ' ' . WC_Gateway_PayzenStd::get_order_property($order, 'currency'); ?>"
             order-discounts="<?php echo PayzenTools::get_used_discounts($order); ?>"
-            order-carrier="<?php echo $std_payment_method->get_order_property($order, 'shipping_method'); ?>"></contact-support>
+            order-carrier="<?php echo WC_Gateway_PayzenStd::get_order_property($order, 'shipping_method'); ?>"></contact-support>
         <?php
-        // Load css and add spinner.
-        wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), '1.9.0');
-        wp_enqueue_style('payzen');
+            // Load css and add spinner.
+            wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(),  WC_Gateway_Payzen::PLUGIN_VERSION);
+            wp_enqueue_style('payzen');
+        }
         ?>
         <script type="text/javascript">
             jQuery(document).ready(function() {
+              <?php if ($payzen_plugin_features['support']) { ?>
                 jQuery('contact-support').on('sendmail', function(e) {
                     jQuery('body').block({
                         message: null,
@@ -506,6 +514,14 @@ function payzen_send_support_email_on_order($order)
                         }
                     });
                 });
+        <?php
+            }
+
+            if ($payzen_update_subscription_error_msg) {
+                delete_transient('payzen_update_subscription_error_msg');
+        ?>
+                jQuery('#lost-connection-notice').after('<div class="error notice is-dismissible"><p><?php echo addslashes($payzen_update_subscription_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__( 'Dismiss this notice.', 'woocommerce' )  ?></span></button></div>');
+        <?php } ?>
             });
         </script>
         <?php

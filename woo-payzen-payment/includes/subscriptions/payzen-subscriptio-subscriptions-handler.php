@@ -54,6 +54,22 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
 
     /**
      * {@inheritDoc}
+     * @see Payzen_Subscriptions_Handler_Interface::is_subscription_update()
+     */
+    public function is_subscription_update() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see Payzen_Subscriptions_Handler_Interface::get_parent_order()
+     */
+    public function get_parent_order($id) {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
      * @see Payzen_Subscriptions_Handler_Interface::subscription_info()
      */
     public function subscription_info($order)
@@ -184,5 +200,23 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
     public function update_subscription()
     {
         // Not implemented.
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see Payzen_Subscriptions_Handler_Interface::get_view_order_url()
+     */
+    public function get_view_order_url($subsc_id)
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see Payzen_Subscriptions_Handler_Interface::get_subscription_statuses()
+     */
+    public function get_subscription_statuses()
+    {
+        return array();
     }
 }

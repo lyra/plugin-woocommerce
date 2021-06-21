@@ -37,6 +37,21 @@ interface Payzen_Subscriptions_Handler_Interface
     public function cart_contains_multiple_subscriptions($cart);
 
     /**
+     * Return true if the request is a subscription update.
+     *
+     * @return bool
+     */
+    public function is_subscription_update();
+
+    /**
+     * Return WooCommerce parent order from suscription ID if any.
+     *
+     * @param $id
+     * @return WC_Order|false
+     */
+    public function get_parent_order($id);
+
+    /**
      * Return all information about subscription as an associative array containing:
      *   effect_date: The date on which subscription will start formatted as YYYYMMDD.
      *   init_amount: The amount of initial recurrences.
@@ -78,4 +93,19 @@ interface Payzen_Subscriptions_Handler_Interface
      * function to define the necessary hooks.
      */
     public function cancel_subscription();
+
+    /**
+     * Return the URL to the subscription details in the "My Account" page.
+     *
+     * @param $subsc_id
+     * @return string|false
+     */
+    public function get_view_order_url($subsc_id);
+
+    /**
+     * Return an array of subscription statuses.
+     *
+     * @return array
+     */
+    public function get_subscription_statuses();
 }

@@ -4,8 +4,8 @@ Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
 Tested up to: 5.7
 WC requires at least: 2.0
-WC tested up to: 5.2
-Stable tag: 1.9.0
+WC tested up to: 5.4
+Stable tag: 1.9.1-beta3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,18 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.9.1, 2021-06-21=
+* Bug fix: Do not create two transactions when trial is disabled for a subscription.
+* Bug fix: Fatal error when modifying payment for a subscription in My account > subscriptions.
+* Bug fix: Propose dynamically added payment means in "Other payment means" section.
+* Bug fix: Propose subscription payment method when client account creation during checkout is enabled.
+* Bug fix: Adjust rrule for dates at the end of the month when creating subscriptions.
+* Manage retrocompatibility with already validated orders (do not check order key) when processing subscriptions.
+* Manage subscription creation from gateway Back Office.
+* Improve error management on subscription actions (cancel and update).
+* Send the relevant part of the current PHP version in vads_contrib field.
+* Improve support e-mails display.
 
 = 1.9.0, 2021-04-21=
 * [subscr] Manage subscriptions with WooCommerce Subscriptions (including subscription update and cancellation).
