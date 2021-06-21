@@ -354,10 +354,10 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 
         // ... and into DB.
         $order = new WC_Order($order_id);
-        update_post_meta($this->get_order_property($order, 'id'), '_payment_method_title', $this->get_order_property($order, 'payment_method_title') . " ({$option['count']} x)");
+        update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$option['count']} x)");
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
-            $pay_url = add_query_arg('order', $this->get_order_property($order, 'id'), add_query_arg('key', $this->get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
+            $pay_url = add_query_arg('order', self::get_order_property($order, 'id'), add_query_arg('key', self::get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
         } else {
             $pay_url = $order->get_checkout_payment_url(true);
         }
@@ -375,7 +375,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
     {
         parent::payzen_fill_request($order);
 
-        $option = get_transient('payzenmulti_option_' . $this->get_order_property($order, 'id'));
+        $option = get_transient('payzenmulti_option_' . self::get_order_property($order, 'id'));
 
         // Multiple payment options.
         $amount = $this->payzen_request->get('amount');
@@ -383,6 +383,6 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $this->payzen_request->setMultiPayment($amount, $first, $option['count'], $option['period']);
         $this->payzen_request->set('contracts', (isset($option['contract']) && $option['contract']) ? 'CB='.$option['contract'] : null);
 
-        delete_transient('payzenmulti_option_' . $this->get_order_property($order, 'id'));
+        delete_transient('payzenmulti_option_' . self::get_order_property($order, 'id'));
     }
 }
