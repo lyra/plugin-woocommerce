@@ -356,10 +356,10 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
 
         // ... and into DB.
         $order = new WC_Order($order_id);
-        update_post_meta($this->get_order_property($order, 'id'), '_payment_method_title', $this->get_order_property($order, 'payment_method_title') . " ({$option['label']})");
+        update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$option['label']})");
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
-            $pay_url = add_query_arg('order', $this->get_order_property($order, 'id'), add_query_arg('key', $this->get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
+            $pay_url = add_query_arg('order', self::get_order_property($order, 'id'), add_query_arg('key', self::get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
         } else {
             $pay_url = $order->get_checkout_payment_url(true);
         }
@@ -382,7 +382,7 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
         $this->payzen_request->set('validation_mode', '0');
         $this->payzen_request->set('capture_delay', '0');
 
-        $option = get_transient('payzenfranfinance_option_' . $this->get_order_property($order, 'id'));
+        $option = get_transient('payzenfranfinance_option_' . self::get_order_property($order, 'id'));
         $this->payzen_request->set('payment_cards', 'FRANFINANCE_' . $option['count'] . 'X');
 
         if ($option['fees'] !== '-1') {
@@ -390,6 +390,6 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
             $this->payzen_request->set('acquirer_transient_data', '{"FRANFINANCE":{"FEES_' . $option['count'] . 'X":"' . $fees . '"}}');
         }
 
-        delete_transient('payzenfranfinance_option_' . $this->get_order_property($order, 'id'));
+        delete_transient('payzenfranfinance_option_' . self::get_order_property($order, 'id'));
     }
 }

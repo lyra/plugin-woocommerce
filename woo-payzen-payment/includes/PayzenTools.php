@@ -19,9 +19,8 @@ class PayzenTools
         include ABSPATH . WPINC . '/version.php'; // $wp_version.
         $version = $wp_version . '_' . $woocommerce->version;
 
-        $payzen_gateway = new WC_Gateway_Payzen();
-
-        return $payzen_gateway::CMS_IDENTIFIER . '_' . $payzen_gateway::PLUGIN_VERSION . '/' . $version . '/' . PHP_VERSION;
+        return WC_Gateway_Payzen::CMS_IDENTIFIER . '_' . WC_Gateway_Payzen::PLUGIN_VERSION . '/' . $version
+            . '/' . PayzenApi::shortPhpVersion();
     }
 
     public static function get_support_component_language()

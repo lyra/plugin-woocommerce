@@ -31,7 +31,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-5.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.9.0';
+    const PLUGIN_VERSION = '1.9.1-beta3';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -402,7 +402,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'contact' => array(
                 'title' => __('Contact us', 'woo-payzen-payment'),
                 'type' => 'text',
-                'description' => '<b><a href="mailto:' . self::SUPPORT_EMAIL . '">' . self::SUPPORT_EMAIL . '</a></b>',
+                'description' => '<b>' . PayzenApi::formatSupportEmails(self::SUPPORT_EMAIL) . '</b>',
                 'css' => 'display: none;'
             ),
             'contrib_version' => array(
@@ -737,6 +737,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         if (! $docs) {
             unset($this->form_fields['doc_link']);
+        }
+
+        if (! $payzen_plugin_features['support']) {
+            unset($this->form_fields['support_component']);
         }
 
         // Save general form fields.
@@ -1353,7 +1357,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $key = $payzen_response->getExtInfo('order_key');
 
         $order = new WC_Order((int) $order_id);
-        if (! $this->get_order_property($order, 'id') || ($this->get_order_property($order, 'order_key') !== $key)) {
+
+        // If gateway doesn't return vads_ext_info_order_key, skip ckecking order key.
+        if (! self::get_order_property($order, 'id') || ($key && (self::get_order_property($order, 'order_key') !== $key))) {
             $this->log("Error: order #$order_id not found or key does not match received invoice ID.");
 
             if ($from_server) {
@@ -1384,7 +1390,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         // Use the selected susbscriptions handler.
-        $method = $this->get_order_property($order, 'payment_method');
+        $method = self::get_order_property($order, 'payment_method');
         $subscriptions_handler = self::subscriptions_handler($method);
 
         if ($this->is_new_order($order, $payzen_response->get('trans_id'), $payzen_response->get('sequence_number'))) {
@@ -1399,12 +1405,14 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             delete_post_meta((int) $order_id, 'Means of payment');
             delete_post_meta((int) $order_id, 'Card expiry');
             delete_post_meta((int) $order_id, 'Sequence number');
+            delete_post_meta((int) $order_id, 'Total paid');
 
             // Store transaction details.
             update_post_meta((int) $order_id, 'Transaction ID', $payzen_response->get('trans_id'));
             update_post_meta((int) $order_id, 'Card number', $payzen_response->get('card_number'));
             update_post_meta((int) $order_id, 'Means of payment', $payzen_response->get('card_brand'));
             update_post_meta((int) $order_id, 'Sequence number', $payzen_response->get('sequence_number'));
+            update_post_meta((int) $order_id, 'Total paid', self::display_amount($payzen_response->get('amount'), $payzen_response->get('currency')));
 
             $expiry = '';
             if ($payzen_response->get('expiry_month') && $payzen_response->get('expiry_year')) {
@@ -1481,6 +1489,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         } else {
             $this->log("Order #$order_id is already saved.");
 
+            // Case of new recurrence on an active subscription with our method.
             if ($payzen_response->get('recurrence_number') && $subscriptions_handler) {
                 // IPN URL called for each recurrence creation on gateway.
                 $this->log("New recurrence created for order #$order_id. Let subscriptions handler do the work.");
@@ -1496,9 +1505,81 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 $this->log('IPN URL PROCESS END');
                 die();
+            } elseif (($payzen_response->get('identifier_status') === 'UPDATED')
+                /* Case of method change from WooCommerce or subscription creation on gateway Back Office. */
+                || ((($payzen_response->get('recurrence_status') === 'CREATED') || ($payzen_response->get('recurrence_number') === '1'))
+                        && ($subscriptions_handler = self::subscriptions_handler('payzensubscription')))) {
+                // Means of payment updated on payment gateway.
+                $this->log("Updating subscription payment means on gateway for order #$order_id.");
+
+                // View subscription URL (in case of changing payment method of an existing subscription).
+                $subsc_redirect_url = false;
+                if ($subsc_id = $payzen_response->getExtInfo('subsc_id')) {
+                    $subsc_redirect_url = $subscriptions_handler->get_view_order_url($subsc_id);
+                }
+
+                if (self::is_successful_action($payzen_response)) {
+                    // Means of payment successfully updated on payment gateway.
+                    $this->log("Means of payment successfully updated for order #$order_id. Save new means of payment info.");
+
+                    // Workarround to manage subscription creation on gateway Back Office.
+                    // Delete workarround when subscription IPN is fixed.
+                    $force_update = $payzen_response->get('recurrence_number') === '1';
+
+                    if ($force_update && ($method !== 'payzensubscription')) {
+                        // Update payment method in order.
+                        $payzen_subscription = new WC_Gateway_PayzenSubscription();
+                        if (method_exists($order, 'set_payment_method')) {
+                            $order->set_payment_method($payzen_subscription);
+                        } else {
+                            $order->payment_method = $payzen_subscription->id;
+                            $order->payment_method_title = $payzen_subscription->get_title();
+                        }
+
+                        $order->save();
+                    }
+
+                    // Try to save identifier if any.
+                    $this->payzen_save_identifier($order, $payzen_response, $force_update);
+
+                    // Try to save subscritption info if any.
+                    $this->payzen_save_recurrence($order, $payzen_response, $force_update);
+
+                    $subscriptions_handler->process_subscription($order, $payzen_response);
+
+                    // Try to save subscription recurrences.
+                    if ($force_update) {
+                        $subscriptions_handler->process_subscription_renewal($order, $payzen_response);
+                    }
+
+                    if ($from_server) {
+                        $this->log('IPN URL PROCESS END');
+                        die($payzen_response->getOutputForGateway('payment_ok_already_done'));
+                    } else {
+                        $this->add_notice(__('Payment method updated.', 'woocommerce-subscriptions'));
+
+                        $this->log('RETURN URL PROCESS END');
+                        $this->payzen_redirect($subsc_redirect_url ? $subsc_redirect_url : $this->get_return_url($order), $iframe);
+                    }
+                } else {
+                    if ($from_server) {
+                        $this->log('IPN URL PROCESS END');
+                        die($payzen_response->getOutputForGateway('payment_ok_already_done'));
+                    } else {
+                        $this->log('RETURN URL PROCESS END');
+
+                        if (! $payzen_response->isCancelledPayment()) {
+                            $this->add_notice(__('The payment method can not be changed for that subscription.', 'woocommerce-subscriptions'), 'error');
+
+                            $this->payzen_redirect($subsc_redirect_url ? $subsc_redirect_url : $cart_url, $iframe);
+                        } else {
+                            $this->payzen_redirect($subsc_redirect_url ? $subsc_redirect_url : $checkout_url, $iframe);
+                        }
+                    }
+                }
             }
 
-            if ($from_server && ($this->get_order_property($order, 'status') === 'on-hold')) {
+            if ($from_server && (self::get_order_property($order, 'status') === 'on-hold')) {
                 switch (true) {
                     case $payzen_response->isCancelledPayment():
                         $this->log("Order #$order_id is in a pending status and payment is cancelled. It may be a payment expiration. Do nothing.");
@@ -1527,11 +1608,11 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 $this->log('IPN URL PROCESS END');
                 die();
-            } elseif (self::is_successful_action($payzen_response) && key_exists($this->get_order_property($order, 'status'), self::get_success_order_statuses())) {
-                $status = $payzen_response->isPendingPayment() ? 'pending' : 'successfull';
+            } elseif (self::is_successful_action($payzen_response) && key_exists(self::get_order_property($order, 'status'), self::get_success_order_statuses(false, $subscriptions_handler))) {
+                $status = $payzen_response->isPendingPayment() ? 'pending' : 'successful';
                 $this->log("Payment $status confirmed for order #$order_id.");
 
-                // Order success registered and payment succes received.
+                // Order success registered and payment success received.
                 if ($from_server) {
                     $this->log('IPN URL PROCESS END');
                     die($payzen_response->getOutputForGateway('payment_ok_already_done'));
@@ -1539,7 +1620,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     $this->log('RETURN URL PROCESS END');
                     $this->payzen_redirect($this->get_return_url($order), $iframe);
                 }
-            } elseif (! self::is_successful_action($payzen_response) && ($this->get_order_property($order, 'status') === 'failed' || $this->get_order_property($order, 'status') === 'cancelled')) {
+            } elseif (! self::is_successful_action($payzen_response) && (self::get_order_property($order, 'status') === 'failed' || self::get_order_property($order, 'status') === 'cancelled')) {
                 $this->log("Payment failed confirmed for order #$order_id.");
 
                 // Order failure registered and payment error received.
@@ -1557,7 +1638,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     }
                 }
             } else {
-                $this->log("Error! Invalid payment result received for already saved order #$order_id. Payment result : {$payzen_response->getTransStatus()}, Order status : {$this->get_order_property($order, 'status')}.");
+                $this->log("Error! Invalid payment result received for already saved order #$order_id. Payment result : {$payzen_response->getTransStatus()}, Order status : {self::get_order_property($order, 'status')}.");
 
                 // Registered order status not match payment result.
                 if ($from_server) {
@@ -1579,7 +1660,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     {
         $order = new WC_Order((int)$order_id);
 
-        if ((strpos($this->get_order_property($order, 'payment_method'), 'payzen') === 0)
+        if ((strpos(self::get_order_property($order, 'payment_method'), 'payzen') === 0)
             && ($this->get_general_option('order_status_on_success') != 'default')) {
             return $this->get_general_option('order_status_on_success');
         }
@@ -1589,15 +1670,15 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     private function is_new_order($order, $trs_id, $seq_nb)
     {
-        if ($this->get_order_property($order, 'status') === 'pending') {
+        if (self::get_order_property($order, 'status') === 'pending') {
             return true;
         }
 
-        if ($this->get_order_property($order, 'status') === 'failed'
-            || $this->get_order_property($order, 'status') === 'cancelled') {
-            if (get_post_meta((int) $this->get_order_property($order, 'id'), 'Transaction ID', true) !== $trs_id) {
+        if (self::get_order_property($order, 'status') === 'failed'
+            || self::get_order_property($order, 'status') === 'cancelled') {
+            if (get_post_meta((int) self::get_order_property($order, 'id'), 'Transaction ID', true) !== $trs_id) {
                 return  true;
-            } elseif (get_post_meta((int) $this->get_order_property($order, 'id'), 'Sequence number', true) !== $seq_nb) {
+            } elseif (get_post_meta((int) self::get_order_property($order, 'id'), 'Sequence number', true) !== $seq_nb) {
                 return true;
             }
         }
@@ -1642,16 +1723,16 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     public function payzen_add_order_email_payment_result($order, $sent_to_admin, $plain_text = false)
     {
-        if (strpos($this->get_order_property($order, 'payment_method'), 'payzen') !== 0) {
+        if (strpos(self::get_order_property($order, 'payment_method'), 'payzen') !== 0) {
             return;
         }
 
-        $trans_id = get_post_meta((int) $this->get_order_property($order, 'id'), 'Transaction ID', true);
+        $trans_id = get_post_meta((int) self::get_order_property($order, 'id'), 'Transaction ID', true);
         if (! $trans_id) {
             return;
         }
 
-        $notes = self::get_order_notes($this->get_order_property($order, 'id'));
+        $notes = self::get_order_notes(self::get_order_property($order, 'id'));
         foreach ($notes as $note) {
             if (strpos($note, $trans_id) !== false) {
                 $payzen_order_note = $note;
@@ -1691,7 +1772,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return $notes;
     }
 
-    public function get_order_property($order, $property_name)
+    public static function get_order_property($order, $property_name)
     {
         $method = 'get_' . $property_name;
 
@@ -1702,7 +1783,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return isset($order->$property_name) ? $order->$property_name : null;
     }
 
-    public function get_customer_property($customer, $property_name)
+    public static function get_customer_property($customer, $property_name)
     {
         $method = 'get_' . $property_name;
 
@@ -1825,7 +1906,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             return;
         }
 
-        if (strpos($this->get_order_property($args['order'], 'payment_method'), 'payzen') === 0) {
+        if (strpos(self::get_order_property($args['order'], 'payment_method'), 'payzen') === 0) {
             if (function_exists('wc_print_notices')) {
                 wc_print_notices();
             } else {
@@ -1834,7 +1915,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
     }
 
-    private static function get_success_order_statuses($default = false)
+    private static function get_success_order_statuses($default = false, $subscriptions_handler = false)
     {
         $statuses = array();
 
@@ -1862,6 +1943,19 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $statuses = array('default' => __('Default', 'woo-payzen-payment')) + $statuses;
         }
 
+        // Add success subscriptions statuses.
+        $subscription_success_statuses = array('active');
+
+        if ($subscriptions_handler) {
+            foreach ($subscriptions_handler->get_subscription_statuses() as $key => $value) {
+                $status = substr($key, 3);
+
+                if (in_array($status, $subscription_success_statuses)) {
+                    $statuses[$status] = $value;
+                }
+            }
+        }
+
         return $statuses;
     }
 
@@ -1887,17 +1981,17 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return false;
     }
 
-    private function payzen_save_identifier($order, $payzen_response)
+    private function payzen_save_identifier($order, $payzen_response, $force_update = false)
     {
-        $cust_id = $this->get_order_property($order, 'user_id');
+        $cust_id = self::get_order_property($order, 'user_id');
         if (! $cust_id) {
             return;
         }
 
-        if ($payzen_response->get('identifier') && (
+        if ($payzen_response->get('identifier') && ($force_update || (
             $payzen_response->get('identifier_status') == 'CREATED' /* page_action is REGISTER_PAY or ASK_REGISTER_PAY */ ||
             $payzen_response->get('identifier_status') == 'UPDATED' /* page_action is REGISTER_UPDATE_PAY */
-        )) {
+        ))) {
             $this->log("Identifier for customer #{$cust_id} successfully created or updated on payment gateway. Let's save it and save masked card and expiry date.");
 
             $identifier_info = array(
@@ -1905,7 +1999,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'active' => true
             );
 
-            update_user_meta((int) $cust_id, $this->get_order_property($order, 'payment_method') . '_identifier', json_encode($identifier_info));
+            update_user_meta((int) $cust_id, self::get_order_property($order, 'payment_method') . '_identifier', json_encode($identifier_info));
 
             // Mask all card digits unless the last 4 ones.
             $number = $payzen_response->get('card_number');
@@ -1931,17 +2025,17 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 }
             }
 
-            update_user_meta((int) $cust_id, $this->get_order_property($order, 'payment_method') . '_masked_pan', $masked);
+            update_user_meta((int) $cust_id, self::get_order_property($order, 'payment_method') . '_masked_pan', $masked);
 
             $this->log("Identifier for customer #{$cust_id} and his masked PAN data are successfully saved.");
         }
     }
 
-    private function payzen_save_recurrence($order, $payzen_response)
+    private function payzen_save_recurrence($order, $payzen_response, $force_update = false)
     {
-        $order_id = (int) $this->get_order_property($order, 'id');
+        $order_id = (int) self::get_order_property($order, 'id');
 
-        if ($payzen_response->get('subscription') && ($payzen_response->get('recurrence_status') === 'CREATED')) {
+        if ($payzen_response->get('subscription') && ($force_update || $payzen_response->get('recurrence_status') === 'CREATED')) {
             $this->log("Subscription for order #{$order_id} successfully created on payment gateway. Let's save subscription information.");
 
             $currency_code = $payzen_response->get('sub_currency');
@@ -1995,7 +2089,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         // Check if user is connected and user can delete only his own payment means.
         if (is_user_logged_in() && isset($_POST['id']) && ! empty($_POST['id'])) {
             $id = $_POST['id'];
-            $cust_id = $this->get_customer_property($woocommerce->customer, 'id');
+            $cust_id = self::get_customer_property($woocommerce->customer, 'id');
 
             if (! $saved_identifier = $this->get_cust_identifier($cust_id, $id)) {
                 $this->log("Error: Customer {$woocommerce->customer->get_billing_email()} doesn't have a saved identifier for \"{$id}\" submodule");

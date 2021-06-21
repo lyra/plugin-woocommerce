@@ -686,7 +686,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 var customizationTable = jQuery('#<?php echo esc_attr($this->get_field_key('rest_customization')); ?>').next();
                 var cardDataMode = jQuery('#<?php echo esc_attr($this->get_field_key('card_data_mode')); ?> option:selected').val();
                 if (isPaymentByTokenEnabled) {
-                    if (! confirm('<?php echo sprintf(__('The "Payment by token" option should be enabled on your %s store to use this feature.\n\nAre you sure you want to enable this feature?', 'woo-payzen-payment'), self::GATEWAY_NAME) ?>')) {
+                    if (! confirm('<?php echo sprintf(addcslashes(__('The "Payment by token" option should be enabled on your %s store to use this feature.\n\nAre you sure you want to enable this feature?', 'woo-payzen-payment'), '\''), self::GATEWAY_NAME) ?>')) {
                         jQuery('#<?php echo esc_attr($this->get_field_key('payment_by_token')); ?>').val('0');
                         jQuery('#<?php echo esc_attr($this->get_field_key('payment_by_token')); ?>').trigger('change');
                         customizationTable.find('tr:nth-child(3)').hide();
@@ -799,7 +799,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
     {
         global $woocommerce;
 
-        $cust_id = $this->get_customer_property($woocommerce->customer, 'id');
+        $cust_id = self::get_customer_property($woocommerce->customer, 'id');
         $can_pay_by_alias = $this->can_use_alias($cust_id, true) && $this->get_cust_identifier($cust_id);
 
         $html = '';
@@ -1067,7 +1067,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $embdded = in_array($this->get_option('card_data_mode'), array('REST', 'POPIN', 'IFRAME')) && ! empty($payment_fields);
         $embedded_fields = ($this->get_option('card_data_mode') === 'REST') && ! empty($payment_fields);
 
-        $cust_id = $this->get_customer_property($woocommerce->customer, 'id');
+        $cust_id = self::get_customer_property($woocommerce->customer, 'id');
         $saved_masked_pan = $embedded_fields ? '' : get_user_meta((int) $cust_id, $this->id . '_masked_pan', true);
         if ($saved_masked_pan) {
             // Recover card brand if saved with masked pan and check if logo exists.
@@ -1294,7 +1294,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             )
         );
 
-        $cust_id = $this->get_customer_property($woocommerce->customer, 'id');
+        $cust_id = self::get_customer_property($woocommerce->customer, 'id');
         if ($use_identifier) {
             $saved_identifier = $this->get_cust_identifier($cust_id);
             $params['paymentMethodToken'] = $saved_identifier;
@@ -1343,7 +1343,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
 
         $strong_auth = $threeds_mpi === '2' ? 'DISABLED' : 'AUTO';
-        $params = array('orderId' => $order_id,
+        $params = array(
+            'orderId' => $order_id,
             'customer' => array(
                 'email' => $this->get_escaped_var($this->payzen_request, 'cust_email'),
                 'reference' => $this->get_escaped_var($this->payzen_request, 'cust_id'),
@@ -1387,7 +1388,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             'currency' => $currency->getAlpha3(),
             'amount' => $this->get_escaped_var($this->payzen_request, 'amount'),
             'metadata' => array(
-                'order_key' => $this->get_order_property($order, 'order_key'),
+                'order_key' => self::get_order_property($order, 'order_key'),
                 'blog_id' => $wpdb->blogid
             )
         );
@@ -1397,7 +1398,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             $params['transactionOptions']['cardOptions']['retry'] = $this->settings['rest_attempts'];
         }
 
-        $cust_id = $this->get_customer_property($woocommerce->customer, 'id');
+        $cust_id = self::get_customer_property($woocommerce->customer, 'id');
         if ($use_identifier) {
             $saved_identifier = $this->get_cust_identifier($cust_id);
             $params['paymentMethodToken'] = $saved_identifier;
@@ -1497,7 +1498,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
-            $pay_url = add_query_arg('order', $this->get_order_property($order, 'id'), add_query_arg('key', $this->get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
+            $pay_url = add_query_arg('order', self::get_order_property($order, 'id'), add_query_arg('key', self::get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
         } else {
             $pay_url = $order->get_checkout_payment_url(true);
         }
@@ -1614,8 +1615,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
     {
         global $wpdb;
 
-        $order_id = $this->get_order_property($order, 'id');
-        $cust_id = $this->get_order_property($order, 'user_id');
+        $order_id = self::get_order_property($order, 'id');
+        $cust_id = self::get_order_property($order, 'user_id');
 
         $this->log("Generating payment form for order #$order_id.");
 
@@ -1636,25 +1637,25 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             // Billing address info.
             'cust_id' => $cust_id,
-            'cust_email' => $this->get_order_property($order, 'billing_email'),
-            'cust_first_name' => $this->get_order_property($order, 'billing_first_name'),
-            'cust_last_name' => $this->get_order_property($order, 'billing_last_name'),
-            'cust_address' => $this->get_order_property($order, 'billing_address_1') . ' ' . $this->get_order_property($order, 'billing_address_2'),
-            'cust_zip' => $this->get_order_property($order, 'billing_postcode'),
-            'cust_country' => $this->get_order_property($order, 'billing_country'),
-            'cust_phone' => str_replace(array('(', '-', ' ', ')'), '', $this->get_order_property($order, 'billing_phone')),
-            'cust_city' => $this->get_order_property($order, 'billing_city'),
-            'cust_state' => $this->get_order_property($order, 'billing_state'),
+            'cust_email' => self::get_order_property($order, 'billing_email'),
+            'cust_first_name' => self::get_order_property($order, 'billing_first_name'),
+            'cust_last_name' => self::get_order_property($order, 'billing_last_name'),
+            'cust_address' => self::get_order_property($order, 'billing_address_1') . ' ' . self::get_order_property($order, 'billing_address_2'),
+            'cust_zip' => self::get_order_property($order, 'billing_postcode'),
+            'cust_country' => self::get_order_property($order, 'billing_country'),
+            'cust_phone' => str_replace(array('(', '-', ' ', ')'), '', self::get_order_property($order, 'billing_phone')),
+            'cust_city' => self::get_order_property($order, 'billing_city'),
+            'cust_state' => self::get_order_property($order, 'billing_state'),
 
             // Shipping address info.
-            'ship_to_first_name' => $this->get_order_property($order, 'shipping_first_name'),
-            'ship_to_last_name' => $this->get_order_property($order, 'shipping_last_name'),
-            'ship_to_street' => $this->get_order_property($order, 'shipping_address_1'),
-            'ship_to_street2' => $this->get_order_property($order, 'shipping_address_2'),
-            'ship_to_city' => $this->get_order_property($order, 'shipping_city'),
-            'ship_to_state' => $this->get_order_property($order, 'shipping_state'),
-            'ship_to_country' => $this->get_order_property($order, 'shipping_country'),
-            'ship_to_zip' => $this->get_order_property($order, 'shipping_postcode'),
+            'ship_to_first_name' => self::get_order_property($order, 'shipping_first_name'),
+            'ship_to_last_name' => self::get_order_property($order, 'shipping_last_name'),
+            'ship_to_street' => self::get_order_property($order, 'shipping_address_1'),
+            'ship_to_street2' => self::get_order_property($order, 'shipping_address_2'),
+            'ship_to_city' => self::get_order_property($order, 'shipping_city'),
+            'ship_to_state' => self::get_order_property($order, 'shipping_state'),
+            'ship_to_country' => self::get_order_property($order, 'shipping_country'),
+            'ship_to_zip' => self::get_order_property($order, 'shipping_postcode'),
 
             'shipping_amount' => $currency->convertAmountToInteger($this->get_shipping_with_tax($order)),
 
@@ -1663,7 +1664,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         );
         $this->payzen_request->setFromArray($misc_params);
 
-        $this->payzen_request->addExtInfo('order_key', $this->get_order_property($order, 'order_key'));
+        $this->payzen_request->addExtInfo('order_key', self::get_order_property($order, 'order_key'));
         $this->payzen_request->addExtInfo('blog_id', $wpdb->blogid);
 
         // VAT amount for colombian payment means.

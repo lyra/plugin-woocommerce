@@ -31,7 +31,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
      */
     public function cart_contains_subscription($cart)
     {
-        if (class_exists('WC_Subscriptions_Order')) {
+        if (class_exists('WC_Subscriptions_Cart')) {
             return WC_Subscriptions_Cart::cart_contains_subscription();
         } else {
             return false;
@@ -59,16 +59,45 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
 
     /**
      * {@inheritDoc}
+     * @see Payzen_Subscriptions_Handler_Interface::is_subscription_update()
+     */
+    public function is_subscription_update() {
+        return WC_Subscriptions_Change_Payment_Gateway::$is_request_to_change_payment;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see Payzen_Subscriptions_Handler_Interface::get_parent_order()
+     */
+    public function get_parent_order($id) {
+        $subscription = wcs_get_subscription($id);
+
+        if ($subscription) {
+            return $subscription->get_parent();
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
      * @see Payzen_Subscriptions_Handler_Interface::subscription_info()
      */
     public function subscription_info($order)
     {
-        $is_payment_change = WC_Subscriptions_Change_Payment_Gateway::$is_request_to_change_payment;
+        $order_id = wcs_get_objects_property($order, 'id');
+
+        $old_payment_method = get_transient('payzensubscription_change_payment_' . $order_id);
+        $is_payment_change = $old_payment_method ? true : false;
+        delete_transient('payzensubscription_change_payment_' . $order_id);
 
         // Payment method changes act on the subscription not the original order.
         if ($is_payment_change) {
-            $subscription = wcs_get_subscription(wcs_get_objects_property($order, 'id'));
-            $order = $subscription->get_parent();
+            if ($old_payment_method === 'payzensubscription') {
+                return false;
+            }
+
+            $subscription = wcs_get_subscription($order_id);
 
             // We need the subscription's total.
             if (WC_Subscriptions::is_woocommerce_pre('3.0')) {
@@ -77,7 +106,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
                 remove_filter('woocommerce_subscription_get_total', 'WC_Subscriptions_Change_Payment_Gateway::maybe_zero_total', 11);
             }
         } else {
-            // Otherwise the order is the $order
+            // Otherwise the order is $order.
             if (wcs_cart_contains_failed_renewal_order_payment() ||
                 false !== WC_Subscriptions_Renewal_Order::get_failed_order_replaced_by(wcs_get_objects_property($order, 'id'))) {
                 $subscriptions = wcs_get_subscriptions_for_renewal_order($order);
@@ -88,7 +117,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
             $subscription = reset($subscriptions); // Get first subscription
         }
 
-        $info = array(
+        $info = $subscription ? array(
             'effect_date' => self::get_effect_date($subscription, $is_payment_change),
             'init_amount' => null,
             'init_number' => null,
@@ -96,7 +125,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
             'frequency' => self::get_frequency($subscription),
             'interval' => (int) $subscription->get_billing_interval(),
             'end_date' => self::get_end_date($subscription)
-        );
+        ) : false;
 
         // Reattach the filter we removed earlier.
         if ($is_payment_change) {
@@ -122,8 +151,11 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
         // Get free trial end date.
         $trial_end = $subscription->get_time('trial_end');
 
-        // Subscription starts after a trial period.
-        if ($trial_end > $start_time) {
+        if ($trial_end <= date('Ymd', time())) {
+            // No trial period, 1st recurrence is paid in order amount.
+            $start_time = $subscription->get_time('next_payment');
+        } elseif ($trial_end > $start_time) {
+            // Subscription starts after a trial period.
             $start_time = $trial_end;
         }
 
@@ -132,7 +164,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
 
     private static function get_end_date($subscription)
     {
-        return $subscription->get_time('end') ? date('Ymd', $subscription->get_time('end')) : null;
+        return $subscription->get_time('end') ? date('Ymd', strtotime('-1 day', $subscription->get_time('end'))) : null;
     }
 
     private static function get_frequency($subscription)
@@ -182,6 +214,18 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
     {
         $subscriptions = wcs_get_subscriptions_for_order($order);
         $subscription = reset($subscriptions); // Get first subscription.
+        if (wcs_get_objects_property($subscription, 'payment_method') !== 'payzensubscription') {
+            // Update payment method in order.
+            $payzen_subscription = new WC_Gateway_PayzenSubscription();
+            if (method_exists($subscription, 'set_payment_method')) {
+                $subscription->set_payment_method($payzen_subscription);
+            } else {
+                $subscription->payment_method = $payzen_subscription->id;
+                $subscription->payment_method_title = $payzen_subscription->get_title();
+            }
+
+            $subscription->save();
+        }
 
         if ($renewal_order_id = (int) $subscription->get_last_order('ids', 'renewal')) { // Get last generated order.
             $renewal_order = new WC_Order($renewal_order_id);
@@ -232,6 +276,10 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
      */
     public function update_subscription()
     {
+        if (! isset($_GET['message']) || $_GET['message'] != 1 ) {
+            return;
+        }
+
         list($subscription) = func_get_args();
 
         $subscription_id = $subscription->get_id();
@@ -239,5 +287,28 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
 
         $payzen_subscription = new WC_Gateway_PayzenSubscription();
         $payzen_subscription->update_online_subscription($subscription_id, $order_id);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see Payzen_Subscriptions_Handler_Interface::get_view_order_url()
+     */
+    public function get_view_order_url($subsc_id)
+    {
+        $subscription = wcs_get_subscription($subsc_id);
+        return $subscription->get_view_order_url();
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see Payzen_Subscriptions_Handler_Interface::get_subscription_statuses()
+     */
+    public function get_subscription_statuses()
+    {
+        if (function_exists('wcs_get_subscription_statuses')) {
+            return wcs_get_subscription_statuses();
+        }
+
+        return array();
     }
 }

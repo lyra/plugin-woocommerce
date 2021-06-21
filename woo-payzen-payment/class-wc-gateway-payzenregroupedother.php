@@ -252,7 +252,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                     switch (attr) {
                         case 'payment_mean':
                             optionLine += '<select style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '">';
-                            optionLine += '<?php foreach ($this->get_supported_card_types() as $key => $value) {
+                            optionLine += '<?php foreach ($cards as $key => $value) {
                                                     echo '<option value="' . $key . '">' . $value . '</option>';
                                                 } ?>';
 
@@ -563,7 +563,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         $order = new WC_Order($order_id);
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
-            $pay_url = add_query_arg('order', $this->get_order_property($order, 'id'), add_query_arg('key', $this->get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
+            $pay_url = add_query_arg('order', self::get_order_property($order, 'id'), add_query_arg('key', self::get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
         } else {
             $pay_url = $order->get_checkout_payment_url(true);
         }
@@ -581,7 +581,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
     {
         parent::payzen_fill_request($order);
 
-        $order_id = $this->get_order_property($order, 'id');
+        $order_id = self::get_order_property($order, 'id');
         $selected_card = get_transient($this->id . '_card_type_' . $order_id);
 
         // Set selected card.
