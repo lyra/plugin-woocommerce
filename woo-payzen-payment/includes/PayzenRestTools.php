@@ -85,6 +85,7 @@ class PayzenRestTools
 
                 if ($authorizationResponse = self::getProperty($cardDetails, 'authorizationResponse')) {
                     $response['vads_auth_result'] = self::getProperty($authorizationResponse, 'authorizationResult');
+                    $response['vads_authorized_amount'] = self::getProperty($authorizationResponse, 'amount');
                 }
 
                 if (($authenticationResponse = self::getProperty($cardDetails, 'authenticationResponse'))

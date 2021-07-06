@@ -31,7 +31,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-5.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.9.1-beta3';
+    const PLUGIN_VERSION = '1.9.2';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -1405,14 +1405,18 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             delete_post_meta((int) $order_id, 'Means of payment');
             delete_post_meta((int) $order_id, 'Card expiry');
             delete_post_meta((int) $order_id, 'Sequence number');
-            delete_post_meta((int) $order_id, 'Total paid');
+
+            // Store authorized amount.
+            if ($authorized_amount = $payzen_response->get('authorized_amount')) {
+                delete_post_meta((int) $order_id, 'Authorized amount');
+                update_post_meta((int) $order_id, 'Authorized amount', self::display_amount($authorized_amount, $payzen_response->get('currency')));
+            }
 
             // Store transaction details.
             update_post_meta((int) $order_id, 'Transaction ID', $payzen_response->get('trans_id'));
             update_post_meta((int) $order_id, 'Card number', $payzen_response->get('card_number'));
             update_post_meta((int) $order_id, 'Means of payment', $payzen_response->get('card_brand'));
             update_post_meta((int) $order_id, 'Sequence number', $payzen_response->get('sequence_number'));
-            update_post_meta((int) $order_id, 'Total paid', self::display_amount($payzen_response->get('amount'), $payzen_response->get('currency')));
 
             $expiry = '';
             if ($payzen_response->get('expiry_month') && $payzen_response->get('expiry_year')) {
