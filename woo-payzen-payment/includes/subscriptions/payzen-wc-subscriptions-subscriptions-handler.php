@@ -21,7 +21,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
      */
     public function init_hooks()
     {
-        add_action('woocommerce_subscription_cancelled_payzensubscription', array($this, 'cancel_subscription'));
+        add_action('woocommerce_subscription_pending-cancel_payzensubscription', array($this, 'cancel_subscription'));
         add_action('wcs_subscription_schedule_after_billing_schedule', array($this, 'update_subscription'));
     }
 
