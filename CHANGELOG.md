@@ -1,3 +1,7 @@
+1.9.2, 2021-07-06=
+* Improve subscription cancellation process (cancel web service is called on buyer action).
+* Display authorized amount in order details when it is available.
+
 = 1.9.1, 2021-06-21=
 * Bug fix: Do not create two transactions when trial is disabled for a subscription.
 * Bug fix: Fatal error when modifying payment for a subscription in My account > subscriptions.

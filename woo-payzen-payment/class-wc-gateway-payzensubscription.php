@@ -270,7 +270,12 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
     {
         $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
         if (! $key) {
-            set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('Subscription is cancelled only in WooCommerce. Please, consider cancelling the subscription in %s Back Office.', 'woo-payzen-payment'), 'PayZen'));
+            if (is_admin()) { // Show error message only if it's made on backend.
+                set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('Subscription is cancelled only in WooCommerce. Please, consider cancelling the subscription in %s Back Office.', 'woo-payzen-payment'), 'PayZen'));
+            } else {
+                wc_add_notice( __('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice' );
+            }
+
             $this->log("Subscription #{$subscription_id} cannot be cancelled on gateway for order #$order_id: private key is not configured.");
             return;
         }
@@ -297,17 +302,22 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             $result = $client->post('V4/Subscription/Cancel', json_encode($params));
             PayzenRestTools::checkResult($result);
 
-            //Subscription cancelled successfully.
+            // Subscription cancelled successfully.
             $this->log("Subscription #{$subscription_id} cancelled successfully for order #$order_id.");
 
-            // Cancel running subscriptions.
+            // Cancel running subscription transactions.
             $transactions = $this->get_order_details($order_id);
 
             foreach ($transactions as $transaction) {
                 $this->cancel_transaction($transaction);
             }
         } catch (Exception $e) {
-            set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
+            if (is_admin()) { // Show error message only if it's made on backend.
+                set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
+            } else {
+                wc_add_notice( __('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice' );
+            }
+
             $this->log("Subscription cancel exception for order #$order_id with code {$e->getCode()}: {$e->getMessage()}");
         }
     }
@@ -339,7 +349,12 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             $result = $client->post('V4/Transaction/Cancel', json_encode($params));
             PayzenRestTools::checkResult($result, 'CANCELLED');
         } catch (Exception $e) {
-            set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
+            if (is_admin()) { // Show error message only if it's made on backend.
+                set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
+            }  else {
+                wc_add_notice( __('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice' );
+            }
+
             $this->log("Transaction cancel exception for order #$order_id with code {$e->getCode()}: {$e->getMessage()}.");
         }
     }

@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 5.7
 WC requires at least: 2.0
 WC tested up to: 5.4
-Stable tag: 1.9.1-beta3
+Stable tag: 1.9.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,10 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+1.9.2, 2021-07-06=
+* Improve subscription cancellation process (cancel web service is called on buyer action).
+* Display authorized amount in order details when it is available.
 
 = 1.9.1, 2021-06-21=
 * Bug fix: Do not create two transactions when trial is disabled for a subscription.
