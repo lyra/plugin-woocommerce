@@ -66,10 +66,16 @@ class PayzenRestTools
             $effectiveCurrency = PayzenApi::getCurrencyNumCode(self::getProperty($transactionDetails, 'effectiveCurrency'));
 
             if ($effectiveAmount && $effectiveCurrency) {
-                $response['vads_effective_amount'] = $response['vads_amount'];
-                $response['vads_effective_currency'] = $response['vads_currency'];
-                $response['vads_amount'] = $effectiveAmount;
-                $response['vads_currency'] = $effectiveCurrency;
+                // Invert only if there is currency conversion.
+                if ($effectiveCurrency !== $response['vads_currency']) {
+                    $response['vads_effective_amount'] = $response['vads_amount'];
+                    $response['vads_effective_currency'] = $response['vads_currency'];
+                    $response['vads_amount'] = $effectiveAmount;
+                    $response['vads_currency'] = $effectiveCurrency;
+                } else {
+                    $response['vads_effective_amount'] = $effectiveAmount;
+                    $response['vads_effective_currency'] = $effectiveCurrency;
+                }
             }
 
             $response['vads_warranty_result'] = self::getProperty($transactionDetails, 'liabilityShift');
@@ -82,6 +88,8 @@ class PayzenRestTools
                 $response['vads_card_number'] = self::getProperty($cardDetails, 'pan');
                 $response['vads_expiry_month'] = self::getProperty($cardDetails, 'expiryMonth');
                 $response['vads_expiry_year'] = self::getProperty($cardDetails, 'expiryYear');
+
+                $response['vads_payment_option_code'] = self::getProperty($cardDetails, 'installmentNumber');
 
                 if ($authorizationResponse = self::getProperty($cardDetails, 'authorizationResponse')) {
                     $response['vads_auth_result'] = self::getProperty($authorizationResponse, 'authorizationResult');

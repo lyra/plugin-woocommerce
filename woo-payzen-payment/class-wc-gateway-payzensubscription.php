@@ -32,7 +32,9 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             'subscription_amount_changes',
             'subscription_date_changes',
             'subscription_payment_method_change_customer',
-            'gateway_scheduled_payments'
+            'gateway_scheduled_payments',
+            'subscription_suspension',
+            'subscription_reactivation'
         );
 
         // Init common vars.

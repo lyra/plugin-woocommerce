@@ -1,8 +1,12 @@
-1.9.2, 2021-07-06=
+= 1.9.3, 2021-07-15 =
+* [subscr] Bug fix: Fix subscription renewal process (create a renewal order).
+* Display installments number in order details when it is available.
+
+= 1.9.2, 2021-07-06 =
 * Improve subscription cancellation process (cancel web service is called on buyer action).
 * Display authorized amount in order details when it is available.
 
-= 1.9.1, 2021-06-21=
+= 1.9.1, 2021-06-21 =
 * Bug fix: Do not create two transactions when trial is disabled for a subscription.
 * Bug fix: Fatal error when modifying payment for a subscription in My account > subscriptions.
 * Bug fix: Propose dynamically added payment means in "Other payment means" section.
@@ -14,7 +18,7 @@
 * Send the relevant part of the current PHP version in vads_contrib field.
 * Improve support e-mails display.
 
-= 1.9.0, 2021-04-21=
+= 1.9.0, 2021-04-21 =
 * [subscr] Manage subscriptions with WooCommerce Subscriptions (including subscription update and cancellation).
 * [franfinance] Added new Franfinance submodule.
 * Possibility to open support issue from the plugin configuration panel or an order details page.
