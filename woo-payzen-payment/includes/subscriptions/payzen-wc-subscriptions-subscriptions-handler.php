@@ -214,9 +214,11 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
     {
         $subscriptions = wcs_get_subscriptions_for_order($order);
         $subscription = reset($subscriptions); // Get first subscription.
+
         if (wcs_get_objects_property($subscription, 'payment_method') !== 'payzensubscription') {
             // Update payment method in order.
             $payzen_subscription = new WC_Gateway_PayzenSubscription();
+
             if (method_exists($subscription, 'set_payment_method')) {
                 $subscription->set_payment_method($payzen_subscription);
             } else {
@@ -227,30 +229,39 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
             $subscription->save();
         }
 
-        if ($renewal_order_id = (int) $subscription->get_last_order('ids', 'renewal')) { // Get last generated order.
-            $renewal_order = new WC_Order($renewal_order_id);
+        $recurrence_number = $response->get('recurrence_number');
+        $renewal_order_id = $this->get_renewal_order($subscription, $recurrence_number);
 
-            WC_Gateway_Payzen::payzen_add_order_note($response, $renewal_order);
+        if (! $renewal_order_id) {
+            try {
+                // Always put the subscription on hold in case something goes wrong while trying to process renewal
+                $order_note = sprintf(_x('IPN subscription payment for recurrence #%s.', 'used in order note', 'woo-payzen-payment'), $recurrence_number);
+                $subscription->update_status('on-hold', $order_note);
 
-            $currency_code = $response->get('currency');
+                // Create a pending renewal order.
+                $renewal_order = $this->create_renewal_order($subscription);
+                $renewal_order_id = $renewal_order->get_id();
 
-            delete_post_meta($renewal_order_id, 'Subscription ID');
-            delete_post_meta($renewal_order_id, 'Subscription amount');
-            delete_post_meta($renewal_order_id, 'Recurrence number');
+                WC_Gateway_Payzen::payzen_add_order_note($response, $renewal_order);
+                $currency_code = $response->get('currency');
 
-            update_post_meta($renewal_order_id, 'Subscription ID', $response->get('subscription'));
-            update_post_meta($renewal_order_id, 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('sub_amount'), $currency_code));
-            update_post_meta($renewal_order_id, 'Recurrence number', $response->get('recurrence_number'));
+                delete_post_meta($renewal_order_id, 'Subscription ID');
+                delete_post_meta($renewal_order_id, 'Subscription amount');
+                delete_post_meta($renewal_order_id, 'Recurrence number');
 
-            if (WC_Gateway_Payzen::is_successful_action($response)) {
-                // Payment completed.
-                $renewal_order->payment_complete();
-            } elseif ($response->isPendingPayment()) {
-                // Payment is pending.
-                $renewal_order->update_status('on-hold');
-            } else {
-                // Payment failed.
-                $renewal_order->update_status('failed');
+                update_post_meta($renewal_order_id, 'Subscription ID', $response->get('subscription'));
+                update_post_meta($renewal_order_id, 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('amount'), $currency_code));
+                update_post_meta($renewal_order_id, 'Recurrence number', $response->get('recurrence_number'));
+
+                if (WC_Gateway_Payzen::is_successful_action($response)) {
+                    // Payment completed.
+                    $subscription->payment_complete();
+                } else {
+                    // Payment failed or pending.
+                    $subscription->payment_failed();
+                }
+            } catch (Exception $e) {
+                throw new Exception(sprintf( __('Error: Unable to create renewal order with %s plugin.', 'woo-payzen-payment'), WC_Gateway_Payzen::GATEWAY_NAME));
             }
         }
     }
@@ -310,5 +321,40 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
         }
 
         return array();
+    }
+
+    private function get_renewal_order($subscription, $recurrence)
+    {
+        foreach ($subscription->get_related_orders('ids', 'renewal') as $renewal_order_id) {
+            if ($recurrence == get_post_meta($renewal_order_id, 'Recurrence number', true)) {
+                return $renewal_order_id;
+            }
+        }
+
+        return false;
+    }
+
+    private function create_renewal_order($subscription)
+    {
+        $renewal_order = wcs_create_renewal_order($subscription);
+
+        if (is_wp_error($renewal_order)) {
+            // Let's try this again
+            $renewal_order = wcs_create_renewal_order($subscription);
+
+            if (is_wp_error($renewal_order)) {
+                throw new Exception(sprintf( __('Error: Unable to create renewal order with %s plugin.', 'woo-payzen-payment'), WC_Gateway_Payzen::GATEWAY_NAME));
+            }
+        }
+
+        // We need to pass the payment gateway instance to be compatible with WC < 3.0, only WC 3.0+ supports passing the string name.
+        $renewal_order->set_payment_method(wc_get_payment_gateway_by_order($subscription));
+
+        // We need to save the payment method.
+        if (is_callable( array( $renewal_order, 'save'))) {
+            $renewal_order->save();
+        }
+
+        return $renewal_order;
     }
 }
