@@ -1910,7 +1910,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
 
         $answer = json_decode($raw_response['kr-answer'], true);
-        if (! is_array($answer)) {
+        if (! is_array($answer) || empty($answer)) {
             $this->log('Invalid REST request received. Content of kr-answer: ' . $raw_response['kr-answer']);
 
             if ($from_server_rest) {
@@ -1928,7 +1928,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
 
         // Wrap payment result to use traditional order creation tunnel.
-        $response = PayzenRestTools::convertRestResult($answer);
+        $data = PayzenRestTools::convertRestResult($answer);
+        $response = new PayzenResponse($data, null, null, null);
 
         parent::payzen_manage_notify_response($response, $from_server_rest);
     }
