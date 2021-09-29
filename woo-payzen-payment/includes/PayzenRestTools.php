@@ -126,9 +126,7 @@ class PayzenRestTools
             }
         }
 
-        require_once 'PayzenResponse.php';
-
-        return new PayzenResponse($response, null, null, null);
+        return $response;
     }
 
     public static function getProperty($array, $key)

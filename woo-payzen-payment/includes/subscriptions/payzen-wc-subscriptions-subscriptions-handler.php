@@ -232,15 +232,21 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
         $recurrence_number = $response->get('recurrence_number');
         $renewal_order_id = $this->get_renewal_order($subscription, $recurrence_number);
 
-        if (! $renewal_order_id) {
+        if ($renewal_order_id) {
+            // There is already a renewal order for this recurrence.
+            $renewal_order = new WC_Order($renewal_order_id);
+        } else {
+            // Create a pending renewal order.
+            $renewal_order = $this->create_renewal_order($subscription);
+            $renewal_order_id = $renewal_order->get_id();
+        }
+
+        // Case of a new renewal order or one that hasn't been fully processed.
+        if ($renewal_order->has_status('pending')) {
             try {
                 // Always put the subscription on hold in case something goes wrong while trying to process renewal
                 $order_note = sprintf(_x('IPN subscription payment for recurrence #%s.', 'used in order note', 'woo-payzen-payment'), $recurrence_number);
                 $subscription->update_status('on-hold', $order_note);
-
-                // Create a pending renewal order.
-                $renewal_order = $this->create_renewal_order($subscription);
-                $renewal_order_id = $renewal_order->get_id();
 
                 WC_Gateway_Payzen::payzen_add_order_note($response, $renewal_order);
                 $currency_code = $response->get('currency');
@@ -253,6 +259,11 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
                 update_post_meta($renewal_order_id, 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('amount'), $currency_code));
                 update_post_meta($renewal_order_id, 'Recurrence number', $response->get('recurrence_number'));
 
+                // Update subscription next payment date to avoid incoherences.
+                $subsc_interval = (int) $subscription->get_billing_interval();
+                $next_payment_date = date('Y-m-d H:i:s', strtotime('+' . $subsc_interval . $subscription->get_billing_period(), time()));
+                $subscription->update_dates(array("next_payment" => $next_payment_date));
+
                 if (WC_Gateway_Payzen::is_successful_action($response)) {
                     // Payment completed.
                     $subscription->payment_complete();
@@ -261,7 +272,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
                     $subscription->payment_failed();
                 }
             } catch (Exception $e) {
-                throw new Exception(sprintf( __('Error: Unable to create renewal order with %s plugin.', 'woo-payzen-payment'), WC_Gateway_Payzen::GATEWAY_NAME));
+                $subscription->add_order_note($e->getMessage());
             }
         }
     }
