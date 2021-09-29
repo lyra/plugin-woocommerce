@@ -1,3 +1,8 @@
+= 1.9.4, 2021-09-27 =
+* Some minor fixes.
+* [subscr] Bug fix: Fix subscription next payment date.
+* [embedded] Bug fix: Fix wrapping payment result for embedded payment.
+
 = 1.9.3, 2021-07-15 =
 * [subscr] Bug fix: Fix subscription renewal process (create a renewal order).
 * Display installments number in order details when it is available.
