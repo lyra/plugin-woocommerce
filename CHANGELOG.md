@@ -1,3 +1,6 @@
+= 1.9.5, 2022-05-05 =
+* Update list of supported payment means.
+
 = 1.9.4, 2021-09-27 =
 * Some minor fixes.
 * [subscr] Bug fix: Fix subscription next payment date.
