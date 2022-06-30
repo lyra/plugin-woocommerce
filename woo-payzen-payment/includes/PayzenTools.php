@@ -8,6 +8,7 @@
  * @copyright Lyra Network and contributors
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
  */
+use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
 
 class PayzenTools
 {
@@ -103,5 +104,28 @@ class PayzenTools
 
         $parts = $trans_uuid ? explode(':', $trans_uuid) : '';
         return $parts ? $parts[1] : '';
+    }
+
+    public static function get_user_info()
+    {
+        $comment_text = 'WooCommerce user: ' . get_option('admin_email');
+        $comment_text .= ' ; IP address: ' . self::get_ip_address();
+
+        return $comment_text;
+    }
+
+    public static function get_ip_address()
+    {
+        if (isset($_SERVER['HTTP_X_REAL_IP'])) {
+            return sanitize_text_field(wp_unslash($_SERVER['HTTP_X_REAL_IP']));
+        } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            // Proxy servers can send through this header like this: X-Forwarded-For: client1, proxy1, proxy2.
+            // Make sure we always only send through the first IP in the list which should always be the client IP.
+            return (string) rest_is_ip_address(trim(current(preg_split('/,/', sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_FOR']))))));
+        } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+            return sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']));
+        }
+
+        return '';
     }
 }

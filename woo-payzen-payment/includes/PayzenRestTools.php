@@ -9,6 +9,8 @@
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
  */
 
+use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
+
 class PayzenRestTools
 {
     public static function convertRestResult($answer)

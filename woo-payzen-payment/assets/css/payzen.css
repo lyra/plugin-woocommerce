@@ -8,6 +8,12 @@
     margin-bottom: 0 !important;
 }
 
+.kr-form-error span a {
+    all: inherit !important;
+    text-decoration: underline !important;
+    cursor: pointer !important;
+}
+
 .blockUI::before {
     content: '';
     background: url("../images/loading.gif");

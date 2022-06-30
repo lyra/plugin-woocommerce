@@ -13,6 +13,11 @@ if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
+use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
+use Lyranetwork\Payzen\Sdk\Form\Response as PayzenResponse;
+use Lyranetwork\Payzen\Sdk\Form\Request as PayzenRequest;
+use Lyranetwork\Payzen\Sdk\Rest\Api as PayzenRest;
+
 class WC_Gateway_Payzen extends WC_Payment_Gateway
 {
     const GATEWAY_CODE = 'PayZen';
@@ -29,9 +34,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     const SIGN_ALGO = 'SHA-256';
     const LANGUAGE = 'fr';
 
-    const CMS_IDENTIFIER = 'WooCommerce_2.x-5.x';
+    const CMS_IDENTIFIER = 'WooCommerce_2.x-6.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.9.5';
+    const PLUGIN_VERSION = '1.10.0';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -95,9 +100,12 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     protected function payzen_is_section_loaded()
     {
         $current_section = isset($_GET['section']) ? $_GET['section'] : null;
+        if (is_null($current_section)) {
+            return false;
+        }
+
         return ($current_section === $this->id) || (strtolower($current_section) === strtolower(get_class($this)));
     }
-
 
     protected function payzen_init()
     {
@@ -165,16 +173,48 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         //<!--
             jQuery(function() {
                 payzenUpdateCategoryDisplay();
+                payzenUpdateShippingOptionsDisplay();
             });
 
             function payzenUpdateCategoryDisplay() {
                 var commonCategory = jQuery('#<?php echo esc_attr($this->get_field_key('common_category')); ?> option:selected').val();
-                var categoryMapping = jQuery('#<?php echo esc_attr($this->get_field_key('additional_options')); ?>').next().next().find('tr:nth-child(2)');
+                var categoryMapping = jQuery('#<?php echo esc_attr($this->get_field_key('category_mapping')); ?>_table').closest('tr');
 
                 if (commonCategory === 'CUSTOM_MAPPING') {
                     categoryMapping.show();
                 } else {
                     categoryMapping.hide();
+                }
+            }
+
+            function payzenUpdateShippingOptionsDisplay(speedElementId = null) {
+                // Enable delay select for rows with speed equals PRIORITY.
+
+                if  (speedElementId == null) {
+                    // Update display on page loading.
+                     var elements = jQuery(".payzen_list_speed");
+                     for (var i=0; i < elements.length; i++) {
+                         var speedElt = elements.eq(i);
+                         var delayName = speedElt.attr("name").replace("[speed]", "[delay]");
+
+                         // Select by name returns one element.
+                         var delayElt = jQuery("select[name=\"" + delayName + "\"]")[0];
+
+                         if (speedElt.val() === "PRIORITY") {
+                             delayElt.disabled = false;
+                         } else {
+                            delayElt.disabled = true;
+                         }
+                     }
+                } else {
+                    // Update display on element update.
+                    var delayElementId = speedElementId.replace("speed", "delay");
+
+                    if (jQuery('#' + speedElementId + ' option:selected').val() === "PRIORITY") {
+                        jQuery('#' + delayElementId).prop("disabled", false);
+                    } else {
+                        jQuery('#' + delayElementId).prop("disabled", true);
+                    }
                 }
             }
         //-->
@@ -722,6 +762,38 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'description' => sprintf(__('Match each product category with a %s product category. <br /><b>Entries marked with * are newly added and must be configured.</b>', 'woo-payzen-payment'), self::BACKOFFICE_NAME)
         );
 
+        // Delivery options.
+        $descr = sprintf(__('Define the %s information about all shipping methods.<br /><b>Method title: </b>The label of the shipping method.<br /><b>Type: </b>The delivery type of shipping method.<br /><b>Rapidity: </b>Select the delivery rapidity.<br /><b>Delay: </b>Select the delivery delay if rapidity is &laquo; Priority &raquo;.<br /><b>Entries marked with * are newly added and must be configured.</b>',
+            'woo-payzen-payment'), 'PayZen');
+
+        $columns = array();
+        $columns['method_title'] = array(
+            'title' => __('Method title', 'woo-payzen-payment'),
+            'width' => '210px'
+        );
+
+        $columns['type'] = array(
+            'title' => __('Type', 'woo-payzen-payment'),
+            'width' => '130px'
+        );
+
+        $columns['speed'] = array(
+            'title' => __('Rapidity', 'woo-payzen-payment'),
+            'width' => '75px',
+        );
+
+        $columns['delay'] = array(
+            'title' => __('Delay', 'woo-payzen-payment'),
+            'width' => '90px',
+        );
+
+        $this->form_fields['shipping_options'] = array(
+            'title' => __('Shipping options', 'woo-payzen-payment'),
+            'type' => 'shipping_table',
+            'columns' => $columns,
+            'description' => $descr
+        );
+
         if ($payzen_plugin_features['qualif']) {
             // Tests will be made on qualif, no test mode available.
             unset($this->form_fields['key_test']);
@@ -1076,6 +1148,175 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return $html;
     }
 
+    /**
+     * Generate text input HTML.
+     *
+     * @access public
+     * @param mixed $key
+     * @param mixed $data
+     * @since 1.0.0
+     * @return string
+     */
+    public function generate_shipping_table_html($key, $data)
+    {
+        global $woocommerce;
+
+        $html = '';
+
+        $data['title'] = isset($data['title']) ? $data['title'] : '';
+        $data['disabled'] = empty($data['disabled']) ? false : true;
+        $data['class'] = isset($data['class']) ? $data['class'] : '';
+        $data['css'] = isset($data['css']) ? $data['css'] : '';
+        $data['placeholder'] = isset($data['placeholder']) ? $data['placeholder'] : '';
+        $data['type'] = isset($data['type']) ? $data['type'] : 'text';
+        $data['desc_tip'] = isset($data['desc_tip']) ? $data['desc_tip'] : false;
+        $data['description'] = isset($data['description']) ? $data['description'] : '';
+        $data['columns'] = isset($data['columns']) ? (array) $data['columns'] : array();
+        $data['default'] = isset($data['default']) ? (array) $data['default'] : array();
+
+        // Description handling.
+        if ($data['desc_tip'] === true) {
+            $description = '';
+            $tip = $data['description'];
+        } elseif (! empty($data['desc_tip'])) {
+            $description = $data['description'];
+            $tip = $data['desc_tip'];
+        } elseif (! empty($data['description'])) {
+            $description = $data['description'];
+            $tip = '';
+        } else {
+            $description = $tip = '';
+        }
+
+        $field_name = esc_attr($this->plugin_id . $this->id . '_' . $key);
+
+        $html .= '<tr valign="top">' . "\n";
+        $html .= '<th scope="row" class="titledesc">';
+        $html .= '<label for="' . esc_attr($this->plugin_id . $this->id . '_' . $key) . '">' . wp_kses_post($data['title']) . '</label>';
+
+        if ($tip) {
+            $html .= '<img class="help_tip" data-tip="' . esc_attr($tip) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+        }
+
+        $html .= '</th>' . "\n";
+        $html .= '<td class="forminp">' . "\n";
+        $html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post($data['title']) . '</span></legend>' . "\n";
+
+        $html .= '<table id="' . $field_name . '_table" class="'. esc_attr($data['class']) . '" cellpadding="10" cellspacing="0" >';
+
+        $html .= '<thead><tr>';
+        foreach ($data['columns'] as $code => $column) {
+            $html .= '<th class="' . $code . '" style="width: ' . $column['width'] . '; padding: 0px;">' . $column['title'] . '</th>';
+        }
+
+        $html .= '<th style="width: auto; padding: 0px;"></th>';
+        $html .= '</tr></thead>';
+
+        $html .= '<tbody>';
+
+        $shipping_methods = WC()->shipping->get_shipping_methods();
+        $options = $this->get_option($key);
+
+        if (! is_array($options) || empty($options)) {
+            $options = array();
+        }
+
+        $shipping_types = array(
+            'PACKAGE_DELIVERY_COMPANY' => __('Delivery company', 'woo-payzen-payment'),
+            'RECLAIM_IN_SHOP' => __('Reclaim in shop', 'woo-payzen-payment'),
+            'RELAY_POINT' => __('Relay point', 'woo-payzen-payment'),
+            'RECLAIM_IN_STATION' => __('Reclaim in station', 'woo-payzen-payment')
+        );
+
+        $shipping_rapidities = array(
+            'STANDARD' => __('Standard', 'woo-payzen-payment'),
+            'EXPRESS' => __('Express', 'woo-payzen-payment'),
+            'PRIORITY' => __('Priority', 'woo-payzen-payment')
+        );
+
+        $shipping_delays = array(
+            'INFERIOR_EQUALS' => __('<= 1 hour', 'woo-payzen-payment'),
+            'SUPERIOR' => __('> 1 hour', 'woo-payzen-payment'),
+            'IMMEDIATE' => __('Immediate', 'woo-payzen-payment'),
+            'ALWAYS' =>  __('24/7', 'woo-payzen-payment'),
+        );
+
+        foreach ($shipping_methods as $method) {
+            $code = $method->id;
+
+            if (! isset($options[$code]) || ! is_array($options[$code])) {
+                $options[$code]['new'] = true;
+                $options[$code]['type'] = 'PACKAGE_DELIVERY_COMPANY';
+                $options[$code]['speed'] = 'STANDARD';
+            } else {
+                $options[$code]['new'] = false;
+            }
+
+            $options[$code]['method_title'] = $method->method_title;
+        }
+
+        foreach ($options as $code => $option) {
+            $html .= '<tr>';
+            $html .= '<td style="padding: 5px;"><label style="display: inline;">';
+            $html .= $option['method_title'] . ($option['new'] == true ? '<span style="color: red;">*</span> ' : '');
+            $html .= '</label></td>';
+
+            $html .= '<td style="padding: 5px;"><select name="' . $field_name . '[' . $code . '][type]"
+                      value="' . (isset($option['type']) ? $option['type'] : '') .'">';
+            foreach ($shipping_types as $key => $value) {
+                $selected = ($key === $option['type']) ? 'selected="selected"' : '';
+                $html .= '<option value="' . $key . '" ' . $selected . '>' . $value . '</option>';
+            }
+
+            $html .= '<td style="padding: 5px;"><select class="payzen_list_speed" id="' . $field_name . '_' . $code . '_speed"
+                      name="' . $field_name . '[' . $code . '][speed]"
+                      value="' . (isset($option['speed']) ? $option['speed'] : '') . '"
+                      onchange="javascript:payzenUpdateShippingOptionsDisplay(\'' . $field_name . '_' . $code . '_speed\')">';
+            foreach ($shipping_rapidities as $key => $value) {
+                $selected = (isset($option['speed']) && ($key === $option['speed'])) ? 'selected="selected"' : '';
+                $html .= '<option value="' . $key . '" ' . $selected . '>' . $value . '</option>';
+            }
+
+            $html .= '<td style="padding: 5px;"><select id="' . $field_name . '_' . $code . '_delay"
+                      name="' . $field_name . '[' . $code . '][delay]"
+                      value="' . (isset($option['delay']) ? $option['delay'] : '') .'">';
+            foreach ($shipping_delays as $key => $value) {
+                $selected = (isset($option['delay']) && $key === $option['delay']) ? 'selected="selected"' : '';
+                $html .= '<option value="' . $key . '" ' . $selected . '>' . $value . '</option>';
+            }
+
+            $html .= '</select></td>';
+
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody></table>';
+
+        if ($description) {
+            $html .= ' <p class="description">' . wp_kses_post($description) . '</p>' . "\n";
+        }
+
+        $html .= '</fieldset>';
+        $html .= '</td>' . "\n";
+        $html .= '</tr>' . "\n";
+
+        return $html;
+    }
+
+    public function validate_shipping_options_field($key, $value = null)
+    {
+        $name = $this->plugin_id . $this->id . '_' . $key;
+        $value = $value ? $value : (key_exists($name, $_POST) ? $_POST[$name] : array());
+
+        foreach ($value as $code => $option) {
+            // Clean string.
+            $fnc = function_exists('wc_clean') ? 'wc_clean' : 'woocommerce_clean';
+            $value[$code] = array_map('esc_attr', array_map($fnc, (array) $option));
+        }
+
+        return $value;
+    }
+
     public function validate_multilangtext_field($key, $value = null)
     {
         $name = $this->plugin_id . $this->id . '_' . $key;
@@ -1277,6 +1518,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         return $value;
     }
+
     /**
      * Check if this gateway is available for the current currency.
      */

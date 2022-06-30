@@ -13,6 +13,10 @@ if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
+use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
+use Lyranetwork\Payzen\Sdk\Form\Response as PayzenResponse;
+use Lyranetwork\Payzen\Sdk\Rest\Api as PayzenRest;
+
 class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 {
     const ALL_COUNTRIES = '1';
@@ -73,7 +77,10 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         add_action('woocommerce_api_wc_gateway_payzen_form_token', array($this, 'payzen_refresh_form_token'));
 
         // Adding JS to load REST libs.
-        add_action('wp_head', array($this, 'payzen_rest_head_script'));
+        if (! class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')
+               || wc_post_content_has_shortcode('woocommerce_checkout')) {
+            add_action('wp_head', array($this, 'payzen_rest_head_script'));
+        }
     }
 
     public function payzen_rest_head_script()
@@ -725,15 +732,20 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             return false;
         }
 
-        if ($woocommerce->cart) {
-            $amount = $woocommerce->cart->total;
+        if (($order_id = get_query_var('order-pay')) || $woocommerce->cart) {
+            if ($order_id) {
+                $order = new WC_Order((int) $order_id);
+            }
+
+            $amount = $order_id ? $order->get_total() : $woocommerce->cart->total;
             if (($this->get_option('amount_max') != '' && $amount > $this->get_option('amount_max'))
                 || ($this->get_option('amount_min') != '' && $amount < $this->get_option('amount_min'))) {
-
                 return false;
             }
 
-            return $this->is_available_for_subscriptions();
+            if (! $order_id) {
+                return $this->is_available_for_subscriptions();
+            }
         }
 
         return true;
@@ -921,6 +933,9 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             case 'REST':
             case 'POPIN':
+                wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), self::PLUGIN_VERSION);
+                wp_enqueue_style('payzen');
+
                 $html .= $this->rest_payment_fields_view($can_pay_by_alias);
                 if (! $html) {
                     // Force payment by redirection.
@@ -1816,6 +1831,80 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         return null;
     }
 
+    public function to_gateway_carrier($method_code)
+    {
+        $shipping_mapping = $this->get_general_option('shipping_options');
+
+        if (is_array($shipping_mapping) && ! empty($shipping_mapping)) {
+            foreach ($shipping_mapping as $code => $shipping_method) {
+                if ($code === $method_code) {
+                    return $shipping_method;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected function send_shipping_data($order)
+    {
+        $this->payzen_request->set('cust_status', 'PRIVATE');
+        $this->payzen_request->set('ship_to_status', 'PRIVATE');
+
+        $not_allowed_chars_regex = '#[^A-Z0-9ÁÀÂÄÉÈÊËÍÌÎÏÓÒÔÖÚÙÛÜÇ -]#ui';
+
+        $chosen_shipping_methods = WC()->session->get('chosen_shipping_methods');
+        $selected_shipping = substr($chosen_shipping_methods[0], 0, strpos($chosen_shipping_methods[0], ':'));
+
+        if (! $selected_shipping) { // There is no shipping method.
+            $this->payzen_request->set('ship_to_type', 'ETICKET');
+            $this->payzen_request->set('ship_to_speed', 'EXPRESS');
+        } else {
+            $shipping_method = $this->to_gateway_carrier($selected_shipping);
+
+            if (! $shipping_method) {
+                $this->log('Cannot get mapped data for the order shipping method: ' . $shipping_method_code);
+                return;
+            }
+
+            // Get carrier name.
+            $carrier_name = $order->get_shipping_method();
+
+            // Delivery point name.
+            switch ($shipping_method['type']) {
+                case 'RELAY_POINT':
+                case 'RECLAIM_IN_STATION':
+                case 'RECLAIM_IN_SHOP':
+                    $name = $carrier_name;
+
+                    $address = self::get_order_property($order, 'shipping_address_1');
+                    $address .= self::get_order_property($order, 'shipping_address_2') ? ' ' . self::get_order_property($order, 'shipping_address_2') : '';
+
+                    // Send delivery point name, address, postcode and city in field ship_to_delivery_company_name.
+                    $name .= ' ' . $address;
+                    $name .= ' ' . self::get_order_property($order, 'shipping_postcode');
+                    $name .= ' ' . self::get_order_property($order, 'shipping_city');
+
+                    // Delete not allowed chars.
+                    $this->payzen_request->set('ship_to_delivery_company_name', preg_replace($not_allowed_chars_regex, ' ', $name));
+
+                    break;
+
+                default:
+                    $this->payzen_request->set('ship_to_delivery_company_name', preg_replace($not_allowed_chars_regex, ' ', $carrier_name));
+
+                    break;
+            }
+
+            $this->payzen_request->set('ship_to_type', empty($shipping_method['type']) ? null : $shipping_method['type']);
+            $this->payzen_request->set('ship_to_speed', empty($shipping_method['speed']) ? null : $shipping_method['speed']);
+
+            if ($shipping_method['speed'] === 'PRIORITY') {
+                $this->payzen_request->set('ship_to_delay', empty($shipping_method['delay']) ? null : $shipping_method['delay']);
+            }
+        }
+    }
+
     private function get_product_top_level_category($product_id)
     {
         $product_terms = get_the_terms($product_id, 'product_cat');
@@ -1949,5 +2038,19 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $shipping += $order->get_shipping_tax();
 
         return $shipping;
+    }
+
+    public static function get_total_amount()
+    {
+        global $woocommerce;
+
+        if ($order_id = get_query_var('order-pay')) {
+            $order = new WC_Order((int) $order_id);
+            return $order->get_total();
+        } elseif ($woocommerce->cart) {
+            return $woocommerce->cart->total;
+        }
+
+        return 0;
     }
 }

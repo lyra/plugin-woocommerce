@@ -2,10 +2,10 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 5.9
+Tested up to: 6.0
 WC requires at least: 2.0
-WC tested up to: 6.4
-Stable tag: 1.9.5
+WC tested up to: 6.6
+Stable tag: 1.10.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,15 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.10.0, 2022-06-29 =
+* [subscr] Do not process subscription if there is no renewal date.
+* [embedded] Bug fix: Do not refresh payment page automatically after an unrecoverable error.
+* [franfinance] Send information about shipping method for Franfinance payment method.
+* Added shipping options configuration field.
+* Support for "woocommerce blocks" in standard redirection payment.
+* Bug fix: Fix payment methods display based on amount restrictions for commands created from WooCommerce Back Office.
+* Possibility to make refunds for payments.
 
 = 1.9.5, 2022-05-05 =
 * Update list of supported payment means.

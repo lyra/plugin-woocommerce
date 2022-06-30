@@ -267,7 +267,8 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
             return false;
         }
 
-        if ($woocommerce->cart) {
+        $order_id = get_query_var('order-pay');
+        if ($order_id || $woocommerce->cart) {
             // Check Choozeo payment options.
             $available_options = $this->get_available_options();
             if (empty($available_options)) {
@@ -282,7 +283,8 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
     {
         global $woocommerce;
 
-        $amount = $woocommerce->cart->total;
+        // Recover total amount either from order or from current cart if any.
+        $amount = self::get_total_amount();
 
         $options = $this->get_option('payment_options');
         $enabled_options = array();
