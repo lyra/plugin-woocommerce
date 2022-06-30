@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.9.5
+ * Version: 1.10.0
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 5.9
+ * Tested up to: 6.0
  * WC requires at least: 2.0
- * WC tested up to: 6.4
+ * WC tested up to: 6.6
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -30,7 +30,12 @@ if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Lyranetwork\Payzen\Sdk\Refund\Api as PayzenRefundApi;
+use Lyranetwork\Payzen\Sdk\Refund\OrderInfo as PayzenOrderInfo;
+
 define('WC_PAYZEN_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('WC_PAYZEN_PLUGIN_PATH', untrailingslashit(plugin_dir_path(__FILE__)));
 
 /* A global var to easily enable/disable features. */
 global $payzen_plugin_features;
@@ -60,7 +65,7 @@ function woocommerce_payzen_activation()
 
     $all_active_plugins = apply_filters('active_plugins', $all_active_plugins);
 
-    if (! stripos(implode($all_active_plugins), '/woocommerce.php')) {
+    if (! stripos(implode('', $all_active_plugins), '/woocommerce.php')) {
         deactivate_plugins(plugin_basename(__FILE__)); // Deactivate ourself.
 
         // Load translation files.
@@ -134,13 +139,28 @@ function woocommerce_payzen_init()
         require_once 'class-wc-gateway-payzensubscription.php';
     }
 
-    require_once 'includes/PayzenRequest.php';
-    require_once 'includes/PayzenResponse.php';
-    require_once 'includes/PayzenRest.php';
+    require_once 'includes/sdk-autoload.php';
     require_once 'includes/PayzenRestTools.php';
     require_once 'includes/PayzenTools.php';
 }
 add_action('woocommerce_init', 'woocommerce_payzen_init');
+
+function woocommerce_payzen_woocommerce_block_support()
+{
+    if (class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
+        if (! class_exists('WC_Gateway_Payzen_Blocks_Support')) {
+            require_once 'includes/class-wc-gateway-payzen-blocks-support.php';
+        }
+
+        add_action(
+            'woocommerce_blocks_payment_method_type_registration',
+            function(PaymentMethodRegistry $payment_method_registry) {
+                $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenStd'));
+            }
+        );
+    }
+}
+add_action('woocommerce_blocks_loaded', 'woocommerce_payzen_woocommerce_block_support');
 
 /* Add our payment methods to woocommerce methods. */
 function woocommerce_payzen_add_method($methods)
@@ -520,7 +540,7 @@ function payzen_send_support_email_on_order($order)
             if ($payzen_update_subscription_error_msg) {
                 delete_transient('payzen_update_subscription_error_msg');
         ?>
-                jQuery('#lost-connection-notice').after('<div class="error notice is-dismissible"><p><?php echo addslashes($payzen_update_subscription_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__( 'Dismiss this notice.', 'woocommerce' )  ?></span></button></div>');
+                jQuery('#lost-connection-notice').after('<div class="error notice is-dismissible"><p><?php echo addslashes($payzen_update_subscription_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__('Dismiss this notice.', 'woocommerce')  ?></span></button></div>');
         <?php } ?>
             });
         </script>
@@ -587,3 +607,60 @@ if (is_multisite() && key_exists('vads_hash', $_POST) && $_POST['vads_hash']
         $current_site->site_name = ucfirst($current_site->domain);
     }
 }
+
+function payzen_online_refund($order_id, $refund_id)
+{
+    // Check if order was passed with one of payzen submodules.
+    $order = new WC_Order((int) $order_id);
+    if (substr($order->get_payment_method(), 0, strlen('payzen')) !== 'payzen') {
+        return;
+    }
+
+    $refund = new WC_Order_Refund((int) $refund_id);
+
+    // Prepare order refund bean.
+    require_once 'includes/sdk-autoload.php';
+    require_once 'includes/PayzenRefundProcessor.php';
+
+    $order_refund_bean = new PayzenOrderInfo();
+    $order_refund_bean->setOrderRemoteId($order_id);
+    $order_refund_bean->setOrderId($order_id);
+    $order_refund_bean->setOrderReference($order->get_order_number());
+    $order_refund_bean->setOrderCurrencyIsoCode($refund->get_currency());
+    $order_refund_bean->setOrderCurrencySign(html_entity_decode(get_woocommerce_currency_symbol($refund->get_currency())));
+    $order_refund_bean->setOrderUserInfo(PayzenTools::get_user_info());
+    $refund_processor = new PayzenRefundProcessor();
+
+    $std_payment_method = new WC_Gateway_PayzenStd();
+
+    $test_mode = $std_payment_method->get_general_option('ctx_mode') == 'TEST';
+    $key = $test_mode ? $std_payment_method->get_general_option('test_private_key') : $std_payment_method->get_general_option('prod_private_key');
+
+    $refund_api = new PayzenRefundApi(
+        $refund_processor,
+        $key,
+        $std_payment_method->get_general_option('rest_url'),
+        $std_payment_method->get_general_option('site_id'),
+        'WooCommerce'
+    );
+
+    // Do online refund.
+    $refund_api->refund($order_refund_bean, $refund->get_amount());
+}
+
+// Do online refund after local refund.
+add_action('woocommerce_order_refunded', 'payzen_online_refund', 10 , 2);
+
+function payzen_display_refund_result_message($order_id)
+{
+    $payzen_online_refund_result = get_transient('payzen_online_refund_result');
+
+    if ($payzen_online_refund_result) {
+        echo $payzen_online_refund_result;
+
+        delete_transient('payzen_online_refund_result');
+    }
+}
+
+// Display online refund result message.
+add_action('woocommerce_admin_order_totals_after_discount', 'payzen_display_refund_result_message', 10, 1);

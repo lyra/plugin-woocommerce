@@ -13,6 +13,9 @@ if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
+use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
+use Lyranetwork\Payzen\Sdk\Rest\Api as PayzenRest;
+
 class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 {
     const SUBSCRIPTIONS_HANDLER = 'wc-subscriptions';

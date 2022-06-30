@@ -1,6 +1,5 @@
 .project
 .buildpath
 /.settings/
-**/build/
 **/archives/
 **/local.properties

@@ -117,8 +117,13 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
             $subscription = reset($subscriptions); // Get first subscription
         }
 
+        $effect_date = self::get_effect_date($subscription, $is_payment_change);
+        if ($effect_date === null) {
+            return false;
+        }
+
         $info = $subscription ? array(
-            'effect_date' => self::get_effect_date($subscription, $is_payment_change),
+            'effect_date' => $effect_date,
             'init_amount' => null,
             'init_number' => null,
             'amount' => $subscription->get_total(),
@@ -159,7 +164,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
             $start_time = $trial_end;
         }
 
-        return date('Ymd', $start_time);
+        return $start_time ? date('Ymd', $start_time) : null;
     }
 
     private static function get_end_date($subscription)

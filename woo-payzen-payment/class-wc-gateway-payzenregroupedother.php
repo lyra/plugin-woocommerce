@@ -13,6 +13,8 @@ if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
+use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
+
 class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
 {
     public function __construct()
@@ -159,7 +161,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         );
 
         $culumns = array();
-        $descr = $descr = sprintf(__('Click on « Add » button to add one or more new payment means.<br /><b>Code: </b>The code of the means of payment as expected by %s gateway.<br /><b>Label: </b>The default label of the means of payment.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>',
+        $descr = sprintf(__('Click on « Add » button to add one or more new payment means.<br /><b>Code: </b>The code of the means of payment as expected by %s gateway.<br /><b>Label: </b>The default label of the means of payment.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>',
             'woo-payzen-payment'), 'PayZen');
 
         $culumns['code'] = array(
@@ -467,7 +469,8 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
     {
         global $woocommerce;
 
-        $options = $woocommerce->cart ? $this->get_available_options() : null;
+        $order_id = get_query_var('order-pay');
+        $options = ($order_id || $woocommerce->cart) ? $this->get_available_options() : null;
 
         if (version_compare($woocommerce->version, '2.3.0', '>=')) {
             if ($this->get_option('regroup_enabled') !== 'yes') {
@@ -488,7 +491,8 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
     {
         global $woocommerce;
 
-        $amount = $woocommerce->cart->total;
+        // Recover total amount either from order or from current cart if any.
+        $amount = self::get_total_amount();
         $customer_country = $woocommerce->customer->get_shipping_country();
 
         $options = $this->get_option('payment_means');

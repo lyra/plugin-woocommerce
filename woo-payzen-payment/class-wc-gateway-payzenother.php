@@ -13,6 +13,8 @@ if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
+use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
+
 class WC_Gateway_PayzenOther extends WC_Gateway_PayzenStd
 {
     protected $payment_code;
