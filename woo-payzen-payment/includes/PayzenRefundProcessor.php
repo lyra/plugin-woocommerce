@@ -35,7 +35,7 @@ class PayzenRefundProcessor implements RefundProcessor
      * Action to do after sucessful refund process.
      *
      */
-    public function doOnSuccess($orderRefundBean, $forceUpdateOrderStatus, $refundedAmount, $transAmount)
+    public function doOnSuccess($operationResponse, $operationType)
     {
 
        $msg = '<div class="inline updated" style="text-align: left;"><p><strong>' . __('Online refund successfully completed', 'woo-payzen-payment') . '</strong></p></div>';

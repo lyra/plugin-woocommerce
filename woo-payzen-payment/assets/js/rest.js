@@ -27,6 +27,7 @@ var payzenInitRestEvents = function(KR) {
     KR.onError(function(e) {
         jQuery('#payzenstd_rest_processing').css('display', 'none');
         jQuery('form.checkout').removeClass('processing').unblock();
+        jQuery('#order_review').unblock();
 
         var msg = '';
         if (PAYZEN_DFAULT_MESSAGES.indexOf(e.errorCode) > -1) {

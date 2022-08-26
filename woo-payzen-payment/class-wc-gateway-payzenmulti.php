@@ -84,7 +84,8 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
                 'en_GB' => 'Payment by credit card in installments',
                 'fr_FR' => 'Paiement par carte bancaire en plusieurs fois',
                 'de_DE' => 'Ratenzahlung mit EC-/Kreditkarte',
-                'es_ES' => 'Pago con tarjeta de crédito en cuotas'
+                'es_ES' => 'Pago con tarjeta de crédito en cuotas',
+                'pt_BR' => 'Pagamento parcelado com cartão de crédito'
             );
         }
 

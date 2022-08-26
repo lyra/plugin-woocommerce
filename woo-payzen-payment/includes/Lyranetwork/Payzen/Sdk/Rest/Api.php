@@ -145,7 +145,7 @@ class Api
         $raw_response = curl_exec($curl);
 
         $info = curl_getinfo($curl);
-        if (!in_array($info['http_code'], array(200, 401), true)) {
+        if (! in_array($info['http_code'], array(200, 401), true)) {
             $error = curl_error($curl);
             $errno = curl_errno($curl);
             curl_close($curl);
@@ -166,7 +166,7 @@ class Api
         }
 
         $response = json_decode($raw_response, true);
-        if (!is_array($response)) {
+        if (! is_array($response)) {
             $error = curl_error($curl);
             $errno = curl_errno($curl);
             curl_close($curl);
@@ -220,12 +220,12 @@ class Api
         $context = stream_context_create(array('http' => $http, 'ssl' => $ssl));
         $raw_response = file_get_contents($url, false, $context);
 
-        if (!$raw_response) {
+        if (! $raw_response) {
             throw new \Exception("Error: call to URL $url failed.", '-1');
         }
 
         $response = json_decode($raw_response, true);
-        if (!is_array($response)) {
+        if (! is_array($response)) {
             throw new \Exception("Error: call to URL $url failed, response $raw_response.", '-1');
         }
 

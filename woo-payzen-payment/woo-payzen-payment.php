@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.10.0
+ * Version: 1.10.1
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
  * Tested up to: 6.0
  * WC requires at least: 2.0
- * WC tested up to: 6.6
+ * WC tested up to: 6.8
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -578,12 +578,22 @@ function payzen_send_email()
 // Send support email.
 add_action('woocommerce_api_wc_gateway_payzen_send_email', 'payzen_send_email');
 
-/* Retrieve blog_id from post when this is an IPN URL call. */
-if (is_multisite() && key_exists('vads_hash', $_POST) && $_POST['vads_hash']
-    && key_exists('vads_ext_info_blog_id', $_POST) && $_POST['vads_ext_info_blog_id']) {
+/* Retrieve blog_id from POST when this is an IPN URL call. */
+require_once 'includes/sdk-autoload.php';
+require_once 'includes/PayzenRestTools.php';
+
+if (PayzenRestTools::checkResponse($_POST)) {
+    $answer = json_decode($_POST['kr-answer'], true);
+    $data = PayzenRestTools::convertRestResult($answer);
+    $is_valid_ipn = key_exists('vads_ext_info_blog_id', $data) && $data['vads_ext_info_blog_id'];
+} else {
+    $is_valid_ipn = key_exists('vads_hash', $_POST) && $_POST['vads_hash'] && key_exists('vads_ext_info_blog_id', $_POST) && $_POST['vads_ext_info_blog_id'];
+}
+
+if (is_multisite() && $is_valid_ipn) {
     global $wpdb, $current_blog, $current_site;
 
-    $blog = $_POST['vads_ext_info_blog_id'];
+    $blog = $_POST['vads_ext_info_blog_id'] ? $_POST['vads_ext_info_blog_id'] : $data['vads_ext_info_blog_id'];
     switch_to_blog((int) $blog);
 
     // Set current_blog global var.

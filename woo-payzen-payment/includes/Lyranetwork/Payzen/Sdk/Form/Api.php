@@ -236,7 +236,7 @@ class Api
             'NORAUTO' => 'Carte Norauto option Financement', 'NORAUTO_SB' => 'Carte Norauto option Financement (sandbox)',
             'ONEY' => 'Paiement en 3 ou 4 fois par CB', 'ONEY_3X_4X' => 'Paiement en 3 ou 4 fois Oney',
             'ONEY_ENSEIGNE' => 'Cartes enseignes Oney', 'ONEY_SANDBOX' => 'Paiement en 3 ou 4 fois par CB (sandbox)',
-            'PAYBOX' => 'Paybox', 'PAYDIREKT' => 'Paydirekt', 'PAYLIB' => 'Paylib', 'PAYPAL' => 'PayPal',
+            'PAYBOX' => 'Paybox', 'PAYDIREKT' => 'Paydirekt', 'PAYPAL' => 'PayPal',
             'PAYPAL_SB' => 'PayPal Sandbox', 'PICWIC' => 'Carte Picwic', 'PICWIC_SB' => 'Carte Picwic (sandbox)',
             'POSTFINANCE' => 'PostFinance Card', 'POSTFINANCE_EFIN' => 'PostFinance E-Finance', 'PRESTO' => 'Presto',
             'PRZELEWY24' => 'Przelewy24', 'SDD' => 'Prélèvement SEPA', 'SODEXO' => 'Pass Restaurant', 'SOFICARTE' => 'Soficarte',

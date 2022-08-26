@@ -31,11 +31,18 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
      */
     public function cart_contains_subscription($cart)
     {
-        if (class_exists('WC_Subscriptions_Cart')) {
-            return WC_Subscriptions_Cart::cart_contains_subscription();
-        } else {
+        if (! class_exists('WC_Subscriptions_Cart')) {
             return false;
         }
+
+        if ($order = WC_Gateway_PayzenStd::order_created_from_bo()) {
+            $subscriptions = wcs_get_subscriptions_for_order($order);
+            $subscription = reset($subscriptions); // Get first subscription.
+
+            return $subscription ? true : false;
+        }
+
+        return WC_Subscriptions_Cart::cart_contains_subscription();
     }
 
     /**
@@ -44,6 +51,10 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
      */
     public function cart_contains_multiple_subscriptions($cart)
     {
+        if (! class_exists('WC_Subscriptions_Product')) {
+            return false;
+        }
+
         $count = 0;
 
         if (! empty($cart->cart_contents ) && ! wcs_cart_contains_renewal()) {
@@ -62,6 +73,10 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
      * @see Payzen_Subscriptions_Handler_Interface::is_subscription_update()
      */
     public function is_subscription_update() {
+        if (! class_exists('WC_Subscriptions_Product')) {
+            return false;
+        }
+
         return WC_Subscriptions_Change_Payment_Gateway::$is_request_to_change_payment;
     }
 
