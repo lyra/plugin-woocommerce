@@ -87,7 +87,8 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
                 'en_GB' => 'Payment with Klarna',
                 'fr_FR' => 'Paiement avec Klarna',
                 'de_DE' => 'Zahlung mit Klarna',
-                'es_ES' => 'Pago con Klarna'
+                'es_ES' => 'Pago con Klarna',
+                'pt_BR' => 'Pagamento com Klarna'
             );
         }
     }

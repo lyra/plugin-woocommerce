@@ -84,7 +84,9 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         add_action('manage_shop_subscription_posts_custom_column', array($this, 'payzen_display_subscription_error_msg'), 2);
 
-        $this->subscriptions_handler->init_hooks();
+        if ($this->subscriptions_handler) {
+            $this->subscriptions_handler->init_hooks();
+        }
     }
 
     /**
@@ -104,6 +106,9 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         // Add subscription payment fields.
         $this->form_fields['subscriptions'] = array(
+            'custom_attributes' => array(
+                'onchange' => 'payzenShowSubscriptionsWarningMessage()'
+            ),
             'title' => __('Subscriptions management', 'woo-payzen-payment'),
             'type' => 'select',
             'default' => 'wc-subscriptions',
@@ -126,9 +131,13 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
     {
         global $woocommerce;
 
+        if (! $this->subscriptions_handler) {
+            return false;
+        }
+
         // In case of changing payment method of an existing subscription.
         // At this stage all conditions of is_available_for_subscriptions are guaranteed so we return true.
-        if ($this->subscriptions_handler && $this->subscriptions_handler->is_subscription_update()) {
+        if ($this->subscriptions_handler->is_subscription_update()) {
             return true;
         }
 
@@ -140,9 +149,8 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             return false;
         }
 
-        if ($this->subscriptions_handler
-            && ($this->subscriptions_handler->cart_contains_multiple_subscriptions($woocommerce->cart)
-                || ! $this->subscriptions_handler->cart_contains_subscription($woocommerce->cart))) {
+        if ($this->subscriptions_handler->cart_contains_multiple_subscriptions($woocommerce->cart)
+                || ! $this->subscriptions_handler->cart_contains_subscription($woocommerce->cart)) {
             return false;
         }
 
@@ -224,7 +232,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $saved_identifier = $this->get_cust_identifier($cust_id);
         $is_identifier_active = $this->is_cust_identifier_active($cust_id);
 
-        $info = $this->subscriptions_handler->subscription_info($order);
+        $info = $this->subscriptions_handler ? $this->subscriptions_handler->subscription_info($order) : null;
 
         if (is_array($info) && ! empty($info)) {
             $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
@@ -264,7 +272,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         // $order_id is an id of a subscription.
         $order_id = self::get_order_property($order, 'id');
-        if ($parent_order = $this->subscriptions_handler->get_parent_order($order_id)) {
+        if ($this->subscriptions_handler && ($parent_order = $this->subscriptions_handler->get_parent_order($order_id))) {
             $this->payzen_request->set('order_id', self::get_order_property($parent_order, 'id'));
             $this->payzen_request->addExtInfo('order_key', self::get_order_property($parent_order, 'order_key'));
             $this->payzen_request->addExtInfo('subsc_id', $order_id);
@@ -381,7 +389,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $saved_identifier = $this->get_cust_identifier($cust_id);
 
         // Re-generate subscriptions data from updated order.
-        $info = $this->subscriptions_handler->subscription_info($order);
+        $info = $this->subscriptions_handler ? $this->subscriptions_handler->subscription_info($order) : null;
         if (! is_array($info) || empty($info)) {
             set_transient('payzen_update_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
             $this->log("Empty subscription info returned for order #$order_id. Cannot update subscription #{$subscription_id}.");
@@ -493,6 +501,48 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             </script>
             <?php
         }
+    }
+
+    public function payzen_admin_head_script()
+    {
+        parent::payzen_admin_head_script();
+        ?>
+        <script type="text/javascript">
+            //<!--
+            function payzenShowSubscriptionsWarningMessage() {
+                var subscriptions = jQuery('#<?php echo esc_attr($this->get_field_key('subscriptions')); ?> option:selected').val();
+                if ((<?php echo PayzenTools::is_plugin_not_active('woocommerce-subscriptions/woocommerce-subscriptions.php'); ?>) && (subscriptions === 'wc-subscriptions') &&
+                    ! confirm('<?php echo sprintf(__('Warning! %s plugin must be installed and activated for the subscription payment method to work.', 'woo-payzen-payment'), 'WooCommerce Subscriptions')?>')) {
+                    payzenResetSubscriptionsField();
+                } else if ((<?php echo PayzenTools::is_plugin_not_active('subscriptio/subscriptio.php'); ?>) && (subscriptions === 'subscriptio') &&
+                    ! confirm('<?php echo sprintf(__('Warning! %s plugin must be installed and activated for the subscription payment method to work.', 'woo-payzen-payment'), 'Subscriptio')?>')) {
+                    payzenResetSubscriptionsField();
+                } else if ((subscriptions === 'custom') &&
+                    ! confirm('<?php echo __('Warning! You have to implement a subscriptions adapter for our plugin.', 'woo-payzen-payment')?>')) {
+                    payzenResetSubscriptionsField();
+                }
+            }
+
+            function payzenResetSubscriptionsField() {
+                jQuery('#<?php echo esc_attr($this->get_field_key('subscriptions')); ?>').val("<?php echo esc_attr($this->get_option('subscriptions')); ?>");
+                jQuery('#<?php echo esc_attr($this->get_field_key('subscriptions')); ?>').trigger('change');
+            }
+             //-->
+        </script>
+<?php
+    }
+
+    /**
+     * Admin panel options.
+     */
+    public function admin_options()
+    {
+        if ($this->get_option('subscriptions') === 'wc-subscriptions'
+            && PayzenTools::is_plugin_not_active('woocommerce-subscriptions/woocommerce-subscriptions.php') === 'true') {
+            echo '<div class="inline error"><p><strong>' . sprintf(__('Warning! %s plugin must be installed and activated for the subscription payment method to work.', 'woo-payzen-payment'), 'WooCommerce Subscriptions') . '</strong></p></div>';
+        }
+
+        parent::admin_options();
     }
 
     /**

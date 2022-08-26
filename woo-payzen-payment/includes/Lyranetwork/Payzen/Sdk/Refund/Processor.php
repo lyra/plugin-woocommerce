@@ -21,7 +21,7 @@ interface Processor
      * Action to do after sucessful refund process.
      *
      */
-    public function doOnSuccess($orderInfo, $forceUpdateOrderStatus, $refundedAmount, $transAmount);
+    public function doOnSuccess($operationResponse, $operationType);
 
     /**
      * Action to do after failed refund process.

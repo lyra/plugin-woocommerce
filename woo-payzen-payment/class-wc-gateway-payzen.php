@@ -36,7 +36,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-6.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.10.0';
+    const PLUGIN_VERSION = '1.10.1';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -683,7 +683,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     'en_GB' => 'Redirection to shop in a few seconds...',
                     'fr_FR' => 'Redirection vers la boutique dans quelques instants...',
                     'de_DE' => 'Weiterleitung zum Shop in Kürze...',
-                    'es_ES' => 'Redirección a la tienda en unos momentos...'
+                    'es_ES' => 'Redirección a la tienda en unos momentos...',
+                    'pt_BR' => 'Redirecionamento para a loja em poucos segundos...'
                 ),
                 'description' => __('Message displayed on the payment page prior to redirection after a successful payment.', 'woo-payzen-payment'),
                 'css' => 'width: 35em;'
@@ -702,7 +703,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     'en_GB' => 'Redirection to shop in a few seconds...',
                     'fr_FR' => 'Redirection vers la boutique dans quelques instants...',
                     'de_DE' => 'Weiterleitung zum Shop in Kürze...',
-                    'es_ES' => 'Redirección a la tienda en unos momentos...'
+                    'es_ES' => 'Redirección a la tienda en unos momentos...',
+                    'pt_BR' => 'Redirecionamento para a loja em poucos segundos...'
                 ),
                 'description' => __('Message displayed on the payment page prior to redirection after a declined payment.', 'woo-payzen-payment'),
                 'css' => 'width: 35em;'
@@ -1922,7 +1924,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     private function is_new_order($order, $trs_id, $seq_nb)
     {
-        if (self::get_order_property($order, 'status') === 'pending') {
+        if ($order->has_status(apply_filters('woocommerce_payzen_valid_order_statuses', array('pending'), $order))) {
             return true;
         }
 
@@ -1961,6 +1963,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     protected function add_notice($msg, $type = 'success')
     {
         global $woocommerce;
+
+        if (! empty($_POST)) {
+            do_action('woocommerce_set_cart_cookies', true);
+        }
 
         if (function_exists('wc_add_notice')) {
             wc_add_notice($msg, $type);
