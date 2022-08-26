@@ -88,7 +88,8 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                 'en_GB' => 'Other payment means',
                 'fr_FR' => 'Autres moyens de paiement',
                 'de_DE' => 'Anderen Zahlungsmittel',
-                'es_ES' => 'Otros medios de pago'
+                'es_ES' => 'Otros medios de pago',
+                'pt_BR' => 'Outros meios de pagamento'
             );
         }
 

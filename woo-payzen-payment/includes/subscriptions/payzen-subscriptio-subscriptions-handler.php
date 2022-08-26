@@ -29,6 +29,10 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
      */
     public function cart_contains_subscription($cart)
     {
+        if (! class_exists('Subscriptio')) {
+            return false;
+        }
+
         return Subscriptio::cart_contains_subscription();
     }
 
@@ -38,6 +42,10 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
      */
     public function cart_contains_multiple_subscriptions($cart)
     {
+        if (! class_exists('Subscriptio_Subscription_Product')) {
+            return false;
+        }
+
         $count = 0;
 
         if (! empty($cart->cart_contents)) {

@@ -190,7 +190,7 @@ class Response
     public function getRiskControl()
     {
         $riskControl = $this->get('risk_control');
-        if (!isset($riskControl) || !trim($riskControl)) {
+        if (! isset($riskControl) || ! trim($riskControl)) {
             return array();
         }
 
@@ -210,7 +210,7 @@ class Response
     public function getRiskAssessment()
     {
         $riskAssessment = $this->get('risk_assessment_result');
-        if (!isset($riskAssessment) || !trim($riskAssessment)) {
+        if (! isset($riskAssessment) || ! trim($riskAssessment)) {
             return array();
         }
 
@@ -435,7 +435,7 @@ class Response
     public static function translate($result, $type = self::TYPE_RESULT, $lang = 'en', $appendCode = false)
     {
         // If language is not supported, use the domain default language.
-        if (!array_key_exists($lang, self::$RESPONSE_TRANS)) {
+        if (! array_key_exists($lang, self::$RESPONSE_TRANS)) {
             $lang = 'en';
         }
 

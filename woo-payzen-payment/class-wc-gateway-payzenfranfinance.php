@@ -87,7 +87,8 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
                 'en_GB' => 'Payment with Franfinance',
                 'fr_FR' => 'Paiement avec Franfinance',
                 'de_DE' => 'Zahlung mit Franfinance',
-                'es_ES' => 'Pago con Franfinance'
+                'es_ES' => 'Pago con Franfinance',
+                'pt_BR' => 'Pagamento com Franfinance'
             );
         }
 

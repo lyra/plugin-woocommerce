@@ -27,7 +27,7 @@ class Payzen_Subscriptions_Loader
                 // Removed handler provided, force using WC Subscriptions.
                 $handler = 'wc-subscriptions';
             } else {
-                throw new \InvalidArgumentException("\" $handler \" is not a valid subscriptions handler identifier.");
+                return null;
             }
         }
 

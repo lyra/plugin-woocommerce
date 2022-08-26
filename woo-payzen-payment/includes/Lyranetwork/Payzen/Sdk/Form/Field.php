@@ -89,7 +89,7 @@ class Field
             return false;
         }
 
-        if ($this->value !== null && !preg_match($this->regex, $this->value)) {
+        if ($this->value !== null && ! preg_match($this->regex, $this->value)) {
             return false;
         }
 

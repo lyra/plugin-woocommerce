@@ -122,8 +122,7 @@ class Api {
                             $AmountStillToRefund -= $transactionAmounRefund;
 
                             // Do not update order status till we refund all the amount.
-                            $forceUpdateOrderStatus = (($amountInCents == $refundableAmount) && ($AmountStillToRefund == 0));
-                            $this->refundFromOneTransaction($orderInfo, $transactionAmounRefund, $transaction, $currency, $forceUpdateOrderStatus);
+                            $this->refundFromOneTransaction($orderInfo, $transactionAmounRefund, $transaction, $currency);
 
                             if ($AmountStillToRefund == 0) {
                                 break;
@@ -253,7 +252,7 @@ class Api {
         return $refundedableAmount;
     }
 
-    private function refundFromOneTransaction($orderInfo, $amountInCents, $transaction, $currency, $forceUpdateOrderStatus = null)
+    private function refundFromOneTransaction($orderInfo, $amountInCents, $transaction, $currency)
     {
         $amount = $currency->convertAmountToFloat($amountInCents, $currency->getDecimals());
         $successStatuses = array_merge(
@@ -309,9 +308,6 @@ class Api {
                     // We refund all the transaction refundable remaining amount in the gateway currency to avoid also conversions rounding.
                     $amountInCents = $transaction['amount'] - $transaction['transactionDetails']['cardDetails']['captureResponse']['refundAmount'];
                     $currency_alpha3 = $transaction['currency'];
-
-                    $forceUpdateOrderStatus = true;
-                    $real_refund_amount = $remainingAmount; // Real refunded amount in order currency;
                 }
             }
 
@@ -337,11 +333,9 @@ class Api {
                 throw new \Exception(sprintf($this->refundProcessor->translate('Unexpected transaction type received (%1$s).'), $transType));
             }
 
-            $refundedAmount += $real_refund_amount;
-
             // Refund success do after refund function.
             $this->refundProcessor->log("Online refund $amount {$orderInfo->getOrderCurrencySign()} for transaction with uuid #$uuid for order #{$orderInfo->getOrderId()} is successful.", 'INFO');
-            $this->refundProcessor->doOnSuccess($orderInfo, $forceUpdateOrderStatus, $refundedAmount, $transAmount);
+            $this->refundProcessor->doOnSuccess($refundPaymentResponse['answer'], 'refund');
         } else {
             $transAmount = $transaction['amount'];
 
@@ -368,7 +362,7 @@ class Api {
 
                 // Refund success do after refund function.
                 $this->refundProcessor->log("Online transaction with uuid #$uuid cancel for order #{$orderInfo->getOrderId()} is successful.", 'INFO');
-                $this->refundProcessor->doOnSuccess($orderInfo, $forceUpdateOrderStatus, $transAmount, $transAmount);
+                $this->refundProcessor->doOnSuccess($cancelPaymentResponse['answer'], 'cancel');
             } else {
                 // Partial transaction cancel, call update WS.
                 $new_transaction_amount = $transAmount - $amountInCents;
@@ -395,7 +389,7 @@ class Api {
 
                 // Refund success do after refund function.
                 $this->refundProcessor->log("Online transaction with uuid #$uuid update for order #{$orderInfo->getOrderId()} is successful.", 'INFO');
-                $this->refundProcessor->doOnSuccess($orderInfo, false, $transAmount, $transAmount);
+                $this->refundProcessor->doOnSuccess($updatePaymentResponse['answer'], 'update');
             }
         }
     }

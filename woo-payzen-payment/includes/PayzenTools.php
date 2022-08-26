@@ -57,6 +57,11 @@ class PayzenTools
         return implode(' / ', $active_plugins);
     }
 
+    public static function is_plugin_not_active($plugin)
+    {
+        return is_plugin_active($plugin) ? 'false' : 'true';
+    }
+
     public static function get_used_discounts($order)
     {
         $coupons = array();
