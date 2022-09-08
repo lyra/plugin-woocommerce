@@ -36,7 +36,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-6.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.10.1';
+    const PLUGIN_VERSION = '1.10.2';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -412,7 +412,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'fr' => 'Français',
                 'en' => 'English',
                 'de' => 'Deutsch',
-                'es' => 'Español'
+                'es' => 'Español',
+                'pt' => 'Português'
                 // Complete when other languages are managed.
             );
 

@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PayZen para WooCommerce 1.10.1\n"
+"Project-Id-Version: PayZen para WooCommerce 1.10.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-07-28 09:14+0100\n"
-"PO-Revision-Date: 2022-08-02 15:01+0200\n"
+"PO-Revision-Date: 2022-09-07 14:42+0200\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <support@payzen.eu>\n"
 "Language: pt\n"
@@ -786,7 +786,7 @@ msgstr "OPÇÕES DE PAGAMENTO MÚLTIPLAS"
 
 #: ../class-wc-gateway-payzenmulti.php:109
 msgid "Click on \"Add\" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </b>Minimum amount to enable the payment option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Count: </b>Total number of payments.<br /><b>Period: </b>Delay (in days) between payments.<br /><b>1st payment: </b>Amount of first payment, in percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do not forget to click on \"Save\" button to save your modifications.</b>"
-msgstr "Clique no botão « Adicionar » para configurar uma ou mais opções de pagamento.<br /><b>Rótulo: </b>A opção de rótulo para exibir no cabeçalho.<br /><b>Valor min.: </b>Valor mínimo para autorizar a opção de pagamento.<br /><b>Valor máximo: </b>Valor máximo para autorizar a opção de pagamento.<br /><b>Contagem: </b>Quantidade total de pagamentos.<br /><b>Período: </b>Prazo (em dias) entre os pagamentos.<br /><b>1° pagamento: </b>Valor do primeiro pagamento, em percentegaem do valor total. Se estiver vazio, todos os pagamentos terão o mesmo valor.<br /><b>Não esqueça de clicar no botão \"Salvar\" para salvar suas modificações.</b>"
+msgstr "Clique no botão « Adicionar » para configurar uma ou mais opções de pagamento.<br /><b>Rótulo: </b>A opção de rótulo para exibir no cabeçalho.<br /><b>Valor min.: </b>Valor mínimo para autorizar a opção de pagamento.<br /><b>Valor máximo: </b>Valor máximo para autorizar a opção de pagamento.<br /><b>Contagem: </b>Quantidade total de pagamentos.<br /><b>Período: </b>Prazo (em dias) entre os pagamentos.<br /><b>1° pagamento: </b>Valor do primeiro pagamento, em percentagem do valor total. Se estiver vazio, todos os pagamentos terão o mesmo valor.<br /><b>Não esqueça de clicar no botão \"Salvar\" para salvar suas modificações.</b>"
 
 #: ../class-wc-gateway-payzenmulti.php:131
 msgid "Contract"

@@ -146,5 +146,25 @@ var PAYZEN_ERROR_MESSAGES = {
 
         ACQ_001: 'El pago es rechazado. Intenta pagar con otra tarjeta.',
         ACQ_999: 'Ocurrió un error en el proceso de pago.'
+    },
+
+    pt: {
+        RELOAD_LINK: 'Por favor, atualize a página.',
+        CLIENT_001: 'O pagamento é rejeitado. Tente pagar com outro cartão.',
+        CLIENT_101: 'O pagamento é cancelado.',
+        CLIENT_301: 'O número do cartão é inválido. Por favor, cheque o número e tente novamente.',
+        CLIENT_302: 'A data de expiração é inválida. Verifique a data e tente novamente.',
+        CLIENT_303: 'O código de segurança do cartão (CVV) é inválido. Verifique o código e tente novamente.',
+        CLIENT_999: 'Ocorreu um erro técnico. Por favor, tente novamente mais tarde.',
+
+        INT_999: 'Ocorreu um erro técnico. Por favor, tente novamente mais tarde.',
+
+        PSP_003: 'O pagamento é rejeitado. Tente pagar com outro cartão.',
+        PSP_099: 'Muitas tentativas. Por favor, tente novamente mais tarde.',
+        PSP_108: 'O formulário expirou.',
+        PSP_999: 'Ocorreu um erro no processo de pagamento.',
+
+        ACQ_001: 'O pagamento é rejeitado. Tente pagar com outro cartão.',
+        ACQ_999: 'Ocorreu um erro no processo de pagamento.'
     }
 };
