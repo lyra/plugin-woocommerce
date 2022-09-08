@@ -1,3 +1,6 @@
+= 1.10.2, 2022-09-08 =
+* Improve some translations.
+
 = 1.10.1, 2022-08-26 =
 * Bug fix: Fix payment methods for orders created from WooCommerce Back Office.
 * [embedded] Bug fix: Fix return to shop and IPN management in multi-site environment in case of payment with embedded fields.

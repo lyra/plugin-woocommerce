@@ -86,7 +86,8 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
                 'en_GB' => 'Payment with Choozeo without fees',
                 'fr_FR' => 'Paiement avec Choozeo sans frais',
                 'de_DE' => 'Zahlung mit Choozeo ohne zusätzliche',
-                'es_ES' => 'Pago con Choozeo sin gastos'
+                'es_ES' => 'Pago con Choozeo sin gastos',
+                'pt_BR' => 'Pagamento com Choozeo sem custo'
             );
         }
 
