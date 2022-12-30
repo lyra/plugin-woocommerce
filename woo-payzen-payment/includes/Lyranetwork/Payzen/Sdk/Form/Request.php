@@ -144,6 +144,9 @@ class Request
         $this->addField('vads_cust_status', 'Customer status (private or company)', '#^PRIVATE|COMPANY$#u', false, 7);
         $this->addField('vads_cust_title', 'Customer title', '#^' . $ans . '{0,63}$#u', false, 63);
         $this->addField('vads_cust_zip', 'Customer zip code', $an63, false, 63);
+        $this->addField('vads_cust_national_id', 'Customer national id', $ans255);
+        $this->addField('vads_cust_address_number', 'Customer address number',  '#^' . $ans . '{0,64}$#u', false, 64);
+        $this->addField('vads_cust_district', 'Customer district', $ans127, false, 127);
         $this->addField('vads_cvv', 'Card verification number', '#^\d{3,4}$#u');
         $this->addField('vads_expiry_month', 'Month of card expiration', '#^\d[0-2]{1}$#u');
         $this->addField('vads_expiry_year', 'Year of card expiration', '#^20[0-9]{2}$#u');
@@ -693,7 +696,7 @@ class Request
     {
         $fields = $this->getRequestFields();
 
-        $sensitive_data = array('vads_card_number', 'vads_cvv', 'vads_expiry_month', 'vads_expiry_year');
+        $sensitive_data = array('vads_card_number', 'vads_cvv', 'vads_expiry_month', 'vads_expiry_year', 'vads_cust_national_id');
 
         $result = array();
         foreach ($fields as $field) {
