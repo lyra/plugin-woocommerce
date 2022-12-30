@@ -34,9 +34,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     const SIGN_ALGO = 'SHA-256';
     const LANGUAGE = 'fr';
 
-    const CMS_IDENTIFIER = 'WooCommerce_2.x-6.x';
+    const CMS_IDENTIFIER = 'WooCommerce_2.x-7.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.10.2';
+    const PLUGIN_VERSION = '1.10.3';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
