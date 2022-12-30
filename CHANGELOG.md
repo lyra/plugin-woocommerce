@@ -1,3 +1,8 @@
+= 1.10.3, 2022-12-30 =
+* Added compatibility with "Brazilian Market on WooCommerce".
+* Update list of supported payment means.
+* Update list of supported currencies.
+
 = 1.10.2, 2022-09-08 =
 * Improve some translations.
 

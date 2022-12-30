@@ -1460,7 +1460,11 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                     'city' => $this->get_escaped_var($this->payzen_request, 'cust_city'),
                     'state' => $this->get_escaped_var($this->payzen_request, 'cust_state'),
                     'phoneNumber' => $this->get_escaped_var($this->payzen_request, 'cust_phone'),
-                    'country' => $this->get_escaped_var($this->payzen_request, 'cust_country')
+                    'country' => $this->get_escaped_var($this->payzen_request, 'cust_country'),
+                    'identityCode' => $this->get_escaped_var($this->payzen_request, 'cust_national_id'),
+                    'streetNumber' => $this->get_escaped_var($this->payzen_request, 'cust_address_number'),
+                    'district' => $this->get_escaped_var($this->payzen_request, 'cust_district'),
+                    'status' => $this->get_escaped_var($this->payzen_request, 'cust_status')
                 ),
                 'shippingDetails' => array(
                     'firstName' => $this->get_escaped_var($this->payzen_request, 'ship_to_first_name'),
@@ -1757,6 +1761,10 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             'cust_phone' => str_replace(array('(', '-', ' ', ')'), '', self::get_order_property($order, 'billing_phone')),
             'cust_city' => self::get_order_property($order, 'billing_city'),
             'cust_state' => self::get_order_property($order, 'billing_state'),
+            'cust_national_id' => $order->get_meta('_billing_persontype') == '2' ? $order->get_meta('_billing_cnpj') : $order->get_meta('_billing_cpf'),
+            'cust_address_number' => $order->get_meta('_billing_number'),
+            'cust_district' => $order->get_meta('_billing_neighborhood') ? $order->get_meta('_billing_neighborhood') : self::get_order_property($order, 'billing_city'),
+            'cust_status' => $order->get_meta('_billing_persontype') ? ($order->get_meta('_billing_persontype') == '2' ? 'COMPANY' : 'PRIVATE') : '',
 
             // Shipping address info.
             'ship_to_first_name' => self::get_order_property($order, 'shipping_first_name'),
