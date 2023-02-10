@@ -257,7 +257,8 @@ class Api
             'AUTHORISED',
             'AUTHORISED_TO_VALIDATE', // TODO is this a pending status?
             'CAPTURED',
-            'ACCEPTED'
+            'ACCEPTED',
+            'PARTIALLY_AUTHORISED'
         );
     }
 
@@ -274,7 +275,8 @@ class Api
             'WAITING_AUTHORISATION_TO_VALIDATE',
             'UNDER_VERIFICATION',
             'PRE_AUTHORISED',
-            'WAITING_FOR_PAYMENT'
+            'WAITING_FOR_PAYMENT',
+            'PENDING'
         );
     }
 
@@ -407,6 +409,17 @@ class Api
         return array(
             'BL', 'GF', 'GP', 'MF', 'MQ', 'NC', 'PF', 'PM', 'RE',
             'TF', 'WF', 'YT'
+        );
+    }
+
+    /**
+     * Returns an array of the online documentation URI of the payment module.
+     *
+     * @return array[string][string]
+     */
+    public static function getOnlineDocUri()
+    {
+        return array(###ONLINE_DOC_URI###
         );
     }
 }
