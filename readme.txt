@@ -4,8 +4,8 @@ Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
 Tested up to: 6.1
 WC requires at least: 2.0
-WC tested up to: 7.2
-Stable tag: 1.10.3
+WC tested up to: 7.3
+Stable tag: 1.10.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,10 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.10.4, 2023-02-10 =
+* Added new transaction statuses PENDING and PARTIALLY_AUTHORISED.
+* Some code fixes.
 
 = 1.10.3, 2022-12-30 =
 * Added compatibility with "Brazilian Market on WooCommerce".

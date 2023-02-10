@@ -1,3 +1,7 @@
+= 1.10.4, 2023-02-10 =
+* Added new transaction statuses PENDING and PARTIALLY\_AUTHORISED.
+* Some code fixes.
+
 = 1.10.3, 2022-12-30 =
 * Added compatibility with "Brazilian Market on WooCommerce".
 * Update list of supported payment means.
