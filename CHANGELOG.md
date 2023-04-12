@@ -1,3 +1,6 @@
+1.10.6, 2023-04-12=
+* Bug fix: Fix error related to displaying order details.
+
 1.10.5, 2023-04-11=
 * Fix compatibility with WooCommerce 7.5.x versions.
 * Fix "WooCommerce Blocks" support in standard redirection payment.
