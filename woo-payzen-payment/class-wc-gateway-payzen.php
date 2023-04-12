@@ -36,7 +36,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-7.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.10.4';
+    const PLUGIN_VERSION = '1.10.5';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -87,10 +87,13 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         // Filter to allow order status override.
         add_filter('woocommerce_payment_complete_order_status', array($this, 'payzen_complete_order_status'), 10, 2);
 
+        // Filter to get general settings option.
+        add_filter('woocommerce_general_option_payzen', array($this, 'get_general_option'));
+
         // Customize email.
         add_action('woocommerce_email_after_order_table', array($this, 'payzen_add_order_email_payment_result'), 10, 3);
 
-        // Print our notices when payment was sucessful.
+        // Print our notices.
         add_action('woocommerce_before_template_part', array($this, 'payzen_notices'), 10, 4);
 
         // Delete saved means of payment and saved identifier.
@@ -245,7 +248,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
         ?>
 
-        <script type="text/javascript" src="<?php echo WC_PAYZEN_PLUGIN_URL . '/assets/js/support.js' ?>"></script>
+        <script type="text/javascript" src="<?php echo WC_PAYZEN_PLUGIN_URL . 'assets/js/support.js' ?>"></script>
         <br />
         <h3><?php echo self::GATEWAY_NAME; ?></h3>
         <p><?php echo sprintf(__('The module works by sending users to %s in order to select their payment mean and enter their payment information.', 'woo-payzen-payment'), self::GATEWAY_NAME); ?></p>
@@ -401,31 +404,19 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         // Get documentation links.
-        $docs = '';
-        $minor = substr(self::PLUGIN_VERSION, 0, strrpos(self::PLUGIN_VERSION, '.'));
-        $doc_pattern = plugin_dir_path(__FILE__) . 'installation_doc/';
-        $doc_pattern .= self::GATEWAY_CODE . '_' . self::CMS_IDENTIFIER . '_v' . $minor . '*.pdf';
-        $filenames = glob($doc_pattern);
+        $languages = array(
+            'fr' => 'Français',
+            'en' => 'English',
+            'es' => 'Español',
+            'pt' => 'Português'
+            // Complete when other languages are managed.
+        );
 
-        if (! empty($filenames)) {
-            $languages = array(
-                'fr' => 'Français',
-                'en' => 'English',
-                'de' => 'Deutsch',
-                'es' => 'Español',
-                'pt' => 'Português'
-                // Complete when other languages are managed.
-            );
+        // Get documentation links.
+        $docs = __('Click to view the module configuration documentation: ', 'woo-payzen-payment');
 
-            $docs = __('Click to view the module configuration documentation: ', 'woo-payzen-payment');
-
-            foreach ($filenames as $filename) {
-                $base_filename = basename($filename, '.pdf');
-                $lang = substr($base_filename, -2); // Extract language code.
-
-                $docs .= '<a style="margin-left: 10px; text-decoration: none; text-transform: uppercase;" href="' . WC_PAYZEN_PLUGIN_URL
-                . 'installation_doc/' . $base_filename . '.pdf" target="_blank">' . $languages[$lang] . '</a>';
-            }
+        foreach (PayzenApi::getOnlineDocUri() as $lang => $docUri) {
+            $docs .= '<a style="margin-left: 10px; text-decoration: none; text-transform: uppercase;" href="' . $docUri . 'woocommerce/sitemap.html" target="_blank">' . $languages[$lang] . '</a>';
         }
 
         $this->form_fields = array(
@@ -1761,11 +1752,11 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 $this->log('IPN URL PROCESS END');
                 die();
             } elseif (($payzen_response->get('identifier_status') === 'UPDATED')
-                /* Case of method change from WooCommerce or subscription creation on gateway Back Office. */
-                || ((($payzen_response->get('recurrence_status') === 'CREATED') || ($payzen_response->get('recurrence_number') === '1'))
+                    /* Case of method change from WooCommerce or subscription creation on gateway Back Office. */
+                    || ((($payzen_response->get('recurrence_status') === 'CREATED') || ($payzen_response->get('recurrence_number') === '1'))
                         && ($subscriptions_handler = self::subscriptions_handler('payzensubscription')))) {
                 // Means of payment updated on payment gateway.
-                $this->log("Updating subscription payment means on gateway for order #$order_id.");
+                $this->log("Updating payment means on gateway for order #$order_id.");
 
                 // View subscription URL (in case of changing payment method of an existing subscription).
                 $subsc_redirect_url = false;
@@ -1797,14 +1788,16 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     // Try to save identifier if any.
                     $this->payzen_save_identifier($order, $payzen_response, $force_update);
 
-                    // Try to save subscritption info if any.
+                    // Try to save subscription info if any.
                     $this->payzen_save_recurrence($order, $payzen_response, $force_update);
 
-                    $subscriptions_handler->process_subscription($order, $payzen_response);
+                    if ($subscriptions_handler) {
+                        $subscriptions_handler->process_subscription($order, $payzen_response);
 
-                    // Try to save subscription recurrences.
-                    if ($force_update) {
-                        $subscriptions_handler->process_subscription_renewal($order, $payzen_response);
+                        // Try to save subscription recurrences.
+                        if ($force_update) {
+                            $subscriptions_handler->process_subscription_renewal($order, $payzen_response);
+                        }
                     }
 
                     if ($from_server) {
@@ -1954,6 +1947,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     {
         global $woocommerce;
 
+        delete_transient('payzen_notices_'. wp_get_session_token());
+
         if (function_exists('wc_clear_notices')) {
             wc_clear_notices();
         } else {
@@ -1964,10 +1959,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     protected function add_notice($msg, $type = 'success')
     {
         global $woocommerce;
-
-        if (! empty($_POST)) {
-            do_action('woocommerce_set_cart_cookies', true);
-        }
 
         if (function_exists('wc_add_notice')) {
             wc_add_notice($msg, $type);
@@ -2044,6 +2035,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     public static function get_customer_property($customer, $property_name)
     {
+        if (! $customer) {
+            return null;
+        }
+
         $method = 'get_' . $property_name;
 
         if (method_exists($customer, $method)) {
@@ -2055,6 +2050,12 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     protected function payzen_redirect($url, $iframe = false)
     {
+        // Save WC Notices to restore them on return page.
+        $wc_notices = WC()->session->get('wc_notices', array());
+        if (isset($_REQUEST['vads_ext_info_session_id']) && ! empty($wc_notices)) {
+            set_transient('payzen_notices_'.  $_REQUEST['vads_ext_info_session_id'], json_encode($wc_notices));
+        }
+
         if (! $iframe) {
             wp_redirect($url);
         } else {
@@ -2153,24 +2154,34 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
     }
 
+    public static function restore_wc_notices() {
+        if (is_admin()) {
+            return;
+        }
+
+        if (WC()->session && empty(WC()->session->get('wc_notices', array())) && get_transient('payzen_notices_'. wp_get_session_token())) {
+            wc_set_notices(json_decode(get_transient('payzen_notices_'. wp_get_session_token()), true));
+            delete_transient('payzen_notices_'. wp_get_session_token());
+        }
+    }
+
     public function payzen_notices($template_name, $template_path, $located, $args = array())
     {
         global $woocommerce;
 
-        if ($template_name !== 'checkout/thankyou.php') {
+        if (! isset($args['order']) || ($template_name !== 'checkout/thankyou.php')) {
             return;
         }
 
-        if (! isset($args['order'])) {
-            return;
-        }
-
+        // Display notices in case of successful payment.
         if (strpos(self::get_order_property($args['order'], 'payment_method'), 'payzen') === 0) {
             if (function_exists('wc_print_notices')) {
                 wc_print_notices();
             } else {
                 $woocommerce->show_messages();
             }
+
+            $this->clear_notices();
         }
     }
 

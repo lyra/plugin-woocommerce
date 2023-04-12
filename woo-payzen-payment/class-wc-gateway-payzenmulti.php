@@ -20,7 +20,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         global $payzen_plugin_features;
 
         $this->id = 'payzenmulti';
-        $this->icon = apply_filters('woocommerce_payzenmulti_icon', WC_PAYZEN_PLUGIN_URL . '/assets/images/payzenmulti.png');
+        $this->icon = apply_filters('woocommerce_payzenmulti_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/payzenmulti.png');
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME . ' - ' . __('Payment in installments', 'woo-payzen-payment');
 

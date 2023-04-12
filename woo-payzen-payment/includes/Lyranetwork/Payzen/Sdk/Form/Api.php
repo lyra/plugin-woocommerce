@@ -419,7 +419,10 @@ class Api
      */
     public static function getOnlineDocUri()
     {
-        return array(###ONLINE_DOC_URI###
+        return array(
+            'fr' => 'https://payzen.io/fr-FR/plugins/',
+            'en' => 'https://payzen.io/en-EN/plugins/',
+            'es' => 'https://payzen.io/es-ES/plugins/'
         );
     }
 }

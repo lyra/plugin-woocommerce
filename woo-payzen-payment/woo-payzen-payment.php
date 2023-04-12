@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.10.4
+ * Version: 1.10.5
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 6.1
+ * Tested up to: 6.2
  * WC requires at least: 2.0
- * WC tested up to: 7.3
+ * WC tested up to: 7.5
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -142,12 +142,20 @@ function woocommerce_payzen_init()
     require_once 'includes/sdk-autoload.php';
     require_once 'includes/PayzenRestTools.php';
     require_once 'includes/PayzenTools.php';
+
+    // Restore WC notices in case of IFRAME or POST as return mode.
+    WC_Gateway_Payzen::restore_wc_notices();
 }
 add_action('woocommerce_init', 'woocommerce_payzen_init');
 
 function woocommerce_payzen_woocommerce_block_support()
 {
     if (class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
+        require_once 'includes/PayzenTools.php';
+        if (! PayzenTools::has_checkout_block()) {
+            return;
+        }
+
         if (! class_exists('WC_Gateway_Payzen_Blocks_Support')) {
             require_once 'includes/class-wc-gateway-payzen-blocks-support.php';
         }
@@ -155,14 +163,14 @@ function woocommerce_payzen_woocommerce_block_support()
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
             function(PaymentMethodRegistry $payment_method_registry) {
-                $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenStd'));
+                $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenstd'));
             }
         );
     }
 }
 add_action('woocommerce_blocks_loaded', 'woocommerce_payzen_woocommerce_block_support');
 
-/* Add our payment methods to woocommerce methods. */
+/* Add our payment methods to WooCommerce methods. */
 function woocommerce_payzen_add_method($methods)
 {
     global $payzen_plugin_features, $woocommerce;
@@ -263,7 +271,7 @@ function woocommerce_payzen_order_payment_gateways($available_gateways)
         $index_gateways_ids ++;
     }
 
-    // User created payzen not grouped other payment means lets reorder payment gatways as they appear in woocommerce backend.
+    // Reorder custom PayZen non-grouped other payment means as they appear in WooCommerce backend.
     // And if only they are not already in last position.
     if (! empty($index_other_not_grouped_gateways_ids) && ($index_other_grouped_gateway_id !== reset($index_other_not_grouped_gateways_ids) - 1)) {
         $ordered_gateways_ids = array();
@@ -462,7 +470,6 @@ function payzen_send_support_email_on_order($order)
 {
     global $payzen_plugin_features;
 
-    $std_payment_method = new WC_Gateway_PayzenStd();
     if (substr(WC_Gateway_PayzenStd::get_order_property($order, 'payment_method'), 0, strlen('payzen')) === 'payzen') {
         $user_info = get_userdata(1);
         $send_email_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Send_Email', home_url('/'));
@@ -478,11 +485,11 @@ function payzen_send_support_email_on_order($order)
 
         if ($payzen_plugin_features['support']) {
         ?>
-        <script type="text/javascript" src="<?php echo WC_PAYZEN_PLUGIN_URL; ?>/assets/js/support.js"></script>
+        <script type="text/javascript" src="<?php echo WC_PAYZEN_PLUGIN_URL; ?>assets/js/support.js"></script>
         <contact-support
-            shop-id="<?php echo $std_payment_method->get_general_option('site_id'); ?>"
-            context-mode="<?php echo $std_payment_method->get_general_option('ctx_mode'); ?>"
-            sign-algo="<?php echo $std_payment_method->get_general_option('sign_algo'); ?>"
+            shop-id="<?php echo apply_filter('woocommerce_general_option_payzen', 'site_id'); ?>"
+            context-mode="<?php echo apply_filter('woocommerce_general_option_payzen', 'ctx_mode'); ?>"
+            sign-algo="<?php echo apply_filter('woocommerce_general_option_payzen', 'sign_algo'); ?>"
             contrib="<?php echo PayzenTools::get_contrib(); ?>"
             integration-mode="<?php echo PayzenTools::get_integration_mode(); ?>"
             plugins="<?php echo PayzenTools::get_active_plugins(); ?>"
@@ -593,7 +600,7 @@ if (PayzenRestTools::checkResponse($_POST)) {
 if (is_multisite() && $is_valid_ipn) {
     global $wpdb, $current_blog, $current_site;
 
-    $blog = $_POST['vads_ext_info_blog_id'] ? $_POST['vads_ext_info_blog_id'] : $data['vads_ext_info_blog_id'];
+    $blog = isset($_POST['vads_ext_info_blog_id']) ? $_POST['vads_ext_info_blog_id'] : $data['vads_ext_info_blog_id'];
     switch_to_blog((int) $blog);
 
     // Set current_blog global var.
@@ -641,16 +648,14 @@ function payzen_online_refund($order_id, $refund_id)
     $order_refund_bean->setOrderUserInfo(PayzenTools::get_user_info());
     $refund_processor = new PayzenRefundProcessor();
 
-    $std_payment_method = new WC_Gateway_PayzenStd();
-
-    $test_mode = $std_payment_method->get_general_option('ctx_mode') == 'TEST';
-    $key = $test_mode ? $std_payment_method->get_general_option('test_private_key') : $std_payment_method->get_general_option('prod_private_key');
+    $test_mode = apply_filter('woocommerce_general_option_payzen', 'ctx_mode') == 'TEST';
+    $key = $test_mode ? apply_filter('woocommerce_general_option_payzen', 'test_private_key') : apply_filter('woocommerce_general_option_payzen', 'prod_private_key');
 
     $refund_api = new PayzenRefundApi(
         $refund_processor,
         $key,
-        $std_payment_method->get_general_option('rest_url'),
-        $std_payment_method->get_general_option('site_id'),
+        apply_filter('woocommerce_general_option_payzen', 'rest_url'),
+        apply_filter('woocommerce_general_option_payzen', 'site_id'),
         'WooCommerce'
     );
 
