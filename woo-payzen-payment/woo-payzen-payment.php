@@ -14,7 +14,7 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.10.5
+ * Version: 1.10.6
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
@@ -470,6 +470,7 @@ function payzen_send_support_email_on_order($order)
 {
     global $payzen_plugin_features;
 
+    $std_payment_method = new WC_Gateway_PayzenStd();
     if (substr(WC_Gateway_PayzenStd::get_order_property($order, 'payment_method'), 0, strlen('payzen')) === 'payzen') {
         $user_info = get_userdata(1);
         $send_email_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Send_Email', home_url('/'));
@@ -487,9 +488,9 @@ function payzen_send_support_email_on_order($order)
         ?>
         <script type="text/javascript" src="<?php echo WC_PAYZEN_PLUGIN_URL; ?>assets/js/support.js"></script>
         <contact-support
-            shop-id="<?php echo apply_filter('woocommerce_general_option_payzen', 'site_id'); ?>"
-            context-mode="<?php echo apply_filter('woocommerce_general_option_payzen', 'ctx_mode'); ?>"
-            sign-algo="<?php echo apply_filter('woocommerce_general_option_payzen', 'sign_algo'); ?>"
+            shop-id="<?php echo $std_payment_method->get_general_option('site_id'); ?>"
+            context-mode="<?php echo $std_payment_method->get_general_option('ctx_mode'); ?>"
+            sign-algo="<?php echo $std_payment_method->get_general_option('sign_algo'); ?>"
             contrib="<?php echo PayzenTools::get_contrib(); ?>"
             integration-mode="<?php echo PayzenTools::get_integration_mode(); ?>"
             plugins="<?php echo PayzenTools::get_active_plugins(); ?>"
@@ -648,14 +649,16 @@ function payzen_online_refund($order_id, $refund_id)
     $order_refund_bean->setOrderUserInfo(PayzenTools::get_user_info());
     $refund_processor = new PayzenRefundProcessor();
 
-    $test_mode = apply_filter('woocommerce_general_option_payzen', 'ctx_mode') == 'TEST';
-    $key = $test_mode ? apply_filter('woocommerce_general_option_payzen', 'test_private_key') : apply_filter('woocommerce_general_option_payzen', 'prod_private_key');
+    $std_payment_method = new WC_Gateway_PayzenStd();
+
+    $test_mode = $std_payment_method->get_general_option('ctx_mode') == 'TEST';
+    $key = $test_mode ? $std_payment_method->get_general_option('test_private_key') : $std_payment_method->get_general_option('prod_private_key');
 
     $refund_api = new PayzenRefundApi(
         $refund_processor,
         $key,
-        apply_filter('woocommerce_general_option_payzen', 'rest_url'),
-        apply_filter('woocommerce_general_option_payzen', 'site_id'),
+        $std_payment_method->get_general_option('rest_url'),
+        $std_payment_method->get_general_option('site_id'),
         'WooCommerce'
     );
 
