@@ -36,7 +36,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-7.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.10.5';
+    const PLUGIN_VERSION = '1.10.6';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -86,9 +86,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         // Filter to allow order status override.
         add_filter('woocommerce_payment_complete_order_status', array($this, 'payzen_complete_order_status'), 10, 2);
-
-        // Filter to get general settings option.
-        add_filter('woocommerce_general_option_payzen', array($this, 'get_general_option'));
 
         // Customize email.
         add_action('woocommerce_email_after_order_table', array($this, 'payzen_add_order_email_payment_result'), 10, 3);
