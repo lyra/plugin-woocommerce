@@ -22,7 +22,7 @@ class Payzen_Subscriptions_Loader
 
     public static function getInstance($handler)
     {
-        if (! key_exists($handler, self::$handlers)) { // No valid subscriptions handler provided
+        if (! key_exists($handler, self::$handlers)) { // No valid subscriptions handler provided.
             if ($handler === 'disabled') {
                 // Removed handler provided, force using WC Subscriptions.
                 $handler = 'wc-subscriptions';
