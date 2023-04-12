@@ -10,6 +10,8 @@
  */
 use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
 
+include_once WC_ABSPATH . 'includes/blocks/class-wc-blocks-utils.php';
+
 class PayzenTools
 {
     public static function get_contrib()
@@ -32,16 +34,10 @@ class PayzenTools
 
     public static function get_integration_mode()
     {
-        $std_payment_method = new WC_Gateway_PayzenStd();
-        $card_data_mode = $std_payment_method->get_option('card_data_mode');
+        $std_method_settings = get_option('woocommerce_payzenstd_settings', null);
+        $card_data_mode = is_array($std_method_settings) & isset($std_method_settings['card_data_mode']) ? $std_method_settings['card_data_mode'] : 'DEFAULT';
 
-        switch ($card_data_mode) {
-            case 'DEFAULT':
-                return 'REDIRECT';
-                break;
-            default:
-                return $card_data_mode;
-        }
+        return (($card_data_mode === 'DEFAULT') ? 'REDIRECT' : $card_data_mode);
     }
 
     public static function get_active_plugins()
@@ -132,5 +128,16 @@ class PayzenTools
         }
 
         return '';
+    }
+
+    public static function has_checkout_block()
+    {
+        global $woocommerce;
+
+        if (version_compare($woocommerce->version, '2.1.0', '<')) {
+            return WC_Blocks_Utils::has_block_in_page(woocommerce_get_page_id('checkout'), 'woocommerce/checkout');
+        } else {
+            return WC_Blocks_Utils::has_block_in_page(wc_get_page_id('checkout'), 'woocommerce/checkout');
+        }
     }
 }

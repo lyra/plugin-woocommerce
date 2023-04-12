@@ -15,7 +15,6 @@ if (! defined('ABSPATH')) {
 
 class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
 {
-
     protected $payzen_countries = array('FR', 'GP', 'MQ', 'GF', 'RE', 'YT'); // France and DOM.
     protected $payzen_currencies = array('EUR');
 

@@ -1,3 +1,10 @@
+1.10.5, 2023-04-11=
+* Fix compatibility with WooCommerce 7.5.x versions.
+* Fix "WooCommerce Blocks" support in standard redirection payment.
+* [embedded] Bug fix: Fix number of payment attempts in case of rejected payment.
+* Bug fix: Fix error related to displaying multiple payment forms before redirection.
+* Improve module documentation management field.
+
 = 1.10.4, 2023-02-10 =
 * Added new transaction statuses PENDING and PARTIALLY\_AUTHORISED.
 * Some code fixes.

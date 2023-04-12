@@ -1,7 +1,16 @@
 /**
- * External dependencies
+ * Copyright © Lyra Network and contributors.
+ * This file is part of PayZen plugin for WooCommerce. See COPYING.md for license details.
+ *
+ * @author    Lyra Network (https://www.lyra.com/)
+ * @author    Geoffrey Crofte, Alsacréations (https://www.alsacreations.fr/)
+ * @copyright Lyra Network and contributors
+ * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License (GPL v2)
  */
-import { decodeEntities } from '@wordpress/html-entities';
+
+/**
+ * External dependencies.
+ */
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 
 /**
@@ -31,7 +40,7 @@ const Label = () => {
             <span>{ payzen_data?.title}</span>
             <img
                 style={ styles.imgFloat }
-                src={ payzen_data?.logo_url + 'payzen.png' }
+                src={ payzen_data?.logo_url }
                 alt={ payzen_data?.title }
             />
         </div>
