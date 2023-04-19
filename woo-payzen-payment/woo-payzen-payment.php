@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.10.6
+ * Version: 1.10.7
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
  * Tested up to: 6.2
  * WC requires at least: 2.0
- * WC tested up to: 7.5
+ * WC tested up to: 7.6
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
