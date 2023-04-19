@@ -1,3 +1,8 @@
+1.10.7, 2023-04-19=
+* Bug fix: Fix error related to customer form validation in embedded and iframe modes.
+* Bug fix: Fix verification of presence of WC Blocks in checkout page.
+* Bug fix: Fix SDK autoload for compatibility with PHP 8.2.
+
 1.10.6, 2023-04-12=
 * Bug fix: Fix error related to displaying order details.
 

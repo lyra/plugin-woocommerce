@@ -4,8 +4,8 @@ Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
 Tested up to: 6.2
 WC requires at least: 2.0
-WC tested up to: 7.5
-Stable tag: 1.10.6
+WC tested up to: 7.6
+Stable tag: 1.10.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,11 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+1.10.7, 2023-04-19=
+* Bug fix: Fix error related to customer form validation in embedded and iframe modes.
+* Bug fix: Fix verification of presence of WC Blocks in checkout page.
+* Bug fix: Fix SDK autoload for compatibility with PHP 8.2.
 
 1.10.6, 2023-04-12=
 * Bug fix: Fix error related to displaying order details.
