@@ -977,10 +977,32 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                                 // For WooCommerce 7.5.
                                 const _fetch = window.fetch;
                                 window.fetch = (...args) => {
+                                    let [url, options] = args;
+                                    let data = options.body;
+
                                     return Promise.resolve(_fetch.apply(window, args))
-                                      .then(response => {
-                                        var result = (response && response.ok) ? response.ok : false;
-                                        if (! result) {
+                                      .then(async (response) => {
+                                        if ((url.indexOf('wc-ajax=checkout') == -1)
+                                            && (url.indexOf('action=woocommerce-checkout') == -1)) {
+                                            return response;
+                                        }
+
+                                        if (data.indexOf('payment_method=payzenstd') == -1) {
+                                            return response;
+                                        }
+
+                                        var status = (response && response.ok) ? response.ok : false;
+                                        if (! status) {
+                                            return response;
+                                        }
+
+                                        var result = '';
+                                        await response.clone().json().then(data => {
+                                            result = data.result;
+                                            return;
+                                        });
+
+                                        if (result !== 'success') {
                                             return response;
                                         }
 
@@ -1151,17 +1173,36 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                                 // For WooCommerce 7.5.
                                 const _fetch = window.fetch;
                                 window.fetch = (...args) => {
-                                    let [uri, options] = args;
+                                    let [url, options] = args;
                                     let data = options.body;
 
-                                    jQuery('.kr-form-error').html('');
-
                                     return Promise.resolve(_fetch.apply(window, args))
-                                      .then(response => {
-                                        var result = (response && response.ok) ? response.ok : false;
-                                        if (! result) {
+                                      .then(async (response) => {
+                                        if ((url.indexOf('wc-ajax=checkout') == -1)
+                                            && (url.indexOf('action=woocommerce-checkout') == -1)) {
                                             return response;
                                         }
+
+                                        if (data.indexOf('payment_method=payzenstd') == -1) {
+                                            return response;
+                                        }
+
+                                        var status = (response && response.ok) ? response.ok : false;
+                                        if (! status) {
+                                            return response;
+                                        }
+
+                                        var result = '';
+                                        await response.clone().json().then(data => {
+                                            result = data.result;
+                                            return;
+                                        });
+
+                                        if (result !== 'success') {
+                                            return response;
+                                        }
+
+                                        jQuery('.kr-form-error').html('');
 
                                         // Unblock screen.
                                         jQuery('form.checkout').unblock();

@@ -10,8 +10,6 @@
  */
 use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
 
-include_once WC_ABSPATH . 'includes/blocks/class-wc-blocks-utils.php';
-
 class PayzenTools
 {
     public static function get_contrib()
@@ -135,9 +133,11 @@ class PayzenTools
         global $woocommerce;
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
-            return WC_Blocks_Utils::has_block_in_page(woocommerce_get_page_id('checkout'), 'woocommerce/checkout');
+            $checkout_page_id = woocommerce_get_page_id('checkout');
         } else {
-            return WC_Blocks_Utils::has_block_in_page(wc_get_page_id('checkout'), 'woocommerce/checkout');
+            $checkout_page_id = wc_get_page_id('checkout');
         }
+
+        return function_exists('has_block') && has_block('woocommerce/checkout', $checkout_page_id);
     }
 }
