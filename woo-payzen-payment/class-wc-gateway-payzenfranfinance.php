@@ -235,11 +235,11 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
             $fnc = function_exists('wc_clean') ? 'wc_clean' : 'woocommerce_clean';
             $value[$code] = array_map('esc_attr', array_map($fnc, (array) $option));
 
-            if (($option['amount_min'] && (! is_numeric($option['amount_min']) || $option['amount_min'] < 0 || $option['amount_min'] < $min))) {
+            if ($option['amount_min'] && (! is_numeric($option['amount_min']) || $option['amount_min'] < 0 || (is_numeric($min) && $option['amount_min'] < $min))) {
                 $value[$code]['amount_min'] = $old_value[$code]['amount_min']; // Restore old value.
             }
 
-            if ($option['amount_max'] && (! is_numeric($option['amount_max']) || $option['amount_max'] < 0 || $option['amount_max'] > $max)) {
+            if ($option['amount_max'] && (! is_numeric($option['amount_max']) || $option['amount_max'] < 0 || (is_numeric($max) && $option['amount_max'] > $max))) {
                 $value[$code]['amount_max'] = $old_value[$code]['amount_max']; // Restore old value.
             }
 

@@ -1,3 +1,8 @@
+1.10.8, 2023-07-10=
+* [franfinance] Bug fix: Saving min and max amount of the payment options correctly for Franfinance payment method.
+* [subscr] Bug fix: Do not update or cancel subscription processed by another payment method.
+* Some code fixes.
+
 1.10.7, 2023-04-19=
 * Bug fix: Fix error related to customer form validation in embedded and iframe modes.
 * Bug fix: Fix verification of presence of WC Blocks in checkout page.

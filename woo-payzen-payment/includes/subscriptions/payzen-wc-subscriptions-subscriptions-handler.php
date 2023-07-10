@@ -305,6 +305,11 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
     {
         list($subscription) = func_get_args();
 
+        // Checked if the subscription was processed with our payment method.
+        if (wcs_get_objects_property($subscription, 'payment_method') !== 'payzensubscription') {
+            return;
+        }
+
         $subscription_id = $subscription->get_id();
         $order_id = $subscription->get_parent_id() ? $subscription->get_parent_id() : $subscription_id;
 
@@ -323,6 +328,11 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
         }
 
         list($subscription) = func_get_args();
+
+        // Checked if the subscription was processed with our payment method.
+        if (wcs_get_objects_property($subscription, 'payment_method') !== 'payzensubscription') {
+            return;
+        }
 
         $subscription_id = $subscription->get_id();
         $order_id = $subscription->get_parent_id() ? $subscription->get_parent_id() : $subscription_id;
