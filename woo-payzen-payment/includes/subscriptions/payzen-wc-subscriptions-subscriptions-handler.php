@@ -210,14 +210,14 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
         $subscriptions = wcs_get_subscriptions_for_order($order);
         $subscription = reset($subscriptions); // Get first subscription.
 
-        delete_post_meta($subscription->get_id(), 'Subscription ID');
-        delete_post_meta($subscription->get_id(), 'Subscription amount');
-        delete_post_meta($subscription->get_id(), 'Effect date');
+        delete_post_meta($order->get_id(), 'Subscription ID');
+        delete_post_meta($order->get_id(), 'Subscription amount');
+        delete_post_meta($order->get_id(), 'Effect date');
 
         // Store subscription details.
-        update_post_meta($subscription->get_id(), 'Subscription ID', $response->get('subscription'));
-        update_post_meta($subscription->get_id(), 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('sub_amount'), $response->get('sub_currency')));
-        update_post_meta($subscription->get_id(), 'Effect date', preg_replace('#^(\d{4})(\d{2})(\d{2})$#', '\1-\2-\3', $response->get('sub_effect_date')));
+        update_post_meta($order->get_id(), 'Subscription ID', $response->get('subscription'));
+        update_post_meta($order->get_id(), 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('sub_amount'), $response->get('sub_currency')));
+        update_post_meta($order->get_id(), 'Effect date', preg_replace('#^(\d{4})(\d{2})(\d{2})$#', '\1-\2-\3', $response->get('sub_effect_date')));
 
         if (WC_Gateway_Payzen::is_successful_action($response)) {
             $subscription->payment_complete();
