@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 6.2
 WC requires at least: 2.0
 WC tested up to: 7.6
-Stable tag: 1.10.7
+Stable tag: 1.10.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,11 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+1.10.8, 2023-07-10=
+* [franfinance] Bug fix: Saving min and max amount of the payment options correctly for Franfinance payment method.
+* [subscr] Bug fix: Do not update or cancel subscription processed by another payment method.
+* Some code fixes.
 
 1.10.7, 2023-04-19=
 * Bug fix: Fix error related to customer form validation in embedded and iframe modes.
