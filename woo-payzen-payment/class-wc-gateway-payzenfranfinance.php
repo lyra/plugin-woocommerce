@@ -307,32 +307,27 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
      * @access public
      * @return void
      */
-    public function payment_fields()
+    public function get_payment_fields($options = array())
     {
-        parent::payment_fields();
-
-        $options = $this->get_available_options();
-
         if (empty($options)) {
-            // Should not happens for Franfinance payment.
-            return;
+            $options = $this->get_available_options();
         }
 
-        echo '<ul>';
+        $html = '';
 
         if (count($options) == 1) {
             $option = reset($options); // The option itself.
             $key = key($options); // The option key in options array.
-            echo '<span style="font-weight: bold;">' . __('Your payment option', 'woo-payzen-payment') . '</span>';
-            echo '<li style="list-style-type: none;">
+            $html .= '<span style="font-weight: bold;">' . __('Your payment option', 'woo-payzen-payment') . '</span>';
+            $html .= '<li style="list-style-type: none;">
                     <input type="hidden" id="payzenfranfinance_option_' . $key . '" value="' . $key . '" name="payzenfranfinance_option">
                     <label style="display: inline;">' . $option['label'] . '</label>
                   </li>';
         } else {
             $first = true;
-            echo '<span style="font-weight: bold;">' . __('Choose your payment option', 'woo-payzen-payment') . '</span>';
+            $html .= '<span style="font-weight: bold;">' . __('Choose your payment option', 'woo-payzen-payment') . '</span>';
             foreach ($options as $key => $option) {
-                echo '<li style="list-style-type: none;">
+                $html .= '<li style="list-style-type: none;">
                         <input class="radio" type="radio"'. ($first == true ? ' checked="checked"' : '') . ' id="payzenfranfinance_option_' . $key . '" value="' . $key . '" name="payzenfranfinance_option">
                         <label for="payzenfranfinance_option_' . $key . '" style="display: inline;">' . $option['label'] . '</label>
                       </li>';
@@ -340,7 +335,23 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
             }
         }
 
-        echo '</ul>';
+        return $html;
+    }
+
+    public function payment_fields()
+    {
+        $description = $this->get_description();
+        if ($description) {
+            echo wpautop(wptexturize($description));
+        }
+
+        $options = $this->get_available_options();
+        if (empty($options)) {
+            // Should not happen for Franfinance payment.
+            return;
+        }
+
+        echo '<ul>' . $this->get_payment_fields($options) . '</ul>';
     }
 
     /**
@@ -351,7 +362,8 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
         global $woocommerce;
 
         $options = $this->get_available_options();
-        $option = $options[$_POST['payzenfranfinance_option']];
+        $option_id = isset($_POST['payzenfranfinance_option']) ? $_POST['payzenfranfinance_option'] : $_COOKIE['payzenfranfinance_option'];
+        $option = $options[$option_id];
 
         // Save selected payment option into session...
         set_transient('payzenfranfinance_option_' . $order_id, $option);

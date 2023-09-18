@@ -1,3 +1,12 @@
+= 1.11.0, 2023-09-15=
+* [embedded] Smartform integration.
+* [embedded] Bug fix: Fix error related to validation mode.
+* Added compatibility with "Woocommerce Blocks" for payment in redirection.
+* Added compatibility with "CheckoutWC".
+* Added possibility to delete order on failed payment.
+* Update list of supported payment means.
+* Update list of supported currencies.
+
 1.10.8, 2023-07-10=
 * [franfinance] Bug fix: Saving min and max amount of the payment options correctly for Franfinance payment method.
 * [subscr] Bug fix: Do not update or cancel subscription processed by another payment method.
@@ -43,7 +52,7 @@
 * [embedded] Bug fix: Do not refresh payment page automatically after an unrecoverable error.
 * [franfinance] Send information about shipping method for Franfinance payment method.
 * Added shipping options configuration field.
-* Support for "woocommerce blocks" in standard redirection payment.
+* Support for "Woocommerce Blocks" in standard redirection payment.
 * Bug fix: Fix payment methods display based on amount restrictions for orders created from WooCommerce Back Office.
 * Possibility to make refunds for payments.
 

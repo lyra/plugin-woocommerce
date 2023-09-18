@@ -34,6 +34,8 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
     public function __construct($method_id)
     {
         $this->name = $method_id;
+
+
     }
 
     /**
@@ -41,6 +43,9 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
      */
     public function initialize() {
         $this->settings = get_option('woocommerce_' . $this->get_name() .'_settings', null);
+        // Load utils script.
+        wp_register_script('utils-js', WC_PAYZEN_PLUGIN_URL . 'assets/js/utils.js');
+        wp_enqueue_script('utils-js');
     }
 
     /**
@@ -50,19 +55,17 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
      */
     public function get_payment_method_script_handles() {
         $asset_path   = WC_PAYZEN_PLUGIN_PATH . 'build/index.asset.php';
-        $version      = PayzenTools::get_contrib();
+        $version = PayzenTools::get_contrib();
 
         $dependencies = array();
-        if ( file_exists($asset_path )) {
+        if (file_exists($asset_path)) {
             $asset = require $asset_path;
-            $version = is_array($asset) && isset($asset['version'])
-                ? $asset['version']
-                : $version;
-            $dependencies = is_array($asset) && isset($asset['dependencies'] )
-                ? $asset['dependencies']
+            $version = is_array($asset) && isset($asset['version']) ? $asset['version'] : $version;
+            $dependencies = is_array($asset) && isset($asset['dependencies']) ? $asset['dependencies']
                 : $dependencies;
         }
 
+        $build_name = (strpos($this->name, 'payzenother_') === 0) ? 'payzenother' : $this->name;
         wp_register_script(
             'wc-' . $this->get_name() . '-blocks-integration',
             WC_PAYZEN_PLUGIN_URL . 'build/' . $this->get_name() .'.js',
@@ -70,6 +73,16 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
             $version,
             true
         );
+
+        if ($build_name == 'payzenother') {
+            wp_register_script(
+                'wc-payzenother-blocks-integration',
+                WC_PAYZEN_PLUGIN_URL . '/build/payzenother.js',
+                $dependencies,
+                $version,
+                true
+            );
+        }
 
         wp_set_script_translations(
             'wc-' . $this->get_name() . '-blocks-integration',
@@ -80,7 +93,7 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
     }
 
     /**
-     * Returns an array of key=>value pairs of data made available to the payment methods script.
+     * Returns an array of key => value pairs of data made available to the payment methods script.
      *
      * @return array
      */
@@ -95,5 +108,31 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
             'description' => apply_filters('woocommerce_description_' . $this->get_name(), null),
             'logo_url'    => apply_filters('woocommerce_'. $this->get_name() .'_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/payzen.png')
         );
+
+        switch ($this->name) {
+            case 'payzenstd':
+            case 'payzenmulti':
+            case 'payzenfranfinance':
+            case 'payzenregroupedother':
+                $data['payment_fields'] = $this->payment->get_payment_fields();
+
+                break;
+
+            case 'payzenother_lyranetwork':
+                if (get_transient('payzen_other_methods')) {
+                    $methods = json_decode(get_transient('payzen_other_methods'), true);
+                    $data['sub_methods'] = array_keys($methods);
+                }
+
+                break;
+
+            case 'payzensubscription':
+                $data['supports'] = array_merge($this->get_supported_features(), $this->payment->supports);
+
+                break;
+
+            default:
+                break;
+        }
     }
 }

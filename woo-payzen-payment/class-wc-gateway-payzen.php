@@ -34,9 +34,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     const SIGN_ALGO = 'SHA-256';
     const LANGUAGE = 'fr';
 
-    const CMS_IDENTIFIER = 'WooCommerce_2.x-7.x';
+    const CMS_IDENTIFIER = 'WooCommerce_2.x-8.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.10.8';
+    const PLUGIN_VERSION = '1.11.0';
     const GATEWAY_VERSION = 'V2';
 
     protected $admin_page;
@@ -95,6 +95,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         // Delete saved means of payment and saved identifier.
         add_action('woocommerce_api_wc_gateway_payzen_delete_saved_card', array($this, 'payzen_delete_saved_card'));
+
+        // Delete order on failed payment.
+        add_action('woocommerce_order_status_failed', array($this, 'payzen_delete_order_with_status_failed'), 10, 1);
     }
 
     protected function payzen_is_section_loaded()
@@ -409,7 +412,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             // Complete when other languages are managed.
         );
 
-        // Get documentation links.
         $docs = __('Click to view the module configuration documentation: ', 'woo-payzen-payment');
 
         foreach (PayzenApi::getOnlineDocUri() as $lang => $docUri) {
@@ -534,7 +536,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'rest_settings' => array(
                 'title' => __('REST API keys', 'woo-payzen-payment'),
                 'type' => 'title',
-                'description' => sprintf(__('REST API keys are available in your %s Back Office (menu: Settings > Shops > REST API keys).<br><br>Configure this section if you are using order operations from WooCommerce Back Office or if you are using embedded payment fields or popin modes.', 'woo-payzen-payment'), self::BACKOFFICE_NAME)
+                'description' => sprintf(__('REST API keys are available in your %s Back Office (menu: Settings > Shops > REST API keys).<br><br>Configure this section if you are using order operations from WooCommerce Back Office or if you are using embedded payment fields or Smartform modes.', 'woo-payzen-payment'), self::BACKOFFICE_NAME)
              ),
              'test_private_key' => array(
                  'title' => __('Test password', 'woo-payzen-payment'),
@@ -557,7 +559,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'embedded_fields_keys_settings' => array(
                 'title' => '',
                 'type' => 'title',
-                'description' => sprintf(__('Configure this section only if you are using embedded payment fields or popin modes.', 'woo-payzen-payment'), self::BACKOFFICE_NAME)
+                'description' => sprintf(__('Configure this section only if you are using embedded payment fields or Smartform modes.', 'woo-payzen-payment'), self::BACKOFFICE_NAME)
             ),
              'test_public_key' => array(
                  'title' => __('Public test key', 'woo-payzen-payment'),
@@ -716,6 +718,13 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'options' => self::get_success_order_statuses(true),
                 'description' => __('Defines the status of orders paid with this payment mode.', 'woo-payzen-payment'),
                 'class' => 'wc-enhanced-select'
+            ),
+            'delete_order_on_failure' => array(
+                'title' => __('Delete order on failure', 'woo-payzen-payment'),
+                'label' => __('Enable / disable', 'woo-payzen-payment'),
+                'type' => 'checkbox',
+                'default' => 'no',
+                'description' => __('If enabled, the order will be deleted on WooCommerce when the payment is declined.', 'woo-payzen-payment')
             ),
 
             // Additional options.
@@ -1572,7 +1581,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     /**
      * Valid payment process : update order, send mail, ...
      **/
-    public function payzen_manage_notify_response($payzen_response, $from_server_rest = false)
+    public function payzen_manage_notify_response($payzen_response, $from_server_rest = false, $update_on_failure = true)
     {
         global $woocommerce, $payzen_plugin_features;
 
@@ -1586,13 +1595,35 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         // Cart URL.
         $cart_url = function_exists('wc_get_cart_url') ? wc_get_cart_url() : $woocommerce->cart->get_cart_url();
 
+        // Checkout payment URL to allow re-order.
+        $checkout_url = function_exists('wc_get_checkout_url') ? wc_get_checkout_url() : $woocommerce->cart->get_checkout_url();
+
         // Get ext_info parameter.
         $key = $payzen_response->getExtInfo('order_key');
 
-        $order = new WC_Order((int) $order_id);
+        $order = wc_get_order($order_id);
+
+        if (! $order && ($this->get_general_option('delete_order_on_failure') == "yes")
+            && ! self::is_successful_action($payzen_response)) {
+            $this->log("Order #$order_id was deleted on payment failure. Please, try to re-order.");
+
+            if ($from_server) {
+                $this->log('IPN URL PROCESS END');
+                die($payzen_response->getOutputForGateway('payment_ko'));
+            } else {
+                $this->log('RETURN URL PROCESS END');
+
+                if (! $payzen_response->isCancelledPayment()) {
+                    $this->add_notice(__('Your payment was not accepted. Please, try to re-order.', 'woo-payzen-payment'), 'error');
+                    $this->payzen_redirect($cart_url, $iframe);
+                } else {
+                    $this->payzen_redirect($checkout_url, $iframe);
+                }
+            }
+        }
 
         // If gateway doesn't return vads_ext_info_order_key, skip ckecking order key.
-        if (! self::get_order_property($order, 'id') || ($key && (self::get_order_property($order, 'order_key') !== $key))) {
+        if (! $order || ! self::get_order_property($order, 'id') || ($key && (self::get_order_property($order, 'order_key') !== $key))) {
             $this->log("Error: order #$order_id not found or key does not match received invoice ID.");
 
             if ($from_server) {
@@ -1613,9 +1644,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
             $this->add_notice($msg);
         }
-
-        // Checkout payment URL to allow re-order.
-        $checkout_url = function_exists('wc_get_checkout_url') ? wc_get_checkout_url() : $woocommerce->cart->get_checkout_url();
 
         // Backward compatibility.
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
@@ -1707,8 +1735,20 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     $this->payzen_redirect($this->get_return_url($order), $iframe);
                 }
             } else {
-                $order->update_status('failed');
                 $this->log("Payment failed or cancelled for order #$order_id. {$payzen_response->getLogMessage()}");
+                if ($from_server) {
+                    if ($update_on_failure || $this->get_general_option('delete_order_on_failure') !== 'yes') {
+                        $order->update_status('failed');
+                        $this->log("Order #$order_id status updated successfully on failure.");
+
+                        $msg = 'payment_ko';
+                    } else {
+                        $msg = 'payment_ko_bis';
+                    }
+                } else {
+                    $order->update_status('failed');
+                    $this->log("Order #$order_id status updated successfully on failure.");
+                }
 
                 if ($subscriptions_handler) {
                     // Try to manage subscription if any.
@@ -1717,7 +1757,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 if ($from_server) {
                     $this->log('IPN URL PROCESS END');
-                    die($payzen_response->getOutputForGateway('payment_ko'));
+                    die($payzen_response->getOutputForGateway($msg));
                 } else {
                     $this->log('RETURN URL PROCESS END');
 
@@ -1883,7 +1923,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     }
                 }
             } else {
-                $this->log("Error! Invalid payment result received for already saved order #$order_id. Payment result : {$payzen_response->getTransStatus()}, Order status : {self::get_order_property($order, 'status')}.");
+                $this->log("Error! Invalid payment result received for already saved order #$order_id. Payment result : {$payzen_response->getTransStatus()}, Order status :" . self::get_order_property($order, 'status') . ".");
 
                 // Registered order status not match payment result.
                 if ($from_server) {
@@ -2406,6 +2446,18 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 }
             }
         }
+    }
+
+    function payzen_delete_order_with_status_failed($order_id) {
+        // Get an instance of the order object.
+        $order = wc_get_order($order_id);
+
+        if (($this->get_general_option('delete_order_on_failure') == 'yes')
+            && (strpos(self::get_order_property($order, 'payment_method'), 'payzen') === 0)
+            && $order && in_array($order->get_status(), ['failed'])) {
+                wp_delete_post($order_id, true);
+                $this->log("Order #$order_id with failed status was deleted successfully.");
+            }
     }
 
     private function delete_identifier_attributes($cust_id, $id)

@@ -38,6 +38,17 @@ class PayzenTools
         return (($card_data_mode === 'DEFAULT') ? 'REDIRECT' : $card_data_mode);
     }
 
+    public static function get_payzen_integration_mode_enabled()
+    {
+        $std_settings = get_option('woocommerce_payzenstd_settings', null);
+        $enabled = is_array($std_settings) && isset($std_settings['enabled']) && ($std_settings['enabled'] == 'yes');
+        if (! $enabled) {
+            return false;
+        }
+
+        return isset($std_settings['card_data_mode']) && in_array($std_settings['card_data_mode'], array('SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS'));
+    }
+
     public static function get_active_plugins()
     {
         $all_active_plugins = get_option('active_plugins');

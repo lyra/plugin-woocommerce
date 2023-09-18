@@ -179,7 +179,7 @@ class PayzenRestTools
             require_once 'PayzenRestException.php';
             throw new PayzenRestException($errorMessage, $answer['errorCode']);
         } elseif (! empty($expectedStatuses) && ! in_array($answer['detailedStatus'], $expectedStatuses)) {
-            throw new Exception(sprintf(__('Unexpected transaction type received (%s).', 'woo-payzen-payment'), $answer['detailedStatus']));
+            throw new Exception(sprintf(__('Unexpected transaction type received (%1$s).', 'woo-payzen-payment'), $answer['detailedStatus']));
         }
     }
 }

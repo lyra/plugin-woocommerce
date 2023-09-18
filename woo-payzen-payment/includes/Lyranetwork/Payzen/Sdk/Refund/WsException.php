@@ -19,7 +19,10 @@ class WsException extends \Exception
      */
     public function __construct($message, $code = null)
     {
-        parent::__construct($message, null);
-        $this->code = $code;
+        parent::__construct($message, 0);
+
+        if ($code) {
+            $this->code = $code;
+        }
     }
 }
