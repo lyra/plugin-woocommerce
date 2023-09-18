@@ -27,7 +27,7 @@ class PayzenRefundProcessor implements RefundProcessor
      */
     public function doOnError($errorCode, $message)
     {
-        $msg = '<div class="inline error" style="text-align: left;"><p><strong>' . sprintf(__('An error has occurred during the online refund process. Please, consider making necessary changes in %s Back Office.', 'woo-payzen-payment'), WC_Gateway_Payzen::BACKOFFICE_NAME) . '</strong></p></div>';
+        $msg = '<div class="inline error" style="text-align: left;"><p><strong>'. $errorCode . ": " . $message . '</strong></p></div>';
         set_transient('payzen_online_refund_result', $msg);
     }
 
@@ -37,9 +37,8 @@ class PayzenRefundProcessor implements RefundProcessor
      */
     public function doOnSuccess($operationResponse, $operationType)
     {
-
-       $msg = '<div class="inline updated" style="text-align: left;"><p><strong>' . __('Online refund successfully completed', 'woo-payzen-payment') . '</strong></p></div>';
-       set_transient('payzen_online_refund_result', $msg);
+        $msg = '<div class="inline updated" style="text-align: left;"><p><strong>' . $this->translate('Online refund successfully completed') . '</strong></p></div>';
+        set_transient('payzen_online_refund_result', $msg);
     }
 
     /**
@@ -71,8 +70,8 @@ class PayzenRefundProcessor implements RefundProcessor
      * Translate given message.
      *
      */
-    public function Translate($message)
+    public function translate($message)
     {
-        return __($message);
+        return __($message, 'woo-payzen-payment');
     }
 }

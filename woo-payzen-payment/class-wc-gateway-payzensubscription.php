@@ -193,9 +193,9 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $saved_subsc_masked_pan = $card_brand_logo ? $card_brand_logo . '<b style="vertical-align: middle;">' . substr($saved_subsc_masked_pan, strpos($saved_subsc_masked_pan, '|') + 1) . '</b>'
             : ' <b>' . str_replace('|',' ', $saved_subsc_masked_pan) . '</b>';
 
-        echo '<div id="' . $this->id . '_payment_by_token_description">
+        return '<div id="' . $this->id . '_payment_by_token_description">
                   <ul>
-                      <li>
+                      <li style="list-style-type: none;">
                           <span>' .
                               sprintf(__('You will pay with your stored means of payment %s', 'woo-payzen-payment'), $saved_subsc_masked_pan)
                               . ' (<a href="' . esc_url(wc_get_account_endpoint_url($this->get_option('woocommerce_saved_cards_endpoint', 'ly_saved_cards'))) . '">' . __('manage your payment means', 'woo-payzen-payment') . '</a>).

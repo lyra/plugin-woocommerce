@@ -302,32 +302,30 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
      * @access public
      * @return void
      */
-    public function payment_fields()
+    public function get_payment_fields($options = array())
     {
-        parent::payment_fields();
-
-        $options = $this->get_available_options();
-
         if (empty($options)) {
-            // Should not happens for multi payment.
-            return;
+            $options = $this->get_available_options();
         }
 
-        echo '<ul>';
+        $html = '';
+        if (PayzenTools::has_checkout_block()) {
+            $html = parent::get_payment_fields();
+        }
 
         if (count($options) == 1) {
             $option = reset($options); // The option itself.
             $key = key($options); // The option key in options array.
-            echo '<span style="font-weight: bold;">' . __('Your payment option', 'woo-payzen-payment') . '</span>';
-            echo '<li style="list-style-type: none;">
+            $html .= '<span style="font-weight: bold;">' . __('Your payment option', 'woo-payzen-payment') . '</span>';
+            $html .= '<li style="list-style-type: none;">
                     <input type="hidden" id="payzenmulti_option_' . $key . '" value="' . $key . '" name="payzenmulti_option">
                     <label style="display: inline;">' . $option['label'] . '</label>
                   </li>';
         } else {
             $first = true;
-            echo '<span style="font-weight: bold;">' . __('Choose your payment option', 'woo-payzen-payment') . '</span>';
+            $html .= '<span style="font-weight: bold;">' . __('Choose your payment option', 'woo-payzen-payment') . '</span>';
             foreach ($options as $key => $option) {
-                echo '<li style="list-style-type: none;">
+                $html .= '<li style="list-style-type: none;">
                         <input class="radio" type="radio"'. ($first == true ? ' checked="checked"' : '') . ' id="payzenmulti_option_' . $key . '" value="' . $key . '" name="payzenmulti_option">
                         <label for="payzenmulti_option_' . $key . '" style="display: inline;">' . $option['label'] . '</label>
                       </li>';
@@ -335,7 +333,20 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
             }
         }
 
-        echo '</ul>';
+        return $html;
+    }
+
+    public function payment_fields()
+    {
+        echo parent::get_payment_fields();
+
+        $options = $this->get_available_options();
+        if (empty($options)) {
+            // Should not happen for multi payment.
+            return;
+        }
+
+        echo '<ul>' . $this->get_payment_fields($options) . '</ul>';
     }
 
     /**
@@ -350,7 +361,8 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         }
 
         $options = $this->get_available_options();
-        $option = $options[$_POST['payzenmulti_option']];
+        $option_id = isset($_POST['payzenmulti_option']) ? $_POST['payzenmulti_option'] : $_COOKIE['payzenmulti_option'];
+        $option = $options[$option_id];
 
         // Save selected payment option into session...
         set_transient('payzenmulti_option_' . $order_id, $option);

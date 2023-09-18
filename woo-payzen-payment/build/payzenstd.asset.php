@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('wc-blocks-registry', 'wc-settings'), 'version' => 'e57b088eedfe1bbf9c586e814acd3559');
+<?php return array('dependencies' => array('wc-blocks-registry', 'wc-settings'), 'version' => '89df0ee45f3dab80bac66f34f2a5462d');

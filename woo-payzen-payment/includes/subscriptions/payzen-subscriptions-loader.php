@@ -35,6 +35,7 @@ class Payzen_Subscriptions_Loader
         include_once "payzen-$handler-subscriptions-handler.php";
 
         $class = self::$handlers[$handler];
+
         return new $class();
     }
 }

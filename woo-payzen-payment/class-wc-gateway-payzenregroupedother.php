@@ -109,8 +109,15 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
             );
         }
 
+        $smartform_mode = PayzenTools::get_payzen_integration_mode_enabled();
+
         // Payment options.
-        $descr = sprintf(__('Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of payment: </b>Choose the means of payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. Leave blank to authorize all countries.<br /><b>Min. amount: </b>Minimum amount to enable the means of payment.<br /><b>Max. amount: </b>Maximum amount to enable the means of payment.<br /><b>Validation mode: </b>If manual is selected, you will have to confirm payments manually in your %s Back Office.<br /><b>Capture delay: </b>The number of days before the bank capture. Enter value only if different from %s general configuration.<br /><b>Cart data: </b>If you disable this option, the shopping cart details will not be sent to the gateway. Attention, in some cases, this option has to be enabled. For more information, refer to the module documentation.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>',
+        $payment_options_desc_p1 = 'Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of payment: </b>Choose the means of payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. Leave blank to authorize all countries.<br /><b>Min. amount: </b>Minimum amount to enable the means of payment.<br /><b>Max. amount: </b>Maximum amount to enable the means of payment.<br /><b>Validation mode: </b>If manual is selected, you will have to confirm payments manually in your %s Back Office.<br /><b>Capture delay: </b>The number of days before the bank capture. Enter value only if different from %s general configuration.';
+        $integration_mode_desc = '<br /><b>Integrated Mode: </b>If you enable this option, the payment mean will be displayed in the Smartform. Attention, not all available payment means are supported by the Smartform. For more information, refer to the module documentation.';
+        $payment_options_desc_p2 = '<br /><b>Cart data: </b>If you disable this option, the shopping cart details will not be sent to the gateway. Attention, in some cases, this option has to be enabled. For more information, refer to the module documentation.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>';
+
+        $payment_options_desc = $smartform_mode ? $payment_options_desc_p1 . $integration_mode_desc . $payment_options_desc_p2 : $payment_options_desc_p1 . $payment_options_desc_p2;
+        $descr = sprintf(__($payment_options_desc,
             'woo-payzen-payment'), 'PayZen', 'PayZen');
 
         $columns = array();
@@ -148,6 +155,13 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
             'title' => __('Capture delay ', 'woo-payzen-payment'),
             'width' => '92px',
         );
+
+        if ($smartform_mode) {
+            $columns['integrated_mode'] = array(
+                'title' => __('Integrated mode', 'woo-payzen-payment'),
+                'width' => '92px',
+            );
+        }
 
         $columns['send_cart_data'] = array(
             'title' => __('Cart data', 'woo-payzen-payment'),
@@ -211,10 +225,17 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
             }
         }
 
+        $smartformActivated = 'false';
+        if (PayzenTools::get_payzen_integration_mode_enabled()) {
+            $smartformActivated = 'true';
+        }
+
         ?>
         <script type="text/javascript">
         //<!--
             function payzenAddOption(fieldName, record, key) {
+                var smartformActivated = <?php echo $smartformActivated; ?>;
+
                 if (jQuery('#' + fieldName + '_table tbody tr').length == 1) {
                     jQuery('#' + fieldName + '_btn').css('display', 'none');
                     jQuery('#' + fieldName + '_table').css('display', '');
@@ -242,6 +263,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                         'countries': record.countries,
                         'validation_mode': record.validation_mode,
                         'capture_delay': record.capture_delay ,
+                        'integrated_mode': record.integrated_mode,
                         'send_cart_data': record.send_cart_data
                     };
                 }
@@ -250,19 +272,20 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                     var width = jQuery('#' + fieldName + '_table thead tr th.' + attr).width() - 8;
                     var inputName = fieldName + '[' + key + '][' + attr + ']';
 
-                    optionLine += '<td style="padding: 0px;">';
-
                     switch (attr) {
                         case 'payment_mean':
+                            optionLine += '<td style="padding: 0px;">';
                             optionLine += '<select style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '">';
                             optionLine += '<?php foreach ($cards as $key => $value) {
                                                     echo '<option value="' . $key . '">' . $value . '</option>';
                                                 } ?>';
 
                             optionLine = optionLine.replace('<option value="'+value+'"', '<option value="'+value+'" selected');
+                            optionLine += '</td>';
                             break;
 
                         case 'countries':
+                            optionLine += '<td style="padding: 0px;">';
                             optionLine += '<div><select style="display:none; width: ' + width + 'px; height: 150px; background-color: white; padding: 2px;" name="' + inputName + '[]" id="' + inputName +
                                          '" multiple="multiple" onblur="javascript:payzenDisplayMultiSelect(\'' + inputName + '\'); payzenDisplayLabel(\'' + inputName + '\');">';
                             optionLine += '<?php
@@ -283,17 +306,32 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                                                 }
 
                             optionLine += '</select><label style="width:100%;" id="label_' + inputName + '" onclick="javascript:payzenDisplayMultiSelect(\'' + inputName + '\');" >' + labelValue + '</label></div>';
+                            optionLine += '</td>';
                             break;
 
                         case 'validation_mode':
-                            optionLine += '<select style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '">';
+                            optionLine += '<td style="padding: 0px;">';
+                            var disabled = (smartformActivated && (orderedRecord.integrated_mode === 'on')) ? 'disabled' : '';
+                            optionLine += '<select style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '" ' + disabled + '>';
                             optionLine += '<?php foreach ($this->get_validation_modes() as $key => $value) {
                                                     echo '<option value="' . $key . '">' . $value . '</option>';
                                                 } ?>';
-                            optionLine = optionLine.replace('<option value="'+value+'"', '<option value="'+value+'" selected');
+                            optionLine = optionLine.replace('<option value="' + value + '"', '<option value="' + value + '" selected');
+                            optionLine += '</td>';
+                            break;
+
+                        case 'integrated_mode':
+                            if (smartformActivated) {
+                                optionLine += '<td style="padding: 0px;">';
+                                var checked = (value === 'on') ? 'checked' : '';
+                                optionLine += '<input type="checkbox" name="' + inputName + '" id="' + inputName + '" ' + checked + ' onclick="javascript:payzenActivateFields(\'' + inputName + '\', \'' + orderedRecord.validation_mode + '\', \'' + orderedRecord.capture_delay + '\');" >';
+                                optionLine += '</td>';
+                            }
+
                             break;
 
                         case 'send_cart_data':
+                            optionLine += '<td style="padding: 0px;">';
                             optionLine += '<select style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '">';
                             optionLine += '<?php $options = array('n' => __('No', 'woo-payzen-payment'), 'y' => __('Yes', 'woo-payzen-payment'));
                                                 foreach ($options as $key => $value) {
@@ -301,13 +339,22 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                                                 } ?>';
 
                             optionLine = optionLine.replace('<option value="'+value+'"', '<option value="'+value+'" selected');
+                            optionLine += '</td>';
+                            break;
+
+                        case 'capture_delay':
+                            optionLine += '<td style="padding: 0px;">';
+                            var disabled = (smartformActivated && (orderedRecord.integrated_mode === 'on')) ? 'disabled' : '';
+                            var captureDelayValue = (value == null || value == 'undefined') ? '' : value;
+                            optionLine += '<input class="input-text regular-input" style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '" type="text" value="' + captureDelayValue + '" ' + disabled + '>';
+                            optionLine += '</td>';
                             break;
 
                         default:
+                            optionLine += '<td style="padding: 0px;">';
                             optionLine += '<input class="input-text regular-input" style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '" type="text" value="' + value + '">';
+                            optionLine += '</td>';
                     }
-
-                    optionLine += '</td>';
                 });
 
                 optionLine += '<td style="padding: 0px;"><input type="button" value="<?php echo __('Delete', 'woo-payzen-payment')?>" onclick="javascript: payzenDeleteOption(\'' + fieldName + '\', \'' + key + '\');"></td>';
@@ -330,6 +377,20 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                 var label = document.getElementById('label_' + selectId);
                 select.style.display = '';
                 label.style.display = 'none';
+            }
+
+            function payzenActivateFields(checkboxId, validationMode, captureDelay) {
+                var integratedModeCheckbox = document.getElementById(checkboxId);
+                var validationModeId = checkboxId.replace('integrated_mode','validation_mode');
+                var captureDelayId = checkboxId.replace('integrated_mode','capture_delay');
+
+                if (integratedModeCheckbox.checked == true) {
+                    document.getElementById(validationModeId).disabled = true;
+                    document.getElementById(captureDelayId).disabled = true;
+                } else {
+                    document.getElementById(validationModeId).disabled = false;
+                    document.getElementById(captureDelayId).disabled = false;
+                }
             }
 
             function payzenDisplayLabel(selectId) {
@@ -498,12 +559,39 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
 
         $options = $this->get_option('payment_means');
         $enabled_options = array();
+        $smartform_mode = PayzenTools::get_payzen_integration_mode_enabled();
 
         if (isset($options) && is_array($options) && ! empty($options)) {
             foreach ($options as $code => $option) {
                 if ((! $option['amount_min'] || $amount >= $option['amount_min']) && (! $option['amount_max'] || $amount <= $option['amount_max'])
-                    && (empty($option['countries']) || array_key_exists($customer_country, $option['countries']))) {
+                    && (empty($option['countries']) || array_key_exists($customer_country, $option['countries'])) && (! $smartform_mode || ! isset($option['integrated_mode']) || ($option['integrated_mode'] !== 'on'))) {
                     $enabled_options[$code] = $option;
+                }
+            }
+        }
+
+        return $enabled_options;
+    }
+
+    public function get_available_options_for_smartform()
+    {
+        global $woocommerce;
+
+        $enabled_options = array();
+
+        if ($this->get_option('enabled') === 'yes') {
+            // Recover total amount either from order or from current cart if any.
+            $amount = self::get_total_amount();
+            $customer_country = $woocommerce->customer->get_shipping_country();
+
+            $options = $this->get_option('payment_means');
+
+            if (isset($options) && is_array($options) && ! empty($options)) {
+                foreach ($options as $code => $option) {
+                    if ((! $option['amount_min'] || $amount >= $option['amount_min']) && (! $option['amount_max'] || $amount <= $option['amount_max'])
+                        && (empty($option['countries']) || array_key_exists($customer_country, $option['countries'])) && isset($option['integrated_mode']) && ($option['integrated_mode'] === 'on')) {
+                            $enabled_options[$code] = $option;
+                    }
                 }
             }
         }
@@ -517,43 +605,56 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
      * @access public
      * @return void
      */
-    public function payment_fields()
+    public function get_payment_fields($options = array())
     {
-        parent::payment_fields();
-
-        $available_options = $this->get_available_options();
-        if (empty($available_options)) {
-            return;
+        if (empty($options)) {
+            $options = $this->get_available_options();
         }
-
+        
         // Get first array key.
-        $selected_option = key($available_options);
+        $selected_option = key($options);
 
-        echo '<div style="margin-bottom: 15px;" id="' . $this->id .'_display_available_other_payment_means">';
-        foreach ($available_options as $code => $option) {
+        $html = '<div style="margin-bottom: 15px;" id="' . $this->id .'_display_available_other_payment_means">';
+        foreach ($options as $code => $option) {
             $lower_payment_code = strtolower($option['payment_mean']);
 
-            echo '<div style="display: inline-block; margin: 10px;">';
-            if (count($available_options) == 1) {
-                echo '<input type="hidden" id="' . $this->id . '_' . $lower_payment_code . '" name="' . $this->id . '_card_type" value="' . $option['payment_mean'] . '">';
+            $html .= '<div style="display: inline-block; margin: 10px;">';
+            if (count($options) == 1) {
+                $html .= '<input type="hidden" id="' . $this->id . '_' . $lower_payment_code . '" name="' . $this->id . '_card_type" value="' . $option['payment_mean'] . '">';
             } else {
-                echo '<input type="radio" id="' . $this->id . '_' . $lower_payment_code . '" name="' . $this->id . '_card_type" value="' . $option['payment_mean'] . '" style="vertical-align: middle;" '
+                $html .= '<input type="radio" id="' . $this->id . '_' . $lower_payment_code . '" name="' . $this->id . '_card_type" value="' . $option['payment_mean'] . '" style="vertical-align: middle;" '
                     . checked($code, $selected_option, false) . '>';
             }
 
-            echo '<label for="' . $this->id . '_' . $lower_payment_code . '" style="display: inline;">';
+            $html .= '<label for="' . $this->id . '_' . $lower_payment_code . '" style="display: inline;">';
 
             $remote_logo = self::LOGO_URL . $lower_payment_code . '.png';
-            echo '<img src="' . $remote_logo . '"
-                       alt="' . $option['payment_mean']. '"
-                       title="' . $option['label']. '"
+            $html .= '<img src="' . $remote_logo . '"
+                       alt="' . $option['payment_mean'] . '"
+                       title="' . $option['label'] . '"
                        style="vertical-align: middle; margin-left: 5px; max-height: 35px; display: unset;">';
-
-            echo '</label>';
-            echo '</div>';
+            $html .= '</label>';
+            $html .= '</div>';
         }
 
-        echo '</div>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    public function payment_fields()
+    {
+        $description = $this->get_description();
+        if ($description) {
+            echo wpautop(wptexturize($description));
+        }
+
+        $options = $this->get_available_options();
+        if (empty($options)) {
+            // Should not happen.
+            return;
+        }
+
+        echo $this->get_payment_fields($options);
     }
 
     /**

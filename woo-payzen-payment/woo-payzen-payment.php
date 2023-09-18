@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.10.8
+ * Version: 1.11.0
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 6.2
+ * Tested up to: 6.3
  * WC requires at least: 2.0
- * WC tested up to: 7.6
+ * WC tested up to: 8.0
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -150,6 +150,8 @@ add_action('woocommerce_init', 'woocommerce_payzen_init');
 
 function woocommerce_payzen_woocommerce_block_support()
 {
+    global $payzen_plugin_features;
+
     if (class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
         require_once 'includes/PayzenTools.php';
         if (! PayzenTools::has_checkout_block()) {
@@ -166,6 +168,67 @@ function woocommerce_payzen_woocommerce_block_support()
                 $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenstd'));
             }
         );
+
+        if ($payzen_plugin_features['multi']) {
+            add_action(
+                'woocommerce_blocks_payment_method_type_registration',
+                function(PaymentMethodRegistry $payment_method_registry) {
+                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenMulti'));
+                }
+            );
+        }
+
+        if ($payzen_plugin_features['franfinance']) {
+            add_action(
+                'woocommerce_blocks_payment_method_type_registration',
+                function(PaymentMethodRegistry $payment_method_registry) {
+                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenFranfinance'));
+                }
+            );
+        }
+
+        if ($payzen_plugin_features['klarna']) {
+            add_action(
+                'woocommerce_blocks_payment_method_type_registration',
+                function(PaymentMethodRegistry $payment_method_registry) {
+                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenKlarna'));
+                }
+            );
+        }
+
+        if ($payzen_plugin_features['subscr']) {
+            add_action(
+                'woocommerce_blocks_payment_method_type_registration',
+                function(PaymentMethodRegistry $payment_method_registry) {
+                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenSubscription'));
+                }
+            );
+        }
+
+        add_action(
+            'woocommerce_blocks_payment_method_type_registration',
+            function(PaymentMethodRegistry $payment_method_registry) {
+                $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenRegroupedOther'));
+            }
+        );
+
+        add_action(
+            'woocommerce_blocks_payment_method_type_registration',
+            function(PaymentMethodRegistry $payment_method_registry) {
+                if (get_transient('payzen_other_methods')) {
+                    $methods = json_decode(get_transient('payzen_other_methods'), true);
+                    // Virtual method to display non regruped other payment means.
+                    $payment_method_registry->register(
+                        new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenOther', array('lyranetwork' ,'lyra'))
+                    );
+                    foreach ($methods as $method => $label) {
+                        $payment_method_registry->register(
+                            new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenOther', array($method, $label))
+                        );
+                    }
+                }
+            }
+       );
     }
 }
 add_action('woocommerce_blocks_loaded', 'woocommerce_payzen_woocommerce_block_support');
@@ -205,12 +268,19 @@ function woocommerce_payzen_add_method($methods)
         $regrouped_other_payments = new WC_Gateway_PayzenRegroupedOther();
 
         if (! $regrouped_other_payments->regroup_other_payment_means()) {
+            $payzen_other_methods = array();
             $payment_means = $regrouped_other_payments->get_available_options();
+
             if (is_array($payment_means) && ! empty($payment_means)) {
                 foreach ($payment_means as $option) {
                     $methods[] = new WC_Gateway_PayzenOther($option['payment_mean'], $option['label']);
+                    $payzen_other_methods[$option['payment_mean']] =  $option['label'];
                 }
             }
+
+            set_transient('payzen_other_methods', json_encode($payzen_other_methods));
+        } else {
+            delete_transient('payzen_other_methods');
         }
     }
 

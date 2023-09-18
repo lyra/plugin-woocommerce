@@ -18,26 +18,18 @@ import { registerPaymentMethod } from '@woocommerce/blocks-registry';
  */
 import { getPayzenServerData } from './payzen-utils';
 
-const PAYMENT_METHOD_NAME = 'payzenstd';
+const PAYMENT_METHOD_NAME = 'payzenmulti';
 var payzen_data = getPayzenServerData(PAYMENT_METHOD_NAME);
 
 const Content = () => {
-    if (payzen_data?.payment_fields) {
-        var fields = <div dangerouslySetInnerHTML={{__html: payzen_data?.payment_fields}} />;
+    var fields = <ul dangerouslySetInnerHTML={{__html: payzen_data?.payment_fields}} />;
+    jQuery('.wc-block-components-checkout-place-order-button').on('click', payzen_get_selected_option(['payzenmulti_option', 'payzenmulti_card_type']));
 
-        jQuery('.wc-block-components-checkout-place-order-button').on('click', payzenstd_get_card());
-        jQuery(document).ready(function() {
-            payzenUpdatePaymentBlock(true);
-        });
-
-        return (
-            <div>
-                { fields }
-            </div>
-        );
-    } else {
-        return (payzen_data?.description);
-    }
+    return (
+        <div>
+            { fields }
+        </div>
+    );
 };
 
 const Label = () => {

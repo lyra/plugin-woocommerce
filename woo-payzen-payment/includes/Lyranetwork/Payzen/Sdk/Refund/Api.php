@@ -80,7 +80,7 @@ class Api {
         // Client has not configured private key in module backend, let CMS do offline refund.
         if (! $this->privateKey) {
             $this->refundProcessor->log("Impossible to make online refund for order #{$orderInfo->getOrderId()}: private key is not configured. Let {$this->cmsName} do offline refund.", 'WARNING');
-            $this->refundProcessor->doOnError('privateKey', "Impossible to make online refund for order #{$orderInfo->getOrderId()}: private key is not configured. Let {$this->cmsName} do offline refund.");
+            $this->refundProcessor->doOnError('privateKey', sprintf($this->refundProcessor->translate('Impossible to make online refund for order #%1$s: password is not configured. Let %2$s do offline refund.'), $orderInfo->getOrderId(), $this->cmsName));
             return true;
         }
 
@@ -144,7 +144,7 @@ class Api {
                 case 'PSP_100':
                     // Merchant don't have offer allowing REST WS.
                     // Allow offline refund and display warning message.
-                    $this->refundProcessor->doOnError($errorCode, $this->refundProcessor->translate("Payment is refunded/canceled only in {$this->cmsName}. Please, consider making necessary changes in gateway Back Office."));
+                    $this->refundProcessor->doOnError($errorCode, sprintf($this->refundProcessor->translate('Payment is refunded/canceled only in %1$s. Please, consider making necessary changes in %2$s Back Office.'), $this->cmsName, 'PayZen'));
                     return true;
 
                 case 'PSP_083':
@@ -275,6 +275,7 @@ class Api {
 
         if ($transStatus === 'CAPTURED') { // Transaction captured, we can do refund.
             $real_refund_amount = $amountInCents;
+
             // Get transaction amount and already transaction refunded amount.
             if ($orderInfo->getOrderCurrencyIsoCode() != $transaction['currency']) {
                 $currency_conversion = true;
@@ -302,6 +303,7 @@ class Api {
                         $orderInfo->getOrderCurrencySign(),
                         $amount
                     );
+
                     throw new \Exception($msg);
                 } else {
                     // It may be caused by currency conversion.
