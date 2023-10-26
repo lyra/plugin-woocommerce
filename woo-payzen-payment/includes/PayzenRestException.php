@@ -19,7 +19,7 @@ class PayzenRestException extends Exception
      */
     public function __construct($message, $code = null)
     {
-        parent::__construct($message, null);
+        parent::__construct($message, 0);
         $this->code = $code;
     }
 }

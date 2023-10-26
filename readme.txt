@@ -4,8 +4,8 @@ Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
 Tested up to: 6.3
 WC requires at least: 2.0
-WC tested up to: 8.0
-Stable tag: 1.11.0
+WC tested up to: 8.2
+Stable tag: 1.11.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,12 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.11.1, 2023-10-26=
+* Fix compatibility with some WordPress 6.3.x themes.
+* [embedded] Send capture delay parameter in case of Smartform.
+* Update all domains payment means.
+* Update all domains supported currencies.
 
 = 1.11.0, 2023-09-15=
 * [embedded] Smartform integration.
