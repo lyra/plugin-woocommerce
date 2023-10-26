@@ -13,6 +13,10 @@
  */
 
 jQuery(function() {
+    if (typeof IDENTIFIER_FORM_TOKEN !== "undefined") {
+        payzenUpdateFormToken(true);
+    }
+
     setTimeout(function() {
         jQuery('.kr-payment-button').click(function(e) {
             jQuery('.kr-form-error').html('');
@@ -52,6 +56,57 @@ var payzenInitRestEvents = function(KR) {
     KR.onFocus(function(e) {
         jQuery('.kr-form-error').html('');
     });
+};
+
+var payzenDrawRestPaymentFields = function(formToken, first) {
+    var cardsForm = "";
+    if (PAYZEN_CARDS_FORM == true) {
+        cardsForm = '<div class="kr-pan"></div><div class="kr-expiry"></div><div class="kr-security-code"></div>';
+
+        if (PAYZEN_POPIN_ATTR) {
+            cardsForm += '<button class="kr-payment-button"></button>';
+        } else {
+            cardsForm += '<div style="display: none;"><button class="kr-payment-button"></button></div>';
+        }
+    }
+
+    var sfStyle = (PAYZEN_HIDE_SINGLE_BUTTON == true) ? 'style="width: 100%;"' : '';
+    var fields = '<div class="' + PAYZEN_KR_MODE + '" ' + PAYZEN_SINGLE_PAYMENT_BUTTON_MODE + ' ' + PAYZEN_SINGLE_PAYMENT_BUTTON_MODE + ' ' + PAYZEN_SF_EXTENDED_MODE + ' ' + PAYZEN_POPIN_ATTR + ' ' + sfStyle + ' > ' + cardsForm + ' <div class="kr-form-error"></div> <div id="payzenstd_rest_processing" class="kr-field processing" style="display: none; border: none; z-index: -1;"> <div style="background-image: url(' + PAYZEN_IMG_URL + '); margin: 0 auto; display: block; height: 35px; background-position: center; background-repeat: no-repeat; background-size: 35px;"></div></div></div>';
+
+    jQuery("#payzenstd_rest_wrapper").html(fields);
+    KR.renderElements();
+
+    var payzenFormConfig = { language: PAYZEN_LANGUAGE, formToken: formToken };
+    if (PAYZEN_HIDE_SINGLE_BUTTON == true) {
+        payzenFormConfig['form'] = { smartform: { singlePaymentButton: { visibility: false }}};
+    }
+
+    if (PAYZEN_SF_COMPACT_MODE == true) {
+        payzenFormConfig['cardForm'] = { layout: 'compact' };
+        payzenFormConfig['smartForm'] = { layout: 'compact' };
+    }
+
+    if (PAYZEN_GROUPING_THRESHOLD != 'false') {
+        payzenFormConfig['smartForm']['groupingThreshold'] = PAYZEN_GROUPING_THRESHOLD;
+    }
+
+    setTimeout(function () {
+        KR.setFormConfig(payzenFormConfig).then(function(v) {
+            if (first) {
+                payzenInitRestEvents(v.KR);
+            }
+        });
+    }, 300);
+};
+
+var payzenUpdateFormToken = function(useIdentifier) {
+    var formToken = FORM_TOKEN;
+
+    if (typeof IDENTIFIER_FORM_TOKEN !== "undefined" && useIdentifier) {
+        formToken = IDENTIFIER_FORM_TOKEN;
+    }
+
+    payzenDrawRestPaymentFields(formToken, ! KR || ! KR.vueReady);
 };
 
 // Translate error message.

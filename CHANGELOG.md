@@ -1,3 +1,9 @@
+= 1.11.1, 2023-10-26=
+* Fix compatibility with some WordPress 6.3.x themes.
+* [embedded] Send capture delay parameter in case of Smartform.
+* Update all domains payment means.
+* Update all domains supported currencies.
+
 = 1.11.0, 2023-09-15=
 * [embedded] Smartform integration.
 * [embedded] Bug fix: Fix error related to validation mode.
