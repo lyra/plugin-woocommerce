@@ -44,7 +44,7 @@ interface Payzen_Subscriptions_Handler_Interface
     public function is_subscription_update();
 
     /**
-     * Return WooCommerce parent order from suscription ID if any.
+     * Return WooCommerce parent order from subscription ID if any.
      *
      * @param $id
      * @return WC_Order|false
@@ -83,13 +83,13 @@ interface Payzen_Subscriptions_Handler_Interface
     public function process_subscription_renewal($order, $response);
 
     /**
-     * Should be called from a hook triggered by the subscriptions solution when updating suscriptions. Use init_hooks()
+     * Should be called from a hook triggered by the subscriptions solution when updating subscriptions. Use init_hooks()
      * function to define the necessary hooks.
      */
     public function update_subscription();
 
     /**
-     * Should be called from a hook triggered by the subscriptions solution when cancelling suscriptions. Use init_hooks()
+     * Should be called from a hook triggered by the subscriptions solution when cancelling subscriptions. Use init_hooks()
      * function to define the necessary hooks.
      */
     public function cancel_subscription();

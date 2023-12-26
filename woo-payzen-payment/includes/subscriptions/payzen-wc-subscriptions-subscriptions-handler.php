@@ -29,7 +29,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
      * {@inheritDoc}
      * @see Payzen_Subscriptions_Handler_Interface::cart_contains_subscription()
      */
-    public function cart_contains_subscription($cart)
+    public function cart_contains_subscription($cart = null)
     {
         if (! class_exists('WC_Subscriptions_Cart')) {
             return false;
@@ -57,7 +57,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
 
         $count = 0;
 
-        if (! empty($cart->cart_contents ) && ! wcs_cart_contains_renewal()) {
+        if (! empty($cart->cart_contents) && ! wcs_cart_contains_renewal()) {
             foreach ($cart->cart_contents as $cart_item) {
                 if (WC_Subscriptions_Product::is_subscription($cart_item['data'])) {
                     $count ++;
@@ -108,11 +108,12 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
 
         // Payment method changes act on the subscription not the original order.
         if ($is_payment_change) {
-            if ($old_payment_method === 'payzensubscription') {
+            $subscription = wcs_get_subscription($order_id);
+            $subscription_meta = get_post_meta($subscription->id, 'Subscription ID', true);
+
+            if (($old_payment_method === 'payzensubscription') && $subscription_meta) {
                 return false;
             }
-
-            $subscription = wcs_get_subscription($order_id);
 
             // We need the subscription's total.
             if (WC_Subscriptions::is_woocommerce_pre('3.0')) {
@@ -161,6 +162,10 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
 
     private static function get_effect_date($subscription, $is_payment_change = false)
     {
+        if (! $subscription) {
+            return null;
+        }
+
         // If it's a payment change, set effect date to next payment date.
         if ($is_payment_change) {
             $start_time = $subscription->get_time('next_payment');
@@ -170,13 +175,18 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
 
         // Get free trial end date.
         $trial_end = $subscription->get_time('trial_end');
+        $present_time = date('Ymd', time());
 
-        if ($trial_end <= date('Ymd', time())) {
+        if ($trial_end <= $present_time) {
             // No trial period, 1st recurrence is paid in order amount.
             $start_time = $subscription->get_time('next_payment');
         } elseif ($trial_end > $start_time) {
             // Subscription starts after a trial period.
             $start_time = $trial_end;
+        }
+
+        if ($start_time && ($start_time < $present_time)) {
+            $start_time = $present_time;
         }
 
         return $start_time ? date('Ymd', $start_time) : null;
@@ -210,14 +220,27 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
         $subscriptions = wcs_get_subscriptions_for_order($order);
         $subscription = reset($subscriptions); // Get first subscription.
 
-        delete_post_meta($subscription->get_id(), 'Subscription ID');
-        delete_post_meta($subscription->get_id(), 'Subscription amount');
-        delete_post_meta($subscription->get_id(), 'Effect date');
+        if (PayzenTools::is_hpos_enabled()) {
+            // HPOS usage is enabled.
+            $subscription->delete_meta_data('Subscription ID');
+            $subscription->delete_meta_data('Subscription amount');
+            $subscription->delete_meta_data('Effect date');
 
-        // Store subscription details.
-        update_post_meta($subscription->get_id(), 'Subscription ID', $response->get('subscription'));
-        update_post_meta($subscription->get_id(), 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('sub_amount'), $response->get('sub_currency')));
-        update_post_meta($subscription->get_id(), 'Effect date', preg_replace('#^(\d{4})(\d{2})(\d{2})$#', '\1-\2-\3', $response->get('sub_effect_date')));
+            $subscription->update_meta_data('Subscription ID', $response->get('subscription'));
+            $subscription->update_meta_data('Subscription amount', WC_Gateway_Payzen::display_amount($response->get('sub_amount'), $response->get('sub_currency')));
+            $subscription->update_meta_data('Effect date', preg_replace('#^(\d{4})(\d{2})(\d{2})$#', '\1-\2-\3', $response->get('sub_effect_date')));
+
+            $subscription->save();
+        } else {
+            delete_post_meta($subscription->get_id(), 'Subscription ID');
+            delete_post_meta($subscription->get_id(), 'Subscription amount');
+            delete_post_meta($subscription->get_id(), 'Effect date');
+
+            // Store subscription details.
+            update_post_meta($subscription->get_id(), 'Subscription ID', $response->get('subscription'));
+            update_post_meta($subscription->get_id(), 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('sub_amount'), $response->get('sub_currency')));
+            update_post_meta($subscription->get_id(), 'Effect date', preg_replace('#^(\d{4})(\d{2})(\d{2})$#', '\1-\2-\3', $response->get('sub_effect_date')));
+        }
 
         if (WC_Gateway_Payzen::is_successful_action($response)) {
             $subscription->payment_complete();
@@ -271,13 +294,25 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
                 WC_Gateway_Payzen::payzen_add_order_note($response, $renewal_order);
                 $currency_code = $response->get('currency');
 
-                delete_post_meta($renewal_order_id, 'Subscription ID');
-                delete_post_meta($renewal_order_id, 'Subscription amount');
-                delete_post_meta($renewal_order_id, 'Recurrence number');
+                if (PayzenTools::is_hpos_enabled()) {
+                    $renewal_order->delete_meta_data('Subscription ID');
+                    $renewal_order->delete_meta_data('Subscription amount');
+                    $renewal_order->delete_meta_data('Recurrence number');
 
-                update_post_meta($renewal_order_id, 'Subscription ID', $response->get('subscription'));
-                update_post_meta($renewal_order_id, 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('amount'), $currency_code));
-                update_post_meta($renewal_order_id, 'Recurrence number', $response->get('recurrence_number'));
+                    $renewal_order->update_meta_data('Subscription ID', $response->get('subscription'));
+                    $renewal_order->update_meta_data('Subscription amount', WC_Gateway_Payzen::display_amount($response->get('amount'), $currency_code));
+                    $renewal_order->update_meta_data('Recurrence number', $response->get('recurrence_number'));
+
+                    $renewal_order->save();
+                } else {
+                    delete_post_meta($renewal_order_id, 'Subscription ID');
+                    delete_post_meta($renewal_order_id, 'Subscription amount');
+                    delete_post_meta($renewal_order_id, 'Recurrence number');
+
+                    update_post_meta($renewal_order_id, 'Subscription ID', $response->get('subscription'));
+                    update_post_meta($renewal_order_id, 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('amount'), $currency_code));
+                    update_post_meta($renewal_order_id, 'Recurrence number', $response->get('recurrence_number'));
+                }
 
                 // Update subscription next payment date to avoid incoherences.
                 $subsc_interval = (int) $subscription->get_billing_interval();
@@ -323,7 +358,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
      */
     public function update_subscription()
     {
-        if (! isset($_GET['message']) || $_GET['message'] != 1 ) {
+        if (! isset($_GET['message']) || $_GET['message'] != 1) {
             return;
         }
 
@@ -339,6 +374,18 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
 
         $payzen_subscription = new WC_Gateway_PayzenSubscription();
         $payzen_subscription->update_online_subscription($subscription_id, $order_id);
+    }
+
+    public function check_gateway_subscriptions()
+    {
+    }
+
+    public function process_subscription_payment()
+    {
+    }
+
+    public function subscription_payment_meta()
+    {
     }
 
     /**
@@ -367,7 +414,9 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
     private function get_renewal_order($subscription, $recurrence)
     {
         foreach ($subscription->get_related_orders('ids', 'renewal') as $renewal_order_id) {
-            if ($recurrence == get_post_meta($renewal_order_id, 'Recurrence number', true)) {
+            $order = wc_get_order($renewal_order_id);
+            $recurrenceNum = (PayzenTools::is_hpos_enabled()) ? $order->get_meta('Recurrence number', true) : get_post_meta($renewal_order_id, 'Recurrence number', true);
+            if ($recurrence == $recurrenceNum) {
                 return $renewal_order_id;
             }
         }

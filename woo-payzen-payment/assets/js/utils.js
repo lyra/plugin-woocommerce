@@ -24,16 +24,11 @@ var payzen_get_selected_option = function(elementNames) {
 
         document.cookie = name + '=' + option.val() + '; path=/';
     }
-}
+};
 
 var payzenstd_get_card = function () {
     payzen_get_selected_option(['payzenstd_card_type']);
-
-    if (jQuery("#payzen_use_identifier")) {
-        let use_identifier = jQuery("#payzen_use_identifier").val();
-        document.cookie = 'payzen_use_identifier=' + use_identifier + '; path=/';
-    }
-}
+};
 
 var payzenUpdatePaymentBlock = function (useIdentifier) {
     jQuery("ul.payzenstd-view-top li.block").hide();
@@ -42,6 +37,23 @@ var payzenUpdatePaymentBlock = function (useIdentifier) {
     var blockName = useIdentifier ? "id" : "cc";
     jQuery("li.payzenstd-" + blockName + "-block").show();
 
+    if (typeof window.FORM_TOKEN != 'undefined') {
+        payzenUpdateFormToken(useIdentifier);
+    }
+
     jQuery("#payzen_use_identifier").val(useIdentifier);
-}
- 
+};
+
+var payzenstd_show_iframe = function() {
+    // Unblock screen.
+    jQuery('form.wc-block-components-form wc-block-checkout__form').unblock();
+    jQuery('.wc-block-components-checkout-place-order-button').prop("disabled", false);
+
+    jQuery('.payment_method_payzenstd p:first-child').hide();
+    jQuery('ul.payzenstd-view-top li.block').hide();
+    jQuery('ul.payzenstd-view-bottom li.block').hide();
+    jQuery('#payzen_iframe').show();
+    jQuery('#payzen_iframe').attr('src', window.IFRAME_LINK);
+
+    jQuery(window).unbind('beforeunload');
+};

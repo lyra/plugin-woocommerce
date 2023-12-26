@@ -171,13 +171,26 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
 
             $currency_code = $response->get('currency');
 
-            delete_post_meta($renewal_order_id, 'Subscription ID');
-            delete_post_meta($renewal_order_id, 'Subscription amount');
-            delete_post_meta($renewal_order_id, 'Recurrence number');
+            if (PayzenTools::is_hpos_enabled()) {
+                // HPOS usage is enabled.
+                $renewal_order->delete_meta_data('Subscription ID');
+                $renewal_order->delete_meta_data('Subscription amount');
+                $renewal_order->delete_meta_data('Effect date');
 
-            update_post_meta($renewal_order_id, 'Subscription ID', $response->get('subscription'));
-            update_post_meta($renewal_order_id, 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('sub_amount'), $currency_code));
-            update_post_meta($renewal_order_id, 'Recurrence number', $response->get('recurrence_number'));
+                $renewal_order->update_meta_data('Subscription ID', $response->get('subscription'));
+                $renewal_order->update_meta_data('Subscription amount', WC_Gateway_Payzen::display_amount($response->get('sub_amount'), $currency_code));
+                $renewal_order->update_meta_data('Recurrence number', $response->get('recurrence_number'));
+
+                $renewal_order->save();
+            } else {
+                delete_post_meta($renewal_order_id, 'Subscription ID');
+                delete_post_meta($renewal_order_id, 'Subscription amount');
+                delete_post_meta($renewal_order_id, 'Recurrence number');
+
+                update_post_meta($renewal_order_id, 'Subscription ID', $response->get('subscription'));
+                update_post_meta($renewal_order_id, 'Subscription amount', WC_Gateway_Payzen::display_amount($response->get('sub_amount'), $currency_code));
+                update_post_meta($renewal_order_id, 'Recurrence number', $response->get('recurrence_number'));
+            }
 
             if ($response->isPendingPayment()) {
                 // Payment is pending.

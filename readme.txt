@@ -2,10 +2,10 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 6.3
+Tested up to: 6.4
 WC requires at least: 2.0
-WC tested up to: 8.2
-Stable tag: 1.11.1
+WC tested up to: 8.4
+Stable tag: 1.12.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,14 +42,24 @@ The payment plugin has the following features:
 
 == Changelog ==
 
+= 1.12.0, 2023-12-26=
+* New management of WooCommerce subscriptions.
+* Added compatibility with WooCommerce Blocks for all payment modes.
+* Added compatibility with High-Performance Order Storage (HPOS).
+* Handle refund of a split payment.
+* [embedded] Improve payment form token refresh management.
+* [technical] Improve features management by plugin variant.
+* Fix redirection page display with some WordPress themes.
+* Bug Fix: Fix PHP warnings related to deprecated creation of dynamic properties.
+
 = 1.11.1, 2023-10-26=
 * Fix compatibility with some WordPress 6.3.x themes.
-* [embedded] Send capture delay parameter in case of Smartform.
+* [smartform] Send capture delay parameter in case of Smartform.
 * Update all domains payment means.
 * Update all domains supported currencies.
 
 = 1.11.0, 2023-09-15=
-* [embedded] Smartform integration.
+* [smartform] Smartform integration.
 * [embedded] Bug fix: Fix error related to validation mode.
 * Added compatibility with "Woocommerce Blocks" for payment in redirection.
 * Added compatibility with "CheckoutWC".

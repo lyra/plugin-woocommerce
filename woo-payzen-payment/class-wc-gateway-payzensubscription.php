@@ -26,7 +26,9 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $this->id = 'payzensubscription';
         $this->icon = apply_filters('woocommerce_payzensubscription_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/payzen.png');
         $this->has_fields = true;
-        $this->method_title = self::GATEWAY_NAME. ' - ' . __('Subscription payment', 'woo-payzen-payment');
+        $this->method_title = self::GATEWAY_NAME . ' - ' . __('Subscription payment', 'woo-payzen-payment');
+        $this->method_description = sprintf(__('Subscriptions managed by %s gateway', 'woo-payzen-payment'), self::GATEWAY_NAME)
+            . ' <b>('. __('Deprecated', 'woo-payzen-payment') . ')</b>';
 
         $this->supports = array(
             'subscriptions',
@@ -76,8 +78,17 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         // Generate subscription payment form action.
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
 
-        // Iframe payment endpoint action.
-        add_action('woocommerce_api_wc_gateway_' . $this->id, array($this, 'payzen_generate_iframe_form'));
+        // Payment method title filter.
+        add_filter('woocommerce_title_' . $this->id, array($this, 'get_title'));
+
+        // Payment method description filter.
+        add_filter('woocommerce_description_' . $this->id, array($this, 'get_description'));
+
+        // Payment method availability filter.
+        add_filter('woocommerce_available_' . $this->id, array($this, 'is_available'));
+
+        // Generate payment fields filter.
+        add_filter('woocommerce_payzen_payment_fields_' . $this->id, array($this, 'get_payment_fields'));
 
         // Order needs payment filter.
         add_filter('woocommerce_order_needs_payment', array($this, 'payzen_order_needs_payment'), 10, 2);
@@ -286,7 +297,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             if (is_admin()) { // Show error message only if it's made on backend.
                 set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('Subscription is cancelled only in WooCommerce. Please, consider cancelling the subscription in %s Back Office.', 'woo-payzen-payment'), 'PayZen'));
             } else {
-                wc_add_notice( __('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice' );
+                wc_add_notice(__('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice');
             }
 
             $this->log("Subscription #{$subscription_id} cannot be cancelled on gateway for order #$order_id: private key is not configured.");
@@ -299,9 +310,10 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         $cust_id = self::get_order_property($order, 'user_id');
         $saved_identifier = $this->get_cust_identifier($cust_id);
+        $subscriptionId = (PayzenTools::is_hpos_enabled()) ? $order->get_meta('Subscription ID') : get_post_meta($order_id, 'Subscription ID', true);
 
         $params = array(
-            'subscriptionId' => get_post_meta($order_id, 'Subscription ID', true),
+            'subscriptionId' => $subscriptionId,
             'paymentMethodToken' => $saved_identifier
         );
 
@@ -328,7 +340,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             if (is_admin()) { // Show error message only if it's made on backend.
                 set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
             } else {
-                wc_add_notice( __('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice' );
+                wc_add_notice(__('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice');
             }
 
             $this->log("Subscription cancel exception for order #$order_id with code {$e->getCode()}: {$e->getMessage()}");
@@ -337,7 +349,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
     private function cancel_transaction($transaction)
     {
-        if ($transaction['status'] !== 'RUNNING' ) {
+        if ($transaction['status'] !== 'RUNNING') {
             return;
         }
 
@@ -365,7 +377,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             if (is_admin()) { // Show error message only if it's made on backend.
                 set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
             }  else {
-                wc_add_notice( __('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice' );
+                wc_add_notice(__('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice');
             }
 
             $this->log("Transaction cancel exception for order #$order_id with code {$e->getCode()}: {$e->getMessage()}.");
@@ -406,8 +418,10 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
 
+        $subscriptionId = (PayzenTools::is_hpos_enabled()) ? $order->get_meta('Subscription ID', true) : get_post_meta($order_id, 'Subscription ID', true);
+
         $params = array(
-            'subscriptionId' => get_post_meta($order_id, 'Subscription ID', true),
+            'subscriptionId' => $subscriptionId,
             'paymentMethodToken' => $saved_identifier,
             'amount' => $currency->convertAmountToInteger($info['amount']),
             'currency' => $currency->getAlpha3(),
@@ -495,7 +509,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             <script type="text/javascript">
                 jQuery(document).ready(function() {
                     if (! jQuery('#payzen_cancelled_subscription_error').length) {
-                        jQuery('a.page-title-action').after('<div id="payzen_cancelled_subscription_error" class="error notice is-dismissible"><p><?php echo addslashes($payzen_cancelled_subscription_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__( 'Dismiss this notice.', 'woocommerce' )  ?></span></button></div>');
+                        jQuery('a.page-title-action').after('<div id="payzen_cancelled_subscription_error" class="error notice is-dismissible"><p><?php echo addslashes($payzen_cancelled_subscription_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__('Dismiss this notice.', 'woocommerce')  ?></span></button></div>');
                     }
                 });
             </script>
@@ -570,7 +584,8 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         );
     }
 
-    private function get_rrule($subscription_info) {
+    private function get_rrule($subscription_info)
+    {
         $desc = 'RRULE:FREQ=' . $subscription_info['frequency'] . ';INTERVAL=' . $subscription_info['interval'];
 
         $date_time = strtotime($subscription_info['effect_date']);
@@ -588,5 +603,58 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         }
 
         return $desc;
+    }
+
+    public function process_admin_options()
+    {
+        parent::process_admin_options();
+
+        $wcs_subscription_settings = get_option('woocommerce_payzenwcssubscription_settings', null);
+        $wcs_subscription_enabled = is_array($wcs_subscription_settings) && isset($wcs_subscription_settings['enabled']) && ($wcs_subscription_settings['enabled'] == 'yes');
+
+        if (! $wcs_subscription_enabled) {
+            return;
+        }
+
+        $settings = get_option('woocommerce_' . $this->id . '_settings', null);
+        $enabled = is_array($settings) && isset($settings['enabled']) && ($settings['enabled'] == 'yes');
+
+        if (! $enabled) {
+            return;
+        }
+
+        WC_Admin_Settings::add_error(sprintf(__('This method cannot be enabled. You have to disable "%s" method first.', 'woo-payzen-payment'),
+            self::GATEWAY_NAME . ' - ' . __('Subscription payment with WooCommerce Subscriptions', 'woo-payzen-payment')));
+
+        $settings['enabled'] = 'no';
+        update_option('woocommerce_' . $this->id . '_settings', $settings);
+    }
+
+    public function payzen_init()
+    {
+        parent::payzen_init();
+
+        if ($this->payzen_is_section_loaded()) {
+            return;
+        }
+
+        if (isset($_POST['action']) && ($_POST['action'] == 'woocommerce_toggle_gateway_enabled') && isset($_POST['gateway_id']) && ($_POST['gateway_id'] == $this->id)) {
+            $wcs_subscription_settings = get_option('woocommerce_payzenwcssubscription_settings', null);
+            $wcs_subscription_enabled = is_array($wcs_subscription_settings) && isset($wcs_subscription_settings['enabled']) && ($wcs_subscription_settings['enabled'] == 'yes');
+
+            if (! $wcs_subscription_enabled) {
+                return;
+            }
+
+            $settings = get_option('woocommerce_' . $this->id . '_settings', null);
+            $was_enabled = is_array($settings) && isset($settings['enabled']) && ($settings['enabled'] == 'yes');
+
+            if ($was_enabled) {
+                return;
+            }
+
+            $settings['enabled'] = 'yes';
+            update_option('woocommerce_' . $this->id . '_settings', $settings);
+        }
     }
 }

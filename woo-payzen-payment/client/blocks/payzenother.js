@@ -31,40 +31,39 @@ const styles =
     };
 
 var payzen_data = getPayzenServerData(PAYMENT_METHOD_NAME);
-var method = '';
-var Content = '';
-var Label = '';
 
-(payzen_data?.sub_methods).forEach((name) => {
-    let method = payzen_prefix + name.toLowerCase();
-    let payzen_data = getPayzenServerData(method);
+if (payzen_data?.sub_methods) {
+    (payzen_data?.sub_methods).forEach((name) => {
+        let method = payzen_prefix + name.toLowerCase();
+        let data = getPayzenServerData(method);
 
-    let Content = () => {
-        return (payzen_data?.description);
-    };
+        let Content = () => {
+            return (data?.description);
+        };
 
-    let Label = () => {
-        return (
-            <div style={ styles.divWidth }>
-                <span>{ payzen_data?.title}</span>
-                <img
-                    style={ styles.imgFloat }
-                    src={ payzen_data?.logo_url }
-                    alt={ payzen_data?.title }
-                />
-            </div>
-        );
-    };
+        let Label = () => {
+            return (
+                <div style={ styles.divWidth }>
+                    <span>{ data?.title}</span>
+                    <img
+                        style={ styles.imgFloat }
+                        src={ data?.logo_url }
+                        alt={ data?.title }
+                    />
+                </div>
+            );
+        };
 
-    registerPaymentMethod({
-        name: method,
-        label: <Label />,
-        ariaLabel: 'Payzen payment method',
-        canMakePayment: () => true,
-        content: <Content />,
-        edit: <Content />,
-        supports: {
-            features: payzen_data?.supports ?? [],
-        },
-    });
-})
+        registerPaymentMethod({
+            name: method,
+            label: <Label />,
+            ariaLabel: 'Payzen payment method',
+            canMakePayment: () => true,
+            content: <Content />,
+            edit: <Content />,
+            supports: {
+                features: data?.supports ?? [],
+            },
+        });
+    })
+}

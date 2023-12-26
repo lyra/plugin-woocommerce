@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.11.1
+ * Version: 1.12.0
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 6.3
+ * Tested up to: 6.4
  * WC requires at least: 2.0
- * WC tested up to: 8.2
+ * WC tested up to: 8.4
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -46,6 +46,7 @@ $payzen_plugin_features = array(
     'restrictmulti' => false,
     'shatwo' => true,
     'embedded' => true,
+    'smartform' => true,
     'subscr' => true,
     'support' => true,
 
@@ -88,6 +89,7 @@ function woocommerce_payzen_uninstallation()
     delete_option('woocommerce_payzenfranfinance_settings');
     delete_option('woocommerce_payzenregroupedother_settings');
     delete_option('woocommerce_payzensubscription_settings');
+    delete_option('woocommerce_payzenwcssubscription_settings');
 }
 register_uninstall_hook(__FILE__, 'woocommerce_payzen_uninstallation');
 
@@ -139,6 +141,10 @@ function woocommerce_payzen_init()
         require_once 'class-wc-gateway-payzensubscription.php';
     }
 
+    if (! class_exists('WC_Gateway_PayzenWcsSubscription')) {
+        require_once 'class-wc-gateway-payzenwcssubscription.php';
+    }
+
     require_once 'includes/sdk-autoload.php';
     require_once 'includes/PayzenRestTools.php';
     require_once 'includes/PayzenTools.php';
@@ -150,8 +156,6 @@ add_action('woocommerce_init', 'woocommerce_payzen_init');
 
 function woocommerce_payzen_woocommerce_block_support()
 {
-    global $payzen_plugin_features;
-
     if (class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
         require_once 'includes/PayzenTools.php';
         if (! PayzenTools::has_checkout_block()) {
@@ -165,72 +169,49 @@ function woocommerce_payzen_woocommerce_block_support()
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
             function(PaymentMethodRegistry $payment_method_registry) {
+                global $payzen_plugin_features;
+
                 $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenstd'));
-            }
-        );
 
-        if ($payzen_plugin_features['multi']) {
-            add_action(
-                'woocommerce_blocks_payment_method_type_registration',
-                function(PaymentMethodRegistry $payment_method_registry) {
-                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenMulti'));
+                if ($payzen_plugin_features['multi']) {
+                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenmulti'));
                 }
-            );
-        }
 
-        if ($payzen_plugin_features['franfinance']) {
-            add_action(
-                'woocommerce_blocks_payment_method_type_registration',
-                function(PaymentMethodRegistry $payment_method_registry) {
-                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenFranfinance'));
+                if ($payzen_plugin_features['franfinance']) {
+                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenfranfinance'));
                 }
-            );
-        }
 
-        if ($payzen_plugin_features['klarna']) {
-            add_action(
-                'woocommerce_blocks_payment_method_type_registration',
-                function(PaymentMethodRegistry $payment_method_registry) {
-                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenKlarna'));
+                if ($payzen_plugin_features['klarna']) {
+                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenklarna'));
                 }
-            );
-        }
 
-        if ($payzen_plugin_features['subscr']) {
-            add_action(
-                'woocommerce_blocks_payment_method_type_registration',
-                function(PaymentMethodRegistry $payment_method_registry) {
-                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenSubscription'));
+                if ($payzen_plugin_features['subscr']) {
+                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzensubscription'));
                 }
-            );
-        }
 
-        add_action(
-            'woocommerce_blocks_payment_method_type_registration',
-            function(PaymentMethodRegistry $payment_method_registry) {
-                $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenRegroupedOther'));
-            }
-        );
+                $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenwcssubscription'));
 
-        add_action(
-            'woocommerce_blocks_payment_method_type_registration',
-            function(PaymentMethodRegistry $payment_method_registry) {
+                $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenregroupedother'));
+
                 if (get_transient('payzen_other_methods')) {
                     $methods = json_decode(get_transient('payzen_other_methods'), true);
-                    // Virtual method to display non regruped other payment means.
+
+                    // Virtual method to display non regrouped other payment means.
                     $payment_method_registry->register(
-                        new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenOther', array('lyranetwork' ,'lyra'))
+                        new WC_Gateway_Payzen_Blocks_Support('payzenother_lyranetwork')
                     );
-                    foreach ($methods as $method => $label) {
+
+                    foreach ($methods as $code => $label) {
                         $payment_method_registry->register(
-                            new WC_Gateway_Payzen_Blocks_Support('WC_Gateway_PayzenOther', array($method, $label))
+                            new WC_Gateway_Payzen_Blocks_Support('payzenother_' . $code, $label)
                         );
                     }
                 }
-            }
-       );
+             }
+        );
     }
 }
+
 add_action('woocommerce_blocks_loaded', 'woocommerce_payzen_woocommerce_block_support');
 
 /* Add our payment methods to WooCommerce methods. */
@@ -257,15 +238,25 @@ function woocommerce_payzen_add_method($methods)
         $methods[] = 'WC_Gateway_PayzenFranfinance';
     }
 
+    $methods[] = 'WC_Gateway_PayzenWcsSubscription';
+
     if ($payzen_plugin_features['subscr']) {
         $methods[] = 'WC_Gateway_PayzenSubscription';
     }
 
     $methods[] = 'WC_Gateway_PayzenRegroupedOther';
 
+    if (get_transient('payzen_other_methods') && ! is_admin()) {
+        $other_methods = json_decode(get_transient('payzen_other_methods'), true);
+
+        foreach ($other_methods as $code => $label) {
+            $methods[] = new WC_Gateway_PayzenOther($code, $label);
+        }
+    }
+
     // Since 2.3.0, we can display other payment means as submodules.
     if (version_compare($woocommerce->version, '2.3.0', '>=') && $woocommerce->cart) {
-        $regrouped_other_payments = new WC_Gateway_PayzenRegroupedOther();
+        $regrouped_other_payments = new WC_Gateway_PayzenRegroupedOther(false);
 
         if (! $regrouped_other_payments->regroup_other_payment_means()) {
             $payzen_other_methods = array();
@@ -273,7 +264,6 @@ function woocommerce_payzen_add_method($methods)
 
             if (is_array($payment_means) && ! empty($payment_means)) {
                 foreach ($payment_means as $option) {
-                    $methods[] = new WC_Gateway_PayzenOther($option['payment_mean'], $option['label']);
                     $payzen_other_methods[$option['payment_mean']] =  $option['label'];
                 }
             }
@@ -419,7 +409,7 @@ function payzen_my_account_endpoint_content()
 
     $cust_id = WC_Gateway_Payzen::get_customer_property($woocommerce->customer, 'id');
 
-    $sub_module_saving_cards_ids = array('payzenstd', 'payzensubscription');
+    $sub_module_saving_cards_ids = array('payzenstd', 'payzensubscription', 'payzenwcssubscription');
 
     $customer_saved_cards = array();
     $column_card_brand =  false;
@@ -553,6 +543,7 @@ function payzen_send_support_email_on_order($order)
         }
 
         $payzen_update_subscription_error_msg = get_transient('payzen_update_subscription_error_msg');
+        $payzen_renewal_error_msg = get_transient('payzen_renewal_error_msg');
 
         if ($payzen_plugin_features['support']) {
         ?>
@@ -615,11 +606,18 @@ function payzen_send_support_email_on_order($order)
         <?php
             }
 
+            //$payzen_renewal_subscription_error_msg
             if ($payzen_update_subscription_error_msg) {
                 delete_transient('payzen_update_subscription_error_msg');
         ?>
-                jQuery('#lost-connection-notice').after('<div class="error notice is-dismissible"><p><?php echo addslashes($payzen_update_subscription_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__('Dismiss this notice.', 'woocommerce')  ?></span></button></div>');
-        <?php } ?>
+                jQuery('#lost-connection-notice').after('<div class="error notice is-dismissible"><p><?php echo addslashes($payzen_update_subscription_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__('Dismiss this notice.', 'woocommerce') ?></span></button></div>');
+            <?php
+            }
+            if ($payzen_renewal_error_msg) {
+                delete_transient('payzen_renewal_error_msg');
+                ?>
+                    jQuery('#lost-connection-notice').after('<div class="error notice is-dismissible"><p><?php echo addslashes($payzen_renewal_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__('Dismiss this notice.', 'woocommerce') ?></span></button></div>');
+            <?php } ?>
             });
         </script>
         <?php
@@ -663,9 +661,9 @@ require_once 'includes/PayzenRestTools.php';
 if (PayzenRestTools::checkResponse($_POST)) {
     $answer = json_decode($_POST['kr-answer'], true);
     $data = PayzenRestTools::convertRestResult($answer);
-    $is_valid_ipn = key_exists('vads_ext_info_blog_id', $data) && $data['vads_ext_info_blog_id'];
+    $is_valid_ipn = isset($data['vads_ext_info_blog_id']);
 } else {
-    $is_valid_ipn = key_exists('vads_hash', $_POST) && $_POST['vads_hash'] && key_exists('vads_ext_info_blog_id', $_POST) && $_POST['vads_ext_info_blog_id'];
+    $is_valid_ipn = isset($_POST['vads_hash']) && isset($_POST['vads_ext_info_blog_id']);
 }
 
 if (is_multisite() && $is_valid_ipn) {
@@ -752,3 +750,14 @@ function payzen_display_refund_result_message($order_id)
 
 // Display online refund result message.
 add_action('woocommerce_admin_order_totals_after_discount', 'payzen_display_refund_result_message', 10, 1);
+
+function features_compatibility()
+{
+    if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
+    }
+}
+
+// Declaring HPOS compatibility.
+add_action('before_woocommerce_init', 'features_compatibility');

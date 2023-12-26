@@ -54,8 +54,20 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_script'));
         }
 
-        // Generate Franfinance payment form action.
+        // Generate payment form action.
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
+
+        // Payment method title filter.
+        add_filter('woocommerce_title_' . $this->id, array($this, 'get_title'));
+
+        // Payment method description filter.
+        add_filter('woocommerce_description_' . $this->id, array($this, 'get_description'));
+
+        // Payment method availability filter.
+        add_filter('woocommerce_available_' . $this->id, array($this, 'is_available'));
+
+        // Generate payment fields filter.
+        add_filter('woocommerce_payzen_payment_fields_' . $this->id, array($this, 'get_payment_fields'));
     }
 
     /**
@@ -236,6 +248,7 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
             $value[$code] = array_map('esc_attr', array_map($fnc, (array) $option));
 
             if ($option['amount_min'] && (! is_numeric($option['amount_min']) || $option['amount_min'] < 0 || (is_numeric($min) && $option['amount_min'] < $min))) {
+
                 $value[$code]['amount_min'] = $old_value[$code]['amount_min']; // Restore old value.
             }
 
@@ -278,10 +291,14 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
     {
         global $woocommerce;
 
+        $options = $this->get_option('payment_options');
+        if (is_admin()) {
+            return (isset($options) && is_array($options)) ? $options : array();
+        }
+
         // Recover total amount either from order or from current cart if any.
         $amount = self::get_total_amount();
 
-        $options = $this->get_option('payment_options');
         $enabled_options = array();
 
         if (isset($options) && is_array($options) && ! empty($options)) {
@@ -309,6 +326,10 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
      */
     public function get_payment_fields($options = array())
     {
+        if (isset($_GET['tab']) && ($_GET['tab'] === 'checkout')) {
+            return null;
+        }
+
         if (empty($options)) {
             $options = $this->get_available_options();
         }
@@ -328,7 +349,7 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
             $html .= '<span style="font-weight: bold;">' . __('Choose your payment option', 'woo-payzen-payment') . '</span>';
             foreach ($options as $key => $option) {
                 $html .= '<li style="list-style-type: none;">
-                        <input class="radio" type="radio"'. ($first == true ? ' checked="checked"' : '') . ' id="payzenfranfinance_option_' . $key . '" value="' . $key . '" name="payzenfranfinance_option">
+                        <input class="radio" type="radio"' . ($first ? ' checked="checked"' : '') . ' id="payzenfranfinance_option_' . $key . '" value="' . $key . '" name="payzenfranfinance_option">
                         <label for="payzenfranfinance_option_' . $key . '" style="display: inline;">' . $option['label'] . '</label>
                       </li>';
                 $first = false;
@@ -370,7 +391,12 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
 
         // ... and into DB.
         $order = new WC_Order($order_id);
-        update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$option['label']})");
+        if (PayzenTools::is_hpos_enabled()) {
+            $order->set_payment_method_title($order->get_payment_method_title() . " ({$option['label']})");
+            $order->save();
+        } else {
+            update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$option['label']})");
+        }
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
             $pay_url = add_query_arg('order', self::get_order_property($order, 'id'), add_query_arg('key', self::get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));

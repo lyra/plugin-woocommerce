@@ -17,7 +17,7 @@ use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
 
 class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
 {
-    public function __construct()
+    public function __construct($regroup = true)
     {
         $this->id = 'payzenregroupedother';
         $this->icon = apply_filters('woocommerce_' . $this->id . '_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/other.png');
@@ -53,9 +53,22 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_script'));
         }
 
-        // Generate payment form action.
-        add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
+        if ($regroup) {
+            // Generate payment form action.
+            add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
 
+            // Payment method title filter.
+            add_filter('woocommerce_title_' . $this->id, array($this, 'get_title'));
+
+            // Payment method description filter.
+            add_filter('woocommerce_description_' . $this->id, array($this, 'get_description'));
+
+            // Payment method availability filter.
+            add_filter('woocommerce_available_' . $this->id, array($this, 'is_available'));
+
+            // Generate payment fields filter.
+            add_filter('woocommerce_payzen_payment_fields_' . $this->id, array($this, 'get_payment_fields'));
+        }
     }
 
     /**
@@ -109,11 +122,11 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
             );
         }
 
-        $smartform_mode = PayzenTools::get_payzen_integration_mode_enabled();
+        $smartform_mode = PayzenTools::is_embedded_payment();
 
         // Payment options.
         $payment_options_desc_p1 = 'Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of payment: </b>Choose the means of payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. Leave blank to authorize all countries.<br /><b>Min. amount: </b>Minimum amount to enable the means of payment.<br /><b>Max. amount: </b>Maximum amount to enable the means of payment.<br /><b>Validation mode: </b>If manual is selected, you will have to confirm payments manually in your %s Back Office.<br /><b>Capture delay: </b>The number of days before the bank capture. Enter value only if different from %s general configuration.';
-        $integration_mode_desc = '<br /><b>Integrated Mode: </b>If you enable this option, the payment mean will be displayed in the Smartform. Attention, not all available payment means are supported by the Smartform. For more information, refer to the module documentation.';
+        $integration_mode_desc = '<br /><b>Embedded mode: </b>If you enable this option, the payment mean will be displayed in the Smartform. Attention, not all available payment means are supported by the Smartform. For more information, refer to the module documentation.';
         $payment_options_desc_p2 = '<br /><b>Cart data: </b>If you disable this option, the shopping cart details will not be sent to the gateway. Attention, in some cases, this option has to be enabled. For more information, refer to the module documentation.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>';
 
         $payment_options_desc = $smartform_mode ? $payment_options_desc_p1 . $integration_mode_desc . $payment_options_desc_p2 : $payment_options_desc_p1 . $payment_options_desc_p2;
@@ -158,7 +171,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
 
         if ($smartform_mode) {
             $columns['integrated_mode'] = array(
-                'title' => __('Integrated mode', 'woo-payzen-payment'),
+                'title' => __('Embedded mode', 'woo-payzen-payment'),
                 'width' => '92px',
             );
         }
@@ -226,7 +239,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         }
 
         $smartformActivated = 'false';
-        if (PayzenTools::get_payzen_integration_mode_enabled()) {
+        if (PayzenTools::is_embedded_payment()) {
             $smartformActivated = 'true';
         }
 
@@ -553,13 +566,17 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
     {
         global $woocommerce;
 
+        $options = $this->get_option('payment_means');
+        if (is_admin()) {
+            return (isset($options) && is_array($options)) ? $options : array();
+        }
+
         // Recover total amount either from order or from current cart if any.
         $amount = self::get_total_amount();
         $customer_country = $woocommerce->customer->get_shipping_country();
 
-        $options = $this->get_option('payment_means');
         $enabled_options = array();
-        $smartform_mode = PayzenTools::get_payzen_integration_mode_enabled();
+        $smartform_mode = PayzenTools::is_embedded_payment();
 
         if (isset($options) && is_array($options) && ! empty($options)) {
             foreach ($options as $code => $option) {
@@ -576,6 +593,10 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
     public function get_available_options_for_smartform()
     {
         global $woocommerce;
+
+        if (! $woocommerce->customer) {
+            return array();
+        }
 
         $enabled_options = array();
 
@@ -607,14 +628,17 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
      */
     public function get_payment_fields($options = array())
     {
+        if (isset($_GET['tab']) && ($_GET['tab'] === 'checkout')) {
+            return null;
+        }
+
         if (empty($options)) {
             $options = $this->get_available_options();
         }
-        
-        // Get first array key.
+
         $selected_option = key($options);
 
-        $html = '<div style="margin-bottom: 15px;" id="' . $this->id .'_display_available_other_payment_means">';
+        $html = '<div style="margin-bottom: 15px;" id="' . $this->id . '_display_available_other_payment_means">';
         foreach ($options as $code => $option) {
             $lower_payment_code = strtolower($option['payment_mean']);
 

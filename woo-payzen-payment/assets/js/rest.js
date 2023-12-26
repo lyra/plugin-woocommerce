@@ -33,6 +33,13 @@ var payzenInitRestEvents = function(KR) {
         jQuery('form.checkout').removeClass('processing').unblock();
         jQuery('#order_review').unblock();
 
+        jQuery('form.wc-block-components-form wc-block-checkout__form').unblock();
+        jQuery('.wc-block-components-checkout-place-order-button').prop("disabled", false);
+
+        if (typeof window.PAYZEN_BUTTON_TEXT != 'undefined') {
+            jQuery('.wc-block-components-button__text').text("").text(window.PAYZEN_BUTTON_TEXT);
+        }
+
         var msg = '';
         if (PAYZEN_DFAULT_MESSAGES.indexOf(e.errorCode) > -1) {
             msg = e.errorMessage;

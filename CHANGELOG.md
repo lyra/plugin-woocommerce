@@ -1,11 +1,21 @@
+= 1.12.0, 2023-12-26=
+* New management of WooCommerce subscriptions.
+* Added compatibility with WooCommerce Blocks for all payment modes.
+* Added compatibility with High-Performance Order Storage (HPOS).
+* Handle refund of a split payment.
+* [embedded] Improve payment form token refresh management.
+* [technical] Improve features management by plugin variant.
+* Fix redirection page display with some WordPress themes.
+* Bug Fix: Fix PHP warnings related to deprecated creation of dynamic properties.
+
 = 1.11.1, 2023-10-26=
 * Fix compatibility with some WordPress 6.3.x themes.
-* [embedded] Send capture delay parameter in case of Smartform.
+* [smartform] Send capture delay parameter in case of Smartform.
 * Update all domains payment means.
 * Update all domains supported currencies.
 
 = 1.11.0, 2023-09-15=
-* [embedded] Smartform integration.
+* [smartform] Smartform integration.
 * [embedded] Bug fix: Fix error related to validation mode.
 * Added compatibility with "Woocommerce Blocks" for payment in redirection.
 * Added compatibility with "CheckoutWC".
