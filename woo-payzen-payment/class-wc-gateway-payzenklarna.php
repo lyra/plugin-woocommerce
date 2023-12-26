@@ -55,6 +55,18 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
 
         // Generate klarna payment form action.
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
+
+        // Payment method title filter.
+        add_filter('woocommerce_title_' . $this->id, array($this, 'get_title'));
+
+        // Payment method description filter.
+        add_filter('woocommerce_description_' . $this->id, array($this, 'get_description'));
+
+        // Payment method availability filter.
+        add_filter('woocommerce_available_' . $this->id, array($this, 'is_available'));
+
+        // Generate payment fields filter.
+        add_filter('woocommerce_payzen_payment_fields_' . $this->id, array($this, 'get_payment_fields'));
     }
 
     /**

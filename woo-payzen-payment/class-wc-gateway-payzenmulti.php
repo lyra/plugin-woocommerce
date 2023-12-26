@@ -59,6 +59,18 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 
         // Generate multi payment form action.
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
+
+        // Payment method title filter.
+        add_filter('woocommerce_title_' . $this->id, array($this, 'get_title'));
+
+        // Payment method description filter.
+        add_filter('woocommerce_description_' . $this->id, array($this, 'get_description'));
+
+        // Payment method availability filter.
+        add_filter('woocommerce_available_' . $this->id, array($this, 'is_available'));
+
+        // Generate payment fields filter.
+        add_filter('woocommerce_payzen_payment_fields_' . $this->id, array($this, 'get_payment_fields'));
     }
 
     /**
@@ -279,11 +291,16 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
     {
         global $woocommerce;
 
-        // Recover total amount either from order or from current cart if any.
-        $amount = self::get_total_amount();
-
         $options = $this->get_option('payment_options');
         $enabled_options = array();
+
+        if (is_admin()) {
+            $enabled_options = (isset($options) && is_array($options)) ? $options : array();
+            return apply_filters("woocommerce_payzenmulti_enabled_options", $enabled_options);
+        }
+
+        // Recover total amount either from order or from current cart if any.
+        $amount = self::get_total_amount();
 
         if (isset($options) && is_array($options) && ! empty($options)) {
             foreach ($options as $code => $option) {
@@ -304,14 +321,15 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
      */
     public function get_payment_fields($options = array())
     {
+        if (isset($_GET['tab']) && ($_GET['tab'] === 'checkout')) {
+            return null;
+        }
+
         if (empty($options)) {
             $options = $this->get_available_options();
         }
 
-        $html = '';
-        if (PayzenTools::has_checkout_block()) {
-            $html = parent::get_payment_fields();
-        }
+        $html = parent::get_payment_fields();
 
         if (count($options) == 1) {
             $option = reset($options); // The option itself.
@@ -326,7 +344,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
             $html .= '<span style="font-weight: bold;">' . __('Choose your payment option', 'woo-payzen-payment') . '</span>';
             foreach ($options as $key => $option) {
                 $html .= '<li style="list-style-type: none;">
-                        <input class="radio" type="radio"'. ($first == true ? ' checked="checked"' : '') . ' id="payzenmulti_option_' . $key . '" value="' . $key . '" name="payzenmulti_option">
+                        <input class="radio" type="radio"' . ($first == true ? ' checked="checked"' : '') . ' id="payzenmulti_option_' . $key . '" value="' . $key . '" name="payzenmulti_option">
                         <label for="payzenmulti_option_' . $key . '" style="display: inline;">' . $option['label'] . '</label>
                       </li>';
                 $first = false;
@@ -338,15 +356,14 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 
     public function payment_fields()
     {
-        echo parent::get_payment_fields();
-
         $options = $this->get_available_options();
         if (empty($options)) {
             // Should not happen for multi payment.
             return;
         }
 
-        echo '<ul>' . $this->get_payment_fields($options) . '</ul>';
+        $description = '<div>' . wpautop(wptexturize($this->get_description())) . '</div>';
+        echo $description . '<ul>' . $this->get_payment_fields() . '</ul>';
     }
 
     /**
@@ -369,7 +386,12 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 
         // ... and into DB.
         $order = new WC_Order($order_id);
-        update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$option['count']} x)");
+        if (PayzenTools::is_hpos_enabled()) {
+            $order->set_payment_method_title($order->get_payment_method_title() . " ({$option['count']} x)");
+            $order->save();
+        } else {
+            update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$option['count']} x)");
+        }
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
             $pay_url = add_query_arg('order', self::get_order_property($order, 'id'), add_query_arg('key', self::get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
@@ -396,7 +418,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $amount = $this->payzen_request->get('amount');
         $first = $option['first'] ? round(($option['first'] / 100) * $amount) : null;
         $this->payzen_request->setMultiPayment($amount, $first, $option['count'], $option['period']);
-        $this->payzen_request->set('contracts', (isset($option['contract']) && $option['contract']) ? 'CB='.$option['contract'] : null);
+        $this->payzen_request->set('contracts', (isset($option['contract']) && $option['contract']) ? 'CB=' . $option['contract'] : null);
 
         delete_transient('payzenmulti_option_' . self::get_order_property($order, 'id'));
     }

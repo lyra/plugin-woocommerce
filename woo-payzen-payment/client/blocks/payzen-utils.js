@@ -21,8 +21,6 @@ export const getPayzenServerData = (name) => {
     const payzenServerData = getSetting( name + '_data', null );
 
     if (! payzenServerData) {
-        throw new Error( 'Payzen initialization data for ' + name + ' submodule is not available' );
-    } else if (payzenServerData == 'payzen_disabled') {
         return;
     }
 

@@ -27,6 +27,7 @@ const Content = () => {
 
     return (
         <div>
+            { payzen_data?.description }
             { fields }
         </div>
     );

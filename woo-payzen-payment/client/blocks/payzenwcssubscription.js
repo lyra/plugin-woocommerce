@@ -18,19 +18,11 @@ import { registerPaymentMethod } from '@woocommerce/blocks-registry';
  */
 import { getPayzenServerData } from './payzen-utils';
 
-const PAYMENT_METHOD_NAME = 'payzenregroupedother';
+const PAYMENT_METHOD_NAME = 'payzenwcssubscription';
 var payzen_data = getPayzenServerData(PAYMENT_METHOD_NAME);
 
 const Content = () => {
-    var fields = <ul dangerouslySetInnerHTML={{__html: payzen_data?.payment_fields}} />;
-    jQuery('.wc-block-components-checkout-place-order-button').on('click', payzen_get_selected_option(['payzenregroupedother_card_type']));
-
-    return (
-        <div>
-            { payzen_data?.description }
-            { fields }
-        </div>
-    );
+    return (payzen_data?.description);
 };
 
 const Label = () => {
@@ -45,7 +37,7 @@ const Label = () => {
 
     return (
         <div style={ styles.divWidth }>
-            <span>{ payzen_data?.title}</span>
+            <span>{ payzen_data?.title }</span>
             <img
                 style={ styles.imgFloat }
                 src={ payzen_data?.logo_url }

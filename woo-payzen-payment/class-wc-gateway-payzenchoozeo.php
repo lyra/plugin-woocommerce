@@ -15,7 +15,6 @@ if (! defined('ABSPATH')) {
 
 class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
 {
-
     protected $payzen_countries = array('FR', 'GP', 'MQ', 'GF', 'RE', 'YT'); // France and DOM.
     protected $payzen_currencies = array('EUR');
 
@@ -55,8 +54,11 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_script'));
         }
 
-        // Generate choozeo payment form action.
+        // Generate payment form action.
         add_action('woocommerce_receipt_' . $this->id, array($this, 'payzen_generate_form'));
+
+        // Generate payment fields filter.
+        add_filter('woocommerce_payzen_payment_fields_' . $this->id, array($this, 'get_payment_fields'));
     }
 
     /**
@@ -187,7 +189,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         $html .= '<td class="forminp">' . "\n";
         $html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post($data['title']) . '</span></legend>' . "\n";
 
-         $html .= '<table id="' . $field_name . '_table" class="'. esc_attr($data['class']) . '" cellpadding="10" cellspacing="0" >';
+         $html .= '<table id="' . $field_name . '_table" class="' . esc_attr($data['class']) . '" cellpadding="10" cellspacing="0" >';
 
         $html .= '<thead><tr>';
         foreach ($data['columns'] as $code => $column) {
@@ -207,7 +209,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
         foreach ($options as $code => $option) {
             $html .= '<tr>';
             $html .= '<td style="padding: 0px;"><input name="' . $field_name . '[' . $code . '][label]"
-                      value="'. $option['label'] .'"
+                      value="' . $option['label'] . '"
                       type="text" readonly></td>';
             $html .= '<td style="padding: 0px;"><input name="' . $field_name . '[' . $code . '][amount_min]"
                       value="' . $option['amount_min'] . '"
@@ -374,7 +376,12 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
 
         // ... and into DB.
         $order = new WC_Order($order_id);
-        update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$label})");
+        if (PayzenTools::is_hpos_enabled()) {
+            $order->set_payment_method_title($order->get_payment_method_title() . " ({$label})");
+            $order->save();
+        } else {
+            update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$label})");
+        }
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
             $pay_url = add_query_arg('order', self::get_order_property($order, 'id'), add_query_arg('key', self::get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));

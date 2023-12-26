@@ -38,7 +38,7 @@ class PayzenTools
         return (($card_data_mode === 'DEFAULT') ? 'REDIRECT' : $card_data_mode);
     }
 
-    public static function get_payzen_integration_mode_enabled()
+    public static function is_embedded_payment($only_smartform = true)
     {
         $std_settings = get_option('woocommerce_payzenstd_settings', null);
         $enabled = is_array($std_settings) && isset($std_settings['enabled']) && ($std_settings['enabled'] == 'yes');
@@ -46,7 +46,12 @@ class PayzenTools
             return false;
         }
 
-        return isset($std_settings['card_data_mode']) && in_array($std_settings['card_data_mode'], array('SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS'));
+        $modes = array('SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS');
+        if (! $only_smartform) {
+            array_push($modes,'REST');
+        }
+
+        return isset($std_settings['card_data_mode']) && in_array($std_settings['card_data_mode'], $modes);
     }
 
     public static function get_active_plugins()
@@ -100,7 +105,8 @@ class PayzenTools
     public static function get_transaction_uuid($order)
     {
         $trans_uuid = '';
-        $trans_id = get_post_meta((int) $order->get_id(), 'Transaction ID', true);
+        $trans_id = (self::is_hpos_enabled()) ? $order->get_meta('Transaction ID') : get_post_meta((int) $order->get_id(), 'Transaction ID', true);
+
         if ($trans_id) {
             $notes = WC_Gateway_Payzen::get_order_notes($order->get_id());
             foreach ($notes as $note) {
@@ -114,6 +120,11 @@ class PayzenTools
 
         $parts = $trans_uuid ? explode(':', $trans_uuid) : '';
         return $parts ? $parts[1] : '';
+    }
+
+    public static function is_hpos_enabled()
+    {
+        return version_compare(WC_VERSION, '7.1.0', '>=') && class_exists('Automattic\WooCommerce\Utilities\OrderUtil') && Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
     }
 
     public static function get_user_info()
@@ -141,14 +152,28 @@ class PayzenTools
 
     public static function has_checkout_block()
     {
-        global $woocommerce;
+        global $post;
 
-        if (version_compare($woocommerce->version, '2.1.0', '<')) {
-            $checkout_page_id = woocommerce_get_page_id('checkout');
-        } else {
-            $checkout_page_id = wc_get_page_id('checkout');
+        // Checkout page for orders created from BO doesn't use checkout block.
+        if (isset($_GET['pay_for_order'])) {
+            return false;
         }
 
-        return function_exists('has_block') && has_block('woocommerce/checkout', $checkout_page_id);
+        if ($post) {
+            return function_exists('has_block') && has_block('woocommerce/checkout', $post->ID);
+        }
+
+        return function_exists('has_block') && has_block('woocommerce/checkout', wc_get_page_id('checkout'));
+    }
+
+    public static function get_view_order_url($subsc_id)
+    {
+        if (function_exists('wcs_get_subscription')) {
+            $subscription = wcs_get_subscription($subsc_id);
+
+            return $subscription->get_view_order_url();
+        }
+
+        return null;
     }
 }

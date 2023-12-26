@@ -27,7 +27,7 @@ class PayzenRefundProcessor implements RefundProcessor
      */
     public function doOnError($errorCode, $message)
     {
-        $msg = '<div class="inline error" style="text-align: left;"><p><strong>'. $errorCode . ": " . $message . '</strong></p></div>';
+        $msg = '<div class="inline error" style="text-align: left;"><p><strong>' . $message . '</strong></p></div>';
         set_transient('payzen_online_refund_result', $msg);
     }
 
@@ -37,8 +37,12 @@ class PayzenRefundProcessor implements RefundProcessor
      */
     public function doOnSuccess($operationResponse, $operationType)
     {
-        $msg = '<div class="inline updated" style="text-align: left;"><p><strong>' . $this->translate('Online refund successfully completed') . '</strong></p></div>';
-        set_transient('payzen_online_refund_result', $msg);
+        if ($operationType == 'frac_update') {
+            $this->doOnError(-1, sprintf($this->translate('Refund of split payment is not supported. Please, consider making necessary changes in %1$s Back Office.'), 'PayZen'));
+        } else {
+            $msg = '<div class="inline updated" style="text-align: left;"><p><strong>' . $this->translate('Online refund successfully completed') . '</strong></p></div>';
+            set_transient('payzen_online_refund_result', $msg);
+        }
     }
 
     /**
