@@ -1,3 +1,8 @@
+= 1.12.1, 2024-02-14=
+- Set return mode to POST by default.
+- Improve IPN errors management.
+- Bug fix: Fix retrieving admin user data for support component.
+
 = 1.12.0, 2023-12-26=
 * New management of WooCommerce subscriptions.
 * Added compatibility with WooCommerce Blocks for all payment modes.
@@ -6,7 +11,7 @@
 * [embedded] Improve payment form token refresh management.
 * [technical] Improve features management by plugin variant.
 * Fix redirection page display with some WordPress themes.
-* Bug Fix: Fix PHP warnings related to deprecated creation of dynamic properties.
+* Bug fix: Fix PHP warnings related to deprecated creation of dynamic properties.
 
 = 1.11.1, 2023-10-26=
 * Fix compatibility with some WordPress 6.3.x themes.

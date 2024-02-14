@@ -227,7 +227,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
      */
     public function get_description()
     {
-        if ($this->id === 'payzenstd' && PayzenTools::is_embedded_payment() && ($this->get_option('rest_popin') !== 'yes')) {
+        if ($this->id === 'payzenstd' && PayzenTools::is_embedded_payment(false) && ($this->get_option('rest_popin') !== 'yes')) {
             return '';
         } else {
             return parent::get_description();
@@ -2374,6 +2374,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             if ($from_server_rest) {
                 $this->log('SERVER URL PROCESS END');
+
+                header(WC_Gateway_Payzen::HEADER_ERROR_500, true, 500);
                 die('<span style="display:none">KO-Invalid IPN request received.'."\n".'</span>');
             } else {
                 // Fatal error, empty cart.
@@ -2398,6 +2400,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             if ($from_server_rest) {
                 $this->log('SERVER URL PROCESS END');
+
+                header(WC_Gateway_Payzen::HEADER_ERROR_500, true, 500);
                 die('<span style="display:none">KO-An error occurred while computing the signature.'."\n".'</span>');
             } else {
                 // Fatal error, empty cart.
@@ -2416,6 +2420,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             if ($from_server_rest) {
                 $this->log('SERVER URL PROCESS END');
+
+                header(WC_Gateway_Payzen::HEADER_ERROR_500, true, 500);
                 die('<span style="display:none">KO-Invalid IPN request received.'."\n".'</span>');
             } else {
                 // Fatal error, empty cart.
