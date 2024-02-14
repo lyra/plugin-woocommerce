@@ -36,8 +36,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-8.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.12.0';
+    const PLUGIN_VERSION = '1.12.1';
     const GATEWAY_VERSION = 'V2';
+    const HEADER_ERROR_500 = 'HTTP/1.1 500 Internal Server Error';
 
     protected $admin_page;
     protected $admin_link;
@@ -725,7 +726,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'return_mode' => array(
                 'title' => __('Return mode', 'woo-payzen-payment'),
                 'type' => 'select',
-                'default' => 'GET',
+                'default' => 'POST',
                 'options' => array(
                     'GET' => 'GET',
                     'POST' => 'POST'
@@ -878,6 +879,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     public function generate_support_component_html($key, $data)
     {
         $user_info = get_userdata(1);
+        if (! ($user_info instanceof WP_User)) {
+            $user_info = wp_get_current_user();
+        }
+
         $send_email_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Send_Email', home_url('/'));
 
         ob_start();
@@ -1586,6 +1591,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
             if ($from_server) {
                 $this->log('IPN URL PROCESS END');
+
+                header(self::HEADER_ERROR_500, true, 500);
                 die($payzen_response->getOutputForGateway('auth_fail'));
             } else {
                 // Fatal error, empty cart.
@@ -1660,6 +1667,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
             if ($from_server) {
                 $this->log('IPN URL PROCESS END');
+
+                header(self::HEADER_ERROR_500, true, 500);
                 die($payzen_response->getOutputForGateway('order_not_found'));
             } else {
                 // Fatal error, empty cart.
@@ -1952,6 +1961,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 // Registered order status not match payment result.
                 if ($from_server) {
                     $this->log('IPN URL PROCESS END');
+
+                    header(self::HEADER_ERROR_500, true, 500);
                     die($payzen_response->getOutputForGateway('payment_ko_on_order_ok'));
                 } else {
                     // Fatal error, empty cart.

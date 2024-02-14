@@ -258,7 +258,6 @@ class Api
     {
         return array(
             'AUTHORISED',
-            'AUTHORISED_TO_VALIDATE', // TODO is this a pending status?
             'CAPTURED',
             'ACCEPTED',
             'PARTIALLY_AUTHORISED'
@@ -279,6 +278,8 @@ class Api
             'UNDER_VERIFICATION',
             'PRE_AUTHORISED',
             'WAITING_FOR_PAYMENT',
+            'AUTHORISED_TO_VALIDATE',
+            'SUSPENDED',
             'PENDING'
         );
     }
@@ -289,7 +290,11 @@ class Api
      */
     public static function getCancelledStatuses()
     {
-        return array('ABANDONED');
+        return array(
+            'ABANDONED',
+            'NOT_CREATED',
+            'CANCELLED'
+        );
     }
 
     /**
@@ -298,7 +303,10 @@ class Api
      */
     public static function getToValidateStatuses()
     {
-        return array('WAITING_AUTHORISATION_TO_VALIDATE', 'AUTHORISED_TO_VALIDATE');
+        return array(
+            'WAITING_AUTHORISATION_TO_VALIDATE', 
+            'AUTHORISED_TO_VALIDATE'
+        );
     }
 
     /**
