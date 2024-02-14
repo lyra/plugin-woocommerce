@@ -14,7 +14,7 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.12.0
+ * Version: 1.12.1
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
@@ -533,6 +533,10 @@ function payzen_send_support_email_on_order($order)
     $std_payment_method = new WC_Gateway_PayzenStd();
     if (substr(WC_Gateway_PayzenStd::get_order_property($order, 'payment_method'), 0, strlen('payzen')) === 'payzen') {
         $user_info = get_userdata(1);
+        if (! ($user_info instanceof WP_User)) {
+            $user_info = wp_get_current_user();
+        }
+
         $send_email_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Send_Email', home_url('/'));
 
         $payzen_email_send_msg = get_transient('payzen_email_send_msg');
@@ -751,7 +755,7 @@ function payzen_display_refund_result_message($order_id)
 // Display online refund result message.
 add_action('woocommerce_admin_order_totals_after_discount', 'payzen_display_refund_result_message', 10, 1);
 
-function features_compatibility()
+function payzen_features_compatibility()
 {
     if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
         \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
@@ -760,4 +764,4 @@ function features_compatibility()
 }
 
 // Declaring HPOS compatibility.
-add_action('before_woocommerce_init', 'features_compatibility');
+add_action('before_woocommerce_init', 'payzen_features_compatibility');
