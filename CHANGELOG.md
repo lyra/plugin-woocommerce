@@ -1,3 +1,7 @@
+= 1.12.2, 2024-03-12=
+- Bug fix: Fix error related to payment by token statuses management.
+- Bug fix: Fix error related to multi-currency management.
+
 = 1.12.1, 2024-02-14=
 - Set return mode to POST by default.
 - Improve IPN errors management.

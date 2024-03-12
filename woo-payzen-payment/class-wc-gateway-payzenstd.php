@@ -2042,7 +2042,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $this->log("Generating payment form for order #$order_id.");
 
         // Get currency.
-        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
+        $order_currency = $order->get_currency() ? $order->get_currency() : get_woocommerce_currency();
+        $currency = PayzenApi::findCurrencyByAlphaCode($order_currency);
         if ($currency == null) {
             $this->log('The store currency (' . get_woocommerce_currency() . ') is not supported by payment gateway.');
 
