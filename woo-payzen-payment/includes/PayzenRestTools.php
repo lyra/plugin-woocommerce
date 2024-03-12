@@ -86,6 +86,10 @@ class PayzenRestTools
                 $response['vads_trans_id'] = self::getProperty($cardDetails, 'legacyTransId'); // Deprecated.
                 $response['vads_presentation_date'] = self::getProperty($cardDetails, 'expectedCaptureDate');
 
+                if (self::getProperty($transaction, 'paymentMethodToken')) {
+                    $response['vads_identifier_status'] = self::getProperty($cardDetails, 'paymentMethodSource') === 'TOKEN' ? 'UPDATED' : 'CREATED';
+                }
+
                 $response['vads_card_brand'] = self::getProperty($cardDetails, 'effectiveBrand');
                 $response['vads_card_number'] = self::getProperty($cardDetails, 'pan');
                 $response['vads_expiry_month'] = self::getProperty($cardDetails, 'expiryMonth');
