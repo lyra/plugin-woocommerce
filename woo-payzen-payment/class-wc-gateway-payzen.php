@@ -36,7 +36,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-8.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.12.1';
+    const PLUGIN_VERSION = '1.12.2';
     const GATEWAY_VERSION = 'V2';
     const HEADER_ERROR_500 = 'HTTP/1.1 500 Internal Server Error';
 
@@ -2412,20 +2412,20 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     public static function is_successful_action($payzen_response)
     {
-        if ($payzen_response->isAcceptedPayment()) {
+        if ($payzen_response->isAcceptedPayment() && $payzen_response->get('identifier') && (
+            $payzen_response->get('identifier_status') == 'CREATED' /* page_action is REGISTER_PAY or ASK_REGISTER_PAY */ ||
+            $payzen_response->get('identifier_status') == 'UPDATED' /* page_action is REGISTER_UPDATE_PAY */
+        )) {
+            return true;
+        }
+
+        if ($payzen_response->isAcceptedPayment() && ! $payzen_response->get('identifier')) {
             return true;
         }
 
         // This is a backward compatibility feature: it is used as a workarround as long as transcation
         // creation on REGISTER in not enabled on payment gateway.
         if ($payzen_response->get('subscription') && ($payzen_response->get('recurrence_status') === 'CREATED')) {
-            return true;
-        }
-
-        if ($payzen_response->get('identifier') && (
-            $payzen_response->get('identifier_status') == 'CREATED' /* page_action is REGISTER_PAY or ASK_REGISTER_PAY */ ||
-            $payzen_response->get('identifier_status') == 'UPDATED' /* page_action is REGISTER_UPDATE_PAY */
-        )) {
             return true;
         }
 
