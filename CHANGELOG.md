@@ -1,3 +1,7 @@
+= 1.12.3, 2024-03-26=
+- [embedded] Take into account the notification URL on payment abandoned by buyer.
+- Bug fix: Fix PHP warning related to deprecated method wc_get_log_file_path.
+
 = 1.12.2, 2024-03-12=
 - Bug fix: Fix error related to payment by token statuses management.
 - Bug fix: Fix error related to multi-currency management.

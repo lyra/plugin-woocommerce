@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PayZen para WooCommerce 1.12.2\n"
+"Project-Id-Version: PayZen para WooCommerce 1.12.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-11-17 15:13+0100\n"
 "PO-Revision-Date: 2023-12-22 16:26+0100\n"

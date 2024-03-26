@@ -13,6 +13,7 @@ if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
+use Automattic\Jetpack\Constants;
 use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
 use Lyranetwork\Payzen\Sdk\Form\Response as PayzenResponse;
 use Lyranetwork\Payzen\Sdk\Form\Request as PayzenRequest;
@@ -36,9 +37,11 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-8.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.12.2';
+    const PLUGIN_VERSION = '1.12.3';
     const GATEWAY_VERSION = 'V2';
+
     const HEADER_ERROR_500 = 'HTTP/1.1 500 Internal Server Error';
+    const LOG_FOLDER = 'wp-content/uploads/wc-logs/';
 
     protected $admin_page;
     protected $admin_link;
@@ -408,11 +411,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     {
         global $woocommerce, $payzen_plugin_features;
 
-        // Get log folder.
-        if (function_exists('wc_get_log_file_path')) {
-            $log_folder = dirname(wc_get_log_file_path('payzen')) . '/';
-        } else {
-            $log_folder = $woocommerce->plugin_path() . '/logs/';
+        // Get log folder path.
+        $log_folder = trailingslashit(Constants::get_constant('WC_LOG_DIR'));
+        if (! $log_folder) {
+            $log_folder = self::LOG_FOLDER;
         }
 
         $log_folder = str_replace('\\', '/', $log_folder);
@@ -1615,7 +1617,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     /**
      * Valid payment process : update order, send mail, ...
      **/
-    public function payzen_manage_notify_response($payzen_response, $from_server_rest = false, $update_on_failure = true)
+    public function payzen_manage_notify_response($payzen_response, $from_server_rest = false, $update_on_failure = true, $server_rest_abandoned_payment = false)
     {
         global $woocommerce, $payzen_plugin_features;
 
@@ -1641,6 +1643,29 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $key = $payzen_response->getExtInfo('order_key');
 
         $order = wc_get_order($order_id);
+
+        if ($server_rest_abandoned_payment && PayzenTools::is_embedded_payment(false) && empty($payzen_response->getTransStatus())) {
+            if (! $order && ($this->get_option('rest_popin') !== 'yes')) {
+                $this->log("Payment abandoned, do nothing.");
+                $this->log('IPN URL PROCESS END');
+
+                die('<span style="display:none">KO-Payment abandoned, no order to update. IPN ignored.' . "\n" . '</span>');
+            }
+
+            if ($order && ($this->get_option('rest_popin') == 'yes')) {
+                $this->log("Payment abandoned in popin mode. Cancel order #$order_id.");
+
+                $order_can_be_cancelled = $order->has_status(apply_filters('woocommerce_valid_order_statuses_for_cancel', array('pending', 'failed'), $order));
+                if ($order_can_be_cancelled) {
+                    $order->update_status('cancelled');
+                    $this->log("Order #$order_id cancelled successfully.");
+                }
+
+                $this->log('IPN URL PROCESS END');
+
+                die('<span style="display:none">KO-Payment abandoned, order cancelled.' . "\n" . '</span>');
+            }
+        }
 
         if (! $order && ($this->get_general_option('delete_order_on_failure') == "yes")
             && ! self::is_successful_action($payzen_response)) {
