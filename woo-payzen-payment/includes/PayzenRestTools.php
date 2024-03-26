@@ -20,12 +20,11 @@ class PayzenRestTools
         }
 
         $transactions = self::getProperty($answer, 'transactions');
-
         if (! is_array($transactions) || empty($transactions)) {
-            return array();
+            $transaction = $answer;
+        } else {
+            $transaction = $transactions[0];
         }
-
-        $transaction = $transactions[0];
 
         $response = array();
 

@@ -4,8 +4,8 @@ Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
 Tested up to: 6.4
 WC requires at least: 2.0
-WC tested up to: 8.4
-Stable tag: 1.12.2
+WC tested up to: 8.6
+Stable tag: 1.12.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,10 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.12.3, 2024-03-26=
+- [embedded] Take into account the notification URL on payment abandoned by buyer.
+- Bug fix: Fix PHP warning related to deprecated method wc_get_log_file_path.
 
 = 1.12.2, 2024-03-12=
 - Bug fix: Fix error related to payment by token statuses management.
