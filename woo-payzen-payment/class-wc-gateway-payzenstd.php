@@ -2436,12 +2436,13 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
 
         $update_on_failure = isset($answer['orderCycle']) && ($answer['orderCycle'] === 'CLOSED');
+        $server_rest_abandoned_payment = $from_server_rest && $update_on_failure && isset($answer['orderStatus']) && ($answer['orderStatus'] === 'ABANDONED');
 
         // Wrap payment result to use traditional order creation tunnel.
         $data = PayzenRestTools::convertRestResult($answer);
         $response = new PayzenResponse($data, null, '', '');
 
-        parent::payzen_manage_notify_response($response, $from_server_rest, $update_on_failure);
+        parent::payzen_manage_notify_response($response, $from_server_rest, $update_on_failure, $server_rest_abandoned_payment);
     }
 
     private function get_shipping_with_tax($order)
