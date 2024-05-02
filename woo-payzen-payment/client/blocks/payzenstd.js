@@ -80,16 +80,16 @@ registerPaymentMethod({
 });
 
 var displayFields = function () {
-    delete(window.FORM_TOKEN);
-    delete(window.IDENTIFIER_FORM_TOKEN);
-    delete(window.PAYZEN_HIDE_SINGLE_BUTTON);
-
     switch (payzen_data?.payment_mode) {
         case 'REST':
         case 'SMARTFORM':
         case 'SMARTFORMEXT':
         case 'SMARTFORMEXTNOLOGOS':
             if (payzen_data?.vars) {
+                delete(window.FORM_TOKEN);
+                delete(window.IDENTIFIER_FORM_TOKEN);
+                delete(window.PAYZEN_HIDE_SINGLE_BUTTON);
+
                 window.PAYZEN_BUTTON_TEXT = jQuery(submitButton).text();
                 eval(payzen_data?.vars);
 
@@ -134,7 +134,7 @@ var onButtonClick = function (e) {
     jQuery('.kr-form-error').html('');
     window.PAYZEN_BUTTON_TEXT = jQuery(submitButton).text();
 
-    document.cookie = 'payzen_force_redir=; Max-Age=0; path=/; domain=' + location.host;
+    document.cookie = 'payzenstd_force_redir=; Max-Age=0; path=/; domain=' + location.host;
     document.cookie = 'payzen_use_identifier=; Max-Age=0; path=/; domain=' + location.host;
 
     if (jQuery("#payzen_use_identifier")) {
@@ -159,7 +159,7 @@ var onButtonClick = function (e) {
         case 'SMARTFORMEXT':
         case 'SMARTFORMEXTNOLOGOS':
             if (typeof window.FORM_TOKEN == 'undefined') {
-                document.cookie = 'payzen_force_redir="true"; path=/; domain=' + location.host;
+                document.cookie = 'payzenstd_force_redir="true"; path=/; domain=' + location.host;
                 break;
             }
 
@@ -242,7 +242,7 @@ var submitKR = function (KR, popin) {
          KR.openPaymentMethod(smartbuttonMethod);
          unblock();
      } else {
-         jQuery('#payzenstd_rest_processing').css('display', 'block');
+         jQuery('#payzen_rest_processing').css('display', 'block');
          jQuery('ul.payzenstd-view-top li.block').hide();
          jQuery('ul.payzenstd-view-bottom').hide();
 

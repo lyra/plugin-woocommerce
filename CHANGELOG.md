@@ -1,3 +1,12 @@
+= 1.13.0, 2024-05-02:
+- [embedded] Use customer wallet functionality to manage payment by token.
+- [smartform] Use customer wallet functionality with Smartform to manage subscription payment with WooCommerce Subscriptions.
+- Added support of WooCommerce order cancellation from buyer account.
+- Added support of automatic refund.
+- Added new transaction status REFUND_TO_RETRY.
+- Bug fix: Fix error related to payment by token management.
+- Bug fix: Fix automatic retry on failed payment on subscription renewal.
+
 = 1.12.3, 2024-03-26=
 - [embedded] Take into account the notification URL on payment abandoned by buyer.
 - Bug fix: Fix PHP warning related to deprecated method wc_get_log_file_path.

@@ -36,6 +36,10 @@ class WC_Gateway_PayzenOther extends WC_Gateway_PayzenStd
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME . ' - ' . $this->payment_title;
 
+        $this->supports = [
+            'refunds'
+        ];
+
         // Init common vars.
         $this->payzen_init();
 

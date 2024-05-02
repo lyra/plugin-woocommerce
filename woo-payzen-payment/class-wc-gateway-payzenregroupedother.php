@@ -24,6 +24,10 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME . ' - ' . __('Other payment means', 'woo-payzen-payment');
 
+        $this->supports = [
+            'refunds'
+        ];
+
         // Init common vars.
         $this->payzen_init();
 
@@ -86,6 +90,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         unset($this->form_fields['card_data_mode']);
         unset($this->form_fields['payment_by_token']);
         unset($this->form_fields['capture_delay']);
+        unset($this->form_fields['use_customer_wallet']);
 
         // By default, disable regrouped other payment means submodule.
         $this->form_fields['enabled']['default'] = 'no';

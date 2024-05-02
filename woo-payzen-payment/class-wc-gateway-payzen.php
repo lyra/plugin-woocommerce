@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-8.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.12.3';
+    const PLUGIN_VERSION = '1.13.0';
     const GATEWAY_VERSION = 'V2';
 
     const HEADER_ERROR_500 = 'HTTP/1.1 500 Internal Server Error';
@@ -124,6 +124,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         // Delete order on failed payment.
         add_action('woocommerce_order_status_changed', array($this, 'payzen_delete_order_with_status_failed'), 10, 1);
+
+        // Filter to allow customer saved payment means management.
+        add_filter('woocommerce_saved_payment_methods_list', array($this, 'payzen_get_account_saved_payment_methods_list'), 10, 2);
     }
 
     protected function payzen_is_section_loaded()
@@ -1688,6 +1691,16 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         // If gateway doesn't return vads_ext_info_order_key, skip ckecking order key.
         if (! $order || ! self::get_order_property($order, 'id') || ($key && (self::get_order_property($order, 'order_key') !== $key))) {
+            if ($payzen_response->getExtInfo('from_account')) {
+                if ($payzen_response->get('identifier') || ($payzen_response->get('identifier_status') == 'CREATED')) {
+                    wc_add_notice(__('Payment method successfully added.', 'woocommerce'));
+                } else {
+                    wc_add_notice(__('Unable to add payment method to your account.', 'woocommerce'), 'error');
+                }
+
+                $this->payzen_redirect(wc_get_account_endpoint_url('payment-methods'));
+            }
+
             $this->log("Error: order #$order_id not found or key does not match received invoice ID.");
 
             if ($from_server) {
@@ -1717,12 +1730,12 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         if (PayzenRestTools::checkResponse($_POST)) {
-            $payzen_std = new WC_Gateway_PayzenStd();
+            $payzen_method = $payzen_response->getExtInfo('wcs_scheduled') ? new WC_Gateway_PayzenWcsSubscription : new WC_Gateway_PayzenStd();
             if (method_exists($order, 'set_payment_method')) {
-                $order->set_payment_method($payzen_std);
+                $order->set_payment_method($payzen_method);
             } else {
-                $order->payment_method = $payzen_std->id;
-                $order->payment_method_title = $payzen_std->get_title();
+                $order->payment_method = $payzen_method->id;
+                $order->payment_method_title = $payzen_method->get_title();
             }
 
             $order->save();
@@ -2437,20 +2450,20 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     public static function is_successful_action($payzen_response)
     {
-        if ($payzen_response->isAcceptedPayment() && $payzen_response->get('identifier') && (
-            $payzen_response->get('identifier_status') == 'CREATED' /* page_action is REGISTER_PAY or ASK_REGISTER_PAY */ ||
-            $payzen_response->get('identifier_status') == 'UPDATED' /* page_action is REGISTER_UPDATE_PAY */
-        )) {
-            return true;
-        }
-
-        if ($payzen_response->isAcceptedPayment() && ! $payzen_response->get('identifier')) {
+        if ($payzen_response->isAcceptedPayment()) {
             return true;
         }
 
         // This is a backward compatibility feature: it is used as a workarround as long as transcation
         // creation on REGISTER in not enabled on payment gateway.
         if ($payzen_response->get('subscription') && ($payzen_response->get('recurrence_status') === 'CREATED')) {
+            return true;
+        }
+
+        if (! $payzen_response->getExtInfo('is_rest') && $payzen_response->get('identifier') && (
+            $payzen_response->get('identifier_status') == 'CREATED' /* page_action is REGISTER_PAY or ASK_REGISTER_PAY */ ||
+            $payzen_response->get('identifier_status') == 'UPDATED' /* page_action is REGISTER_UPDATE_PAY */
+        )) {
             return true;
         }
 
@@ -2468,15 +2481,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $payzen_response->get('identifier_status') == 'CREATED' /* page_action is REGISTER_PAY or ASK_REGISTER_PAY */ ||
             $payzen_response->get('identifier_status') == 'UPDATED' /* page_action is REGISTER_UPDATE_PAY */
         ))) {
-            $this->log("Identifier for customer #{$cust_id} successfully created or updated on payment gateway. Let's save it and save masked card and expiry date.");
-
-            $identifier_info = array(
-                'identifier' => $payzen_response->get('identifier'),
-                'active' => true
-            );
-
-            update_user_meta((int) $cust_id, self::get_order_property($order, 'payment_method') . '_identifier', json_encode($identifier_info));
-
             // Store subscription details.
             $subsc_id = $payzen_response->getExtInfo('subsc_id') ? $payzen_response->getExtInfo('subsc_id') : $payzen_response->get('order_id');
             $this->log("Saving identifier for order #$subsc_id in meta data.");
@@ -2499,7 +2503,31 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                         update_post_meta($subscription->get_id(), 'payzen_token', $payzen_response->get('identifier'));
                     }
                 }
+
+                if ($payzen_response->getExtInfo('update_identifier_all')) {
+                    foreach (wcs_get_subscriptions_for_order($order) as $subscription) {
+                        if (PayzenTools::is_hpos_enabled()) {
+                            $subscription->update_meta_data('payzen_token', $payzen_response->get('identifier'));
+                            $subscription->save();
+                        } else {
+                            update_post_meta($subscription->get_id(), 'payzen_token', $payzen_response->get('identifier'));
+                        }
+                    }
+                }
             }
+
+            if ($payzen_response->getExtInfo('is_customer_wallet')) {
+                return;
+            }
+
+            $this->log("Identifier for customer #{$cust_id} successfully created or updated on payment gateway. Let's save it and save masked card and expiry date.");
+
+            $identifier_info = array(
+                'identifier' => $payzen_response->get('identifier'),
+                'active' => true
+            );
+
+            update_user_meta((int) $cust_id, self::get_order_property($order, 'payment_method') . '_identifier', json_encode($identifier_info));
 
             // Mask all card digits unless the last 4 ones.
             $number = $payzen_response->get('card_number');
@@ -2527,7 +2555,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
             update_user_meta((int) $cust_id, self::get_order_property($order, 'payment_method') . '_masked_pan', $masked);
 
-            $this->log("Identifier for customer #{$cust_id} and his masked PAN data are successfully saved.");
+            $this->log("Identifier for customer #{$cust_id} and their masked PAN data are successfully saved.");
         }
     }
 
@@ -2606,14 +2634,27 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     {
         global $woocommerce;
 
-        // Check if user is connected and user can delete only his own payment means.
-        if (is_user_logged_in() && isset($_POST['id']) && ! empty($_POST['id'])) {
-            $id = $_POST['id'];
-            $cust_id = self::get_customer_property($woocommerce->customer, 'id');
+        if (! is_user_logged_in()) {
+            return;
+        }
+
+        $cust_id = self::get_customer_property($woocommerce->customer, 'id');
+
+        if (isset($_POST['token']) && $_POST['token']) {
+            $sub_modules = array('payzenstd', 'payzensubscription', 'payzenwcssubscription');
+            foreach ($sub_modules as $id) {
+                if ($_POST['token'] == $this->get_cust_identifier($cust_id, $id)) {
+                    $this->delete_identifier_attributes($cust_id, $id);
+                    break;
+                }
+            }
+         } elseif (isset($_GET['delete-saved-card']) && $_GET['delete-saved-card']) {
+            $id = $_GET['delete-saved-card'];
 
             if (! $saved_identifier = $this->get_cust_identifier($cust_id, $id)) {
                 $this->log("Error: Customer {$woocommerce->customer->get_billing_email()} doesn't have a saved identifier for \"{$id}\" submodule");
-                return false;
+                wp_safe_redirect(wc_get_account_endpoint_url('payment-methods'));
+                exit();
             }
 
             try {
@@ -2624,7 +2665,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     );
 
                     $client = new PayzenRest(
-                        self::REST_URL,
+                        $this->get_general_option('rest_url'),
                         $this->get_general_option('site_id'),
                         $key
                     );
@@ -2641,7 +2682,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 // Delete identifier from WooCommerce.
                 $this->delete_identifier_attributes($cust_id, $id);
-                return true;
             } catch (Exception $e) {
                 $invalid_ident_codes = array('PSP_030', 'PSP_031', 'SP_561', 'PSP_607');
 
@@ -2651,14 +2691,15 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                     // Delete identifier from WooCommerce.
                     $this->delete_identifier_attributes($cust_id, $id);
-                    return true;
                 } else {
                     $this->log("Identifier for customer {$woocommerce->customer->get_billing_email()}, for " . $id . " submodule, couldn't be deleted on gateway. Error occurred: {$e->getMessage()}");
                     $this->add_notice(__('The stored means of payment could not be deleted.', 'woo-payzen-payment'), 'error');
-                    return false;
                 }
             }
         }
+
+        wp_safe_redirect(wc_get_account_endpoint_url('payment-methods'));
+        exit();
     }
 
     function payzen_delete_order_with_status_failed($order_id)
@@ -2677,6 +2718,70 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 $this->log("Order #$order_id with failed status was deleted successfully.");
             }
+    }
+
+    function payzen_get_account_saved_payment_methods_list($list, $cust_id)
+    {
+        if (! is_add_payment_method_page()) {
+            return $list;
+        }
+
+        $sub_modules = array('payzensubscription');
+
+        $payzen_wcssubscription = new WC_Gateway_PayzenWcsSubscription();
+        if ($payzen_wcssubscription->is_available() && $payzen_wcssubscription->use_wallet($cust_id)) {
+            return $list;
+        } else {
+            $sub_modules[] = 'payzenwcssubscription';
+        }
+
+        $payzen_std = new WC_Gateway_PayzenStd();
+        if ($payzen_std->use_wallet($cust_id)) {
+            return $list;
+        } else {
+            $sub_modules[] = 'payzenstd';
+        }
+
+        foreach ($sub_modules as $id) {
+            $saved_masked_pan = get_user_meta((int) $cust_id, $id . '_masked_pan', true);
+
+            if ($saved_masked_pan) {
+                $card_brand_pos = strpos($saved_masked_pan, '|');
+                $expiry_start_pos = strpos($saved_masked_pan, '(');
+                $expiry_end_pos = strpos($saved_masked_pan, ')');
+                $card_number = substr($saved_masked_pan, $card_brand_pos + 1, $expiry_start_pos - $card_brand_pos - 2);
+                $expiry_date = substr($saved_masked_pan, $expiry_start_pos + 1, $expiry_end_pos - $expiry_start_pos -1);
+                $delete_url = add_query_arg(array(
+                    'wc-api' => 'WC_Gateway_Payzen_Delete_Saved_Card',
+                    'delete-saved-card' => $id
+                ), home_url('/'));
+
+                $type = 'cc';
+                $saved_card = array(
+                    'method' => array(
+                        'gateway' => $id,
+                        'last4' => str_replace('X', '', $card_number),
+                        'brand' => substr($saved_masked_pan, 0, strpos($saved_masked_pan, '|'))
+                    ),
+                    'expires' => $expiry_date,
+                    'is_default' => false,
+                    'actions' => array(
+                        'delete' => array(
+                            'url' => $delete_url,
+                            'name' => esc_html__('Delete', 'woocommerce')
+                        ),
+                    ),
+                );
+
+                if (isset($list[$type])) {
+                    array_push($list[$type], $saved_card);
+                } else {
+                    $list[$type][] = $saved_card;
+                }
+            }
+        }
+
+        return $list;
     }
 
     private function delete_identifier_attributes($cust_id, $id)
@@ -2749,7 +2854,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             // Perform REST request to check identifier.
             $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
             $client = new PayzenRest(
-                self::REST_URL,
+                $this->get_general_option('rest_url'),
                 $this->get_general_option('site_id'),
                 $key
             );

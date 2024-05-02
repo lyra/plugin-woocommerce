@@ -2,10 +2,10 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 6.4
+Tested up to: 6.5
 WC requires at least: 2.0
-WC tested up to: 8.6
-Stable tag: 1.12.3
+WC tested up to: 8.7
+Stable tag: 1.13.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,15 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.13.0, 2024-05-02:
+- [embedded] Use customer wallet functionality to manage payment by token.
+- [smartform] Use customer wallet functionality with Smartform to manage subscription payment with WooCommerce Subscriptions.
+- Added support of WooCommerce order cancellation from buyer account.
+- Added support of automatic refund.
+- Added new transaction status REFUND_TO_RETRY.
+- Bug fix: Fix error related to payment by token management.
+- Bug fix: Fix automatic retry on failed payment on subscription renewal.
 
 = 1.12.3, 2024-03-26=
 - [embedded] Take into account the notification URL on payment abandoned by buyer.

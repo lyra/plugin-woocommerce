@@ -207,9 +207,10 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
             case 'payzenmulti':
             case 'payzenfranfinance':
             case 'payzenregroupedother':
+            case 'payzenwcssubscription':
                 $data['payment_fields'] = apply_filters('woocommerce_payzen_payment_fields_' . $this->get_name(), null);
 
-                if ($this->get_name() === 'payzenstd') {
+                if (($this->get_name() === 'payzenstd') || ($this->get_name() === 'payzenwcssubscription')) {
                     $data['payment_mode'] = isset($this->settings['card_data_mode']) ? $this->settings['card_data_mode'] : 'REDIRECT';
                     if ($data['payment_mode'] === 'IFRAME') {
                         $data['link'] = add_query_arg('wc-api', 'WC_Gateway_payzenstd', home_url('/'));
@@ -218,7 +219,7 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
                         if ($vars = get_transient('payzen_js_vars_' . wp_get_session_token())) {
                             $data['vars'] = $vars;
                             $data['hide_smartbutton'] = get_transient('payzen_hide_smartbutton_' . wp_get_session_token());
-                            $data['token_url'] = add_query_arg('wc-api', 'WC_Gateway_Payzen_Form_Token', home_url('/'));
+                            $data['token_url'] = add_query_arg('wc-api', 'WC_Gateway_' . ucfirst($this->get_name()) . '_Form_Token', home_url('/'));
 
                             delete_transient('payzen_js_vars_' . wp_get_session_token());
                             delete_transient('payzen_hide_smartbutton_' . wp_get_session_token());
