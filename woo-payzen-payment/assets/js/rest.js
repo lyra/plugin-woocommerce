@@ -13,6 +13,10 @@
  */
 
 jQuery(function() {
+    if ((typeof PAYZEN_HIDE_ADD_PAYMENT_LINK !== "undefined") && (PAYZEN_HIDE_ADD_PAYMENT_LINK != true)) {
+       jQuery(".woocommerce-MyAccount-content a.button:not(.delete)").hide();
+    }
+
     if (typeof IDENTIFIER_FORM_TOKEN !== "undefined") {
         payzenUpdateFormToken(true);
     }
@@ -29,7 +33,7 @@ var PAYZEN_EXPIRY_ERRORS = ['PSP_108', 'PSP_136', 'PSP_649'];
 
 var payzenInitRestEvents = function(KR) {
     KR.onError(function(e) {
-        jQuery('#payzenstd_rest_processing').css('display', 'none');
+        jQuery('#payzen_rest_processing').css('display', 'none');
         jQuery('form.checkout').removeClass('processing').unblock();
         jQuery('#order_review').unblock();
 
@@ -63,10 +67,22 @@ var payzenInitRestEvents = function(KR) {
     KR.onFocus(function(e) {
         jQuery('.kr-form-error').html('');
     });
+
+    KR.wallet.onPaymentTokenDeleted(function(callback) {
+        jQuery.ajax({
+            method: "POST",
+            url: PAYZEN_DELETE_CARD_URL,
+            data: { "token": callback.token },
+            success: function() {
+                console.log("Card token deleted successfully.");
+            }
+        });
+    });
 };
 
 var payzenDrawRestPaymentFields = function(formToken, first) {
     var cardsForm = "";
+
     if (PAYZEN_CARDS_FORM == true) {
         cardsForm = '<div class="kr-pan"></div><div class="kr-expiry"></div><div class="kr-security-code"></div>';
 
@@ -78,9 +94,14 @@ var payzenDrawRestPaymentFields = function(formToken, first) {
     }
 
     var sfStyle = (PAYZEN_HIDE_SINGLE_BUTTON == true) ? 'style="width: 100%;"' : '';
-    var fields = '<div class="' + PAYZEN_KR_MODE + '" ' + PAYZEN_SINGLE_PAYMENT_BUTTON_MODE + ' ' + PAYZEN_SINGLE_PAYMENT_BUTTON_MODE + ' ' + PAYZEN_SF_EXTENDED_MODE + ' ' + PAYZEN_POPIN_ATTR + ' ' + sfStyle + ' > ' + cardsForm + ' <div class="kr-form-error"></div> <div id="payzenstd_rest_processing" class="kr-field processing" style="display: none; border: none; z-index: -1;"> <div style="background-image: url(' + PAYZEN_IMG_URL + '); margin: 0 auto; display: block; height: 35px; background-position: center; background-repeat: no-repeat; background-size: 35px;"></div></div></div>';
+    var fields = '<div class="' + PAYZEN_KR_MODE + '" ' + PAYZEN_SINGLE_PAYMENT_BUTTON_MODE + ' ' + PAYZEN_SINGLE_PAYMENT_BUTTON_MODE + ' ' + PAYZEN_SF_EXTENDED_MODE + ' ' + PAYZEN_POPIN_ATTR + ' ' + sfStyle + ' > ' + cardsForm + ' <div class="kr-form-error"></div> <div id="payzen_rest_processing" class="kr-field processing" style="display: none; border: none; z-index: -1;"> <div style="background-image: url(' + PAYZEN_IMG_URL + '); margin: 0 auto; display: block; height: 35px; background-position: center; background-repeat: no-repeat; background-size: 35px;"></div></div></div>';
 
-    jQuery("#payzenstd_rest_wrapper").html(fields);
+    if (jQuery("#payzenstd_rest_wrapper").length) {
+        jQuery("#payzenstd_rest_wrapper").html(fields);
+    } else {
+        jQuery("#payzenwcssubscription_rest_wrapper").html(fields);
+    }
+
     KR.renderElements();
 
     var payzenFormConfig = { language: PAYZEN_LANGUAGE, formToken: formToken };

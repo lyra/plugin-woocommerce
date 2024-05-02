@@ -31,3 +31,27 @@ button.kr-popin-button {
     top: 50%;
     left: 50%;
 }
+
+.blockUI.blockOverlay {
+    z-index: -1 !important;
+}
+
+.woocommerce-MyAccount-content .wc-block-components-notice-banner.is-info {
+    display: none !important;
+}
+
+div.kr-smart-form-list-section-name {
+    font-weight: bold !important;
+}
+
+#add_payment_method button.kr-smart-form-single-payment-button {
+    display: none !important;
+}
+
+.woocommerce-account .woocommerce-MyAccount-content #payzenstd_rest_wrapper {
+    margin-bottom: 5%;
+}
+
+#order_review:not(.woocommerce-checkout-review-order) .payment_method_payzensubscription div {
+    display: none !important;
+}

@@ -280,7 +280,8 @@ class Api
             'WAITING_FOR_PAYMENT',
             'AUTHORISED_TO_VALIDATE',
             'SUSPENDED',
-            'PENDING'
+            'PENDING',
+            'REFUND_TO_RETRY'
         );
     }
 
@@ -304,7 +305,7 @@ class Api
     public static function getToValidateStatuses()
     {
         return array(
-            'WAITING_AUTHORISATION_TO_VALIDATE', 
+            'WAITING_AUTHORISATION_TO_VALIDATE',
             'AUTHORISED_TO_VALIDATE'
         );
     }

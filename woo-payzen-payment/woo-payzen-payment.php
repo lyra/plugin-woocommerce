@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.12.3
+ * Version: 1.13.0
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 6.4
+ * Tested up to: 6.5
  * WC requires at least: 2.0
- * WC tested up to: 8.6
+ * WC tested up to: 8.7
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -363,169 +363,6 @@ function woocommerce_payzen_order_payment_gateways($available_gateways)
 }
 add_filter('woocommerce_available_payment_gateways', 'woocommerce_payzen_order_payment_gateways');
 
-if (! function_exists('ly_saved_cards_link')) {
-    function ly_saved_cards_link($menu_links)
-    {
-        // Add "My payment means".
-        $menu_links = array_slice($menu_links, 0, count($menu_links) - 1, true)
-        + array('ly_saved_cards' => __('My payment means', 'woo-payzen-payment'))
-        + array_slice($menu_links, count($menu_links) - 1, NULL, true);
-
-        return $menu_links;
-    }
-    add_filter('woocommerce_account_menu_items', 'ly_saved_cards_link', 40);
-}
-
-if (! function_exists('ly_add_saved_cards_endpoint_query_vars')) {
-    function ly_add_saved_cards_endpoint_query_vars($query_vars)
-    {
-        $query_vars['ly_saved_cards'] = 'ly_saved_cards';
-
-        return $query_vars;
-    }
-    add_filter('woocommerce_get_query_vars', 'ly_add_saved_cards_endpoint_query_vars');
-}
-
-if (! function_exists('ly_change_saved_cards_title')) {
-    function ly_change_saved_cards_title($title)
-    {
-        return __('My payment means', 'woo-payzen-payment');
-    }
-    add_filter('woocommerce_endpoint_ly_saved_cards_title', 'ly_change_saved_cards_title');
-}
-
-if (! function_exists('ly_add_saved_cards_endpoint')) {
-    function ly_add_saved_cards_endpoint()
-    {
-        // Add "ly_saved_cards" endpoint.
-        add_rewrite_endpoint('ly_saved_cards', EP_ROOT | EP_PAGES);
-    }
-    add_action('init', 'ly_add_saved_cards_endpoint');
-}
-
-function payzen_my_account_endpoint_content()
-{
-    global $woocommerce;
-
-    $cust_id = WC_Gateway_Payzen::get_customer_property($woocommerce->customer, 'id');
-
-    $sub_module_saving_cards_ids = array('payzenstd', 'payzensubscription', 'payzenwcssubscription');
-
-    $customer_saved_cards = array();
-    $column_card_brand =  false;
-    foreach ($sub_module_saving_cards_ids as $id) {
-        $saved_masked_pan = get_user_meta((int) $cust_id, $id.'_masked_pan', true);
-        if ($saved_masked_pan) {
-            $card_brand_pos = strpos($saved_masked_pan, '|');
-            if ($card_brand_pos) {
-                $column_card_brand = true;
-                $customer_saved_cards[$id]['card_brand'] = substr($saved_masked_pan, 0, strpos($saved_masked_pan, '|'));
-            }
-
-            $expiry_start_pos = strpos($saved_masked_pan, '(');
-            $expiry_end_pos = strpos($saved_masked_pan, ')');
-            $customer_saved_cards[$id]['card_number'] = substr($saved_masked_pan, $card_brand_pos + 1, $expiry_start_pos - $card_brand_pos - 2);
-            $customer_saved_cards[$id]['expiry'] = substr($saved_masked_pan, $expiry_start_pos + 1, $expiry_end_pos - $expiry_start_pos -1);
-        }
-    }
-
-    if (! empty($customer_saved_cards)) {
-        wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), WC_Gateway_Payzen::PLUGIN_VERSION);
-        wp_enqueue_style('payzen');
-
-        echo '<table id="ly_cards_table" class="shop_table" id ="payzen-customer-card" style="display:none">
-                <thead>
-                  <tr>';
-        if ($column_card_brand) {
-            echo '<th>' . __('Type', 'woo-payzen-payment') . '</th>';
-        }
-
-        echo      '<th>' . __('Means of payment', 'woo-payzen-payment') . '</th>
-                  <th>' . __('Action', 'woo-payzen-payment') . '</th>
-                  </tr>
-                </thead>
-                <tbody>
-                </tbody>
-              </table>';
-
-        $table_body = '';
-        foreach ($customer_saved_cards as $id => $card) {
-            $table_body .= '<tr>';
-            if ($column_card_brand) {
-                $card_brand_logo = $card['card_brand'];
-                $remote_logo = WC_Gateway_Payzen::LOGO_URL . strtolower($card['card_brand']) . '.png';
-                if ($card['card_brand']) {
-                    $card_brand_logo = '<img src=\"' . $remote_logo. '\""
-                           + "alt=\"' . $card['card_brand'] . '\""
-                           + "title=\"' . $card['card_brand'] . '\""
-                           + "style=\"vertical-align: middle; margin: 0 10px 0 5px; max-height: 30px; display: unset;\">';
-                }
-
-                $table_body .= '<td>' . $card_brand_logo . '</td>';
-            }
-
-            $table_body .= '<td>' . $card['card_number'] . ' - ' . $card['expiry'] . '</td>';
-            $table_body .= '<td><a href=\"javascript: void(0);\" onclick=\"payzenConfirmDelete(\'' . $id . '\')\">' . __('Delete', 'woo-payzen-payment') . '</a></td></tr>';
-        }
-
-        $delete_card_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Delete_Saved_Card', home_url('/'));
-
-        echo '<script>
-                  jQuery(document).ready(function(){
-                      if (jQuery("table[id=\'ly_cards_table\']").length == 2) {
-                          jQuery("table[id=\'ly_cards_table\']:last").remove();
-                      }
-
-                      if (jQuery("#ly_empty_cards_message").length) {
-                          jQuery("#ly_empty_cards_message").remove();
-                      }
-
-                      jQuery("#ly_cards_table > tbody:last").append("' . $table_body . '");
-                      jQuery("#ly_cards_table").show();
-                  });
-
-                  function payzenConfirmDelete(id) {
-                      if (confirm("' . __('Are you sure you want to delete your saved means of payment? This action is not reversible!', 'woo-payzen-payment') . '")) {
-                          jQuery("body").block({
-                             message: null,
-                             overlayCSS: {
-                                 background: "#fff",
-                                 opacity: 0.5
-                             }
-                          });
-
-                          jQuery("div.blockUI.blockOverlay").css("cursor", "default");
-
-                          jQuery.ajax({
-                              method: "POST",
-                              url: "' . $delete_card_url . '",
-                              data: { "id": id },
-                              success: function() {
-                                  location.reload();
-                              }
-                          });
-                      }
-                  }
-              </script>';
-    } else {
-        echo '<div id="ly_empty_cards_message" class="woocommerce-Message woocommerce-Message--info woocommerce-info" style="display:none">'
-                  . __('You have no stored payment means.', 'woo-payzen-payment') .
-             '</div>
-             <script>
-                 jQuery(document).ready(function(){
-                     if (jQuery("#ly_cards_table").length || jQuery("div[id=\'ly_empty_cards_message\']").length == 2) {
-                         jQuery("#ly_empty_cards_message").remove();
-                     }
-
-                     if (! jQuery("#ly_cards_table").length) {
-                         jQuery("#ly_empty_cards_message").show();
-                     }
-                 });
-             </script>';
-    }
-}
-add_action('woocommerce_account_ly_saved_cards_endpoint', 'payzen_my_account_endpoint_content');
-
 function payzen_send_support_email_on_order($order)
 {
     global $payzen_plugin_features;
@@ -698,27 +535,19 @@ if (is_multisite() && $is_valid_ipn) {
     }
 }
 
-function payzen_online_refund($order_id, $refund_id)
+function payzen_launch_online_refund($order, $refund_amount, $refund_currency)
 {
-    // Check if order was passed with one of payzen submodules.
-    $order = new WC_Order((int) $order_id);
-    if (substr($order->get_payment_method(), 0, strlen('payzen')) !== 'payzen') {
-        return;
-    }
-
-    $refund = new WC_Order_Refund((int) $refund_id);
-
-    // Prepare order refund bean.
+    // Prepare order information for refund.
     require_once 'includes/sdk-autoload.php';
     require_once 'includes/PayzenRefundProcessor.php';
 
-    $order_refund_bean = new PayzenOrderInfo();
-    $order_refund_bean->setOrderRemoteId($order_id);
-    $order_refund_bean->setOrderId($order_id);
-    $order_refund_bean->setOrderReference($order->get_order_number());
-    $order_refund_bean->setOrderCurrencyIsoCode($refund->get_currency());
-    $order_refund_bean->setOrderCurrencySign(html_entity_decode(get_woocommerce_currency_symbol($refund->get_currency())));
-    $order_refund_bean->setOrderUserInfo(PayzenTools::get_user_info());
+    $order_info = new PayzenOrderInfo();
+    $order_info->setOrderRemoteId($order->get_id());
+    $order_info->setOrderId($order->get_id());
+    $order_info->setOrderReference($order->get_order_number());
+    $order_info->setOrderCurrencyIsoCode($refund_currency);
+    $order_info->setOrderCurrencySign(html_entity_decode(get_woocommerce_currency_symbol($refund_currency)));
+    $order_info->setOrderUserInfo(PayzenTools::get_user_info());
     $refund_processor = new PayzenRefundProcessor();
 
     $std_payment_method = new WC_Gateway_PayzenStd();
@@ -735,11 +564,8 @@ function payzen_online_refund($order_id, $refund_id)
     );
 
     // Do online refund.
-    $refund_api->refund($order_refund_bean, $refund->get_amount());
+    $refund_api->refund($order_info, $refund_amount);
 }
-
-// Do online refund after local refund.
-add_action('woocommerce_order_refunded', 'payzen_online_refund', 10 , 2);
 
 function payzen_display_refund_result_message($order_id)
 {
@@ -765,3 +591,33 @@ function payzen_features_compatibility()
 
 // Declaring HPOS compatibility.
 add_action('before_woocommerce_init', 'payzen_features_compatibility');
+
+function payzen_online_refund($order_id, $refund_id)
+{
+    // Check if order was passed with other payment means submodule.
+    $order = new WC_Order((int) $order_id);
+    if (substr($order->get_payment_method(), 0, strlen('payzenother_')) !== 'payzenother_') {
+        return;
+    }
+
+    $refund = new WC_Order_Refund((int) $refund_id);
+
+    // Do online refund.
+    payzen_launch_online_refund($order, $refund->get_amount(), $refund->get_currency());
+}
+
+// Do online refund after local refund.
+add_action('woocommerce_order_refunded', 'payzen_online_refund', 10 , 2);
+
+function payzen_online_cancel($order_id)
+{
+    $order = new WC_Order((int) $order_id);
+    if (substr($order->get_payment_method(), 0, strlen('payzen')) !== 'payzen') {
+        return;
+    }
+
+    payzen_launch_online_refund($order, $order->get_total(), $order->get_currency());
+}
+
+// Do online cancel after local cancellation.
+add_action('woocommerce_cancelled_order', 'payzen_online_cancel');

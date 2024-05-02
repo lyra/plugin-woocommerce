@@ -37,8 +37,13 @@ class PayzenRestTools
         $response['vads_effective_creation_date'] = self::getProperty($transaction, 'creationDate');
         $response['vads_payment_config'] = 'SINGLE'; // Only single payments are possible via REST API at this time.
 
-        if (($customer = self::getProperty($answer, 'customer')) && ($billingDetails = self::getProperty($customer, 'billingDetails'))) {
-            $response['vads_language'] = self::getProperty($billingDetails, 'language');
+        if ($customer = self::getProperty($answer, 'customer')) {
+            $response['vads_cust_id'] = self::getProperty($customer, 'reference');
+            $response['vads_cust_email'] = self::getProperty($customer, 'email');
+
+            if ($billingDetails = self::getProperty($customer, 'billingDetails')) {
+                $response['vads_language'] = self::getProperty($billingDetails, 'language');
+            }
         }
 
         $response['vads_amount'] = self::getProperty($transaction, 'amount');
@@ -53,6 +58,7 @@ class PayzenRestTools
             $response['vads_order_id'] = self::getProperty($orderDetails, 'orderId');
         }
 
+        $response['vads_ext_info_is_rest'] = true;
         if ($metadata = self::getProperty($transaction, 'metadata')) {
             foreach ($metadata as $key => $value) {
                 $response['vads_ext_info_' . $key] = $value;

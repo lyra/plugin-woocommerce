@@ -24,6 +24,10 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME . ' - ' . __('Klarna payment', 'woo-payzen-payment');
 
+        $this->supports = [
+            'refunds'
+        ];
+
         // Init common vars.
         $this->payzen_init();
 
@@ -81,6 +85,7 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
         unset($this->form_fields['advanced_options']);
         unset($this->form_fields['card_data_mode']);
         unset($this->form_fields['payment_by_token']);
+        unset($this->form_fields['use_customer_wallet']);
 
         $this->form_fields['capture_delay']['default'] = 0;
         $this->form_fields['capture_delay']['description'] = __('The number of days before the bank capture. Should be between 0 and 7.', 'woo-payzen-payment');

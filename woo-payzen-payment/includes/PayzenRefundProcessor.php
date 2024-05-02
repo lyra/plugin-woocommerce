@@ -27,8 +27,10 @@ class PayzenRefundProcessor implements RefundProcessor
      */
     public function doOnError($errorCode, $message)
     {
-        $msg = '<div class="inline error" style="text-align: left;"><p><strong>' . $message . '</strong></p></div>';
-        set_transient('payzen_online_refund_result', $msg);
+        return new WP_Error(
+            'payzen_error', sprintf($this->translate('There was a problem initiating an automatic refund. (ERROR %1$s)'), $errorCode),
+            $message
+            );
     }
 
     /**
@@ -38,10 +40,11 @@ class PayzenRefundProcessor implements RefundProcessor
     public function doOnSuccess($operationResponse, $operationType)
     {
         if ($operationType == 'frac_update') {
-            $this->doOnError(-1, sprintf($this->translate('Refund of split payment is not supported. Please, consider making necessary changes in %1$s Back Office.'), 'PayZen'));
-        } else {
-            $msg = '<div class="inline updated" style="text-align: left;"><p><strong>' . $this->translate('Online refund successfully completed') . '</strong></p></div>';
-            set_transient('payzen_online_refund_result', $msg);
+            $this->doOnError(-1,
+                sprintf($this->translate('Refund of split payment is not supported. Please, consider making necessary changes in %1$s Back Office.'),
+                    'PayZen'
+                    )
+                );
         }
     }
 

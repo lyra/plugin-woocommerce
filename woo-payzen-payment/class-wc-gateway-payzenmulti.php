@@ -81,6 +81,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         parent::init_form_fields();
 
         unset($this->form_fields['payment_by_token']);
+        unset($this->form_fields['use_customer_wallet']);
 
         // By default, disable multiple payment submodule.
         $this->form_fields['enabled']['default'] = 'no';

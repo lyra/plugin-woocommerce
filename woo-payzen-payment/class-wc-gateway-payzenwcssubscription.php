@@ -59,7 +59,9 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
             'subscription_reactivation',
             'multiple_subscriptions',
             'subscription_payment_method_change_admin',
-            'subscription_payment_method_delayed_change'
+            'subscription_payment_method_delayed_change',
+            'refunds',
+            'tokenization'
         );
 
         if ($this->payzen_is_section_loaded()) {
@@ -99,6 +101,21 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
 
         // Process subscription renewal through silent payment.
         add_action('woocommerce_scheduled_subscription_payment_' . $this->id, array($this, 'process_subscription_payment'), 10, 2);
+
+        // Return from REST payment action.
+        add_action('woocommerce_api_wc_gateway_' . $this->id . '_rest', array($this, 'payzen_rest_return_response'));
+
+        // Notification from REST payment action.
+        add_action('woocommerce_api_wc_gateway_payzen_notify_rest', array($this, 'payzen_rest_notify_response'));
+
+        // Rest payment generate token.
+        add_action('woocommerce_api_wc_gateway_' . $this->id . '_form_token', array($this, 'payzen_refresh_form_token'));
+
+        // Display buyer wallet on "Payment methods" menu.
+        add_action('woocommerce_after_account_payment_methods', array($this, 'payment_fields'), 10, 2);
+
+        // Adding JS to load REST libs.
+        add_action('wp_head', array($this, 'payzen_rest_head_script'));
     }
 
     /**
@@ -112,15 +129,57 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
         unset($this->form_fields['advanced_options']);
         unset($this->form_fields['card_data_mode']);
         unset($this->form_fields['payment_by_token']);
+        unset($this->form_fields['use_customer_wallet']);
 
         // By default, disable subscription payment submodule.
         $this->form_fields['enabled']['default'] = 'no';
         $this->form_fields['enabled']['description'] = __('Enables / disables payment by Subscription.', 'woo-payzen-payment');
     }
 
+    /**
+    * Init settings for gateways.
+    */
+    public function init_settings() {
+        global $payzen_plugin_features;
+
+        parent::init_settings();
+        if ($payzen_plugin_features['smartform']) {
+            $this->set_smartform_params();
+        }
+    }
+
+    private function set_smartform_params()
+    {
+        if (! PayzenTools::is_embedded_payment(true)) {
+            $this->settings['card_data_mode'] = 'SMARTFORM';
+            $this->settings['rest_popin'] = 'no';
+            $this->settings['rest_theme'] = 'neon';
+            $this->settings['smartform_compact_mode'] = 'no;';
+            $this->settings['rest_register_card_label'] = '';
+            $this->settings['rest_attempts'] = '';
+            $this->settings['rest_placeholder'] = array(
+                'pan' => '',
+                'expiry' => '',
+                'cvv' => ''
+            );
+
+            return;
+        }
+
+        $std_settings = get_option('woocommerce_payzenstd_settings', null);
+
+        $this->settings['card_data_mode'] = $std_settings['card_data_mode'];
+        $this->settings['rest_popin'] = $std_settings['rest_popin'];
+        $this->settings['rest_theme'] = $std_settings['rest_theme'];
+        $this->settings['smartform_compact_mode'] = $std_settings['smartform_compact_mode'];
+        $this->settings['rest_register_card_label'] = $std_settings['rest_register_card_label'];
+        $this->settings['rest_attempts'] = $std_settings['rest_attempts'];
+        $this->settings['rest_placeholder'] = $std_settings['rest_placeholder'];
+    }
+
     protected function get_rest_fields()
     {
-        // REST API fields are not available for this payment.
+        // Do not display REST API configuration fields for this payment method.
     }
 
     protected function is_available_for_subscriptions()
@@ -157,14 +216,19 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
 
     public function payment_fields()
     {
-        parent::payment_fields();
-
         if ($this->subscriptions_handler && $this->subscriptions_handler->is_subscription_update()) {
             $order_id = get_query_var('order-pay');
             $order = new WC_Order((int) $order_id);
             $method = self::get_order_property($order, 'payment_method');
-            echo '<input type="hidden" id="' . $this->id . '_old_pm" name="' . $this->id . '_old_pm" value="' . $method . '">';
+
+            if ($this->use_wallet()) {
+                set_transient($this->id . '_change_payment_' . $order_id, $method . '_old_pm');
+            } else {
+                echo '<input type="hidden" id="' . $this->id . '_old_pm" name="' . $this->id . '_old_pm" value="' . $method . '">';
+            }
         }
+
+        parent::payment_fields();
     }
 
     protected function payment_by_alias_view($html, $force_redir = true)
@@ -190,13 +254,14 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
 
         $saved_subsc_masked_pan = $card_brand_logo ? $card_brand_logo . '<b style="vertical-align: middle;">' . substr($saved_subsc_masked_pan, strpos($saved_subsc_masked_pan, '|') + 1) . '</b>'
             : ' <b>' . str_replace('|',' ', $saved_subsc_masked_pan) . '</b>';
+        $saved_masked_pan = str_replace('X', '', $saved_masked_pan);
 
         return '<div id="' . $this->id . '_payment_by_token_description">
                   <ul>
                       <li style="list-style-type: none;">
                           <span>' .
                               sprintf(__('You will pay with your stored means of payment %s', 'woo-payzen-payment'), $saved_subsc_masked_pan)
-                              . ' (<a href="' . esc_url(wc_get_account_endpoint_url($this->get_option('woocommerce_saved_cards_endpoint', 'ly_saved_cards'))) . '">' . __('manage your payment means', 'woo-payzen-payment') . '</a>).
+                              . ' (<a href="' . esc_url(wc_get_account_endpoint_url('payment-methods')) . '">' . __('manage your payment means', 'woo-payzen-payment') . '</a>).
                           </span>
                       </li>
                   </ul>
@@ -226,11 +291,8 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
     {
         parent::payzen_fill_request($order);
 
-        $cust_id = self::get_order_property($order, 'user_id');
-        $saved_identifier = $this->get_cust_identifier($cust_id);
-        $is_identifier_active = $this->is_cust_identifier_active($cust_id);
-
         $order_id = wcs_get_objects_property($order, 'id');
+
         $old_payment_method = get_transient($this->id . '_change_payment_' . $order_id);
         $is_payment_change = $old_payment_method ? true : false;
         delete_transient($this->id .'_change_payment_' . $order_id);
@@ -241,6 +303,11 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
             $this->payzen_request->addExtInfo('subsc_id', $order_id);
         }
 
+        $cust_id = self::get_order_property($order, 'user_id');
+
+        $saved_identifier = $this->get_cust_identifier($cust_id);
+        $is_identifier_active = $this->is_cust_identifier_active($cust_id);
+
         if ($saved_identifier && $is_identifier_active) {
             $this->payzen_request->set('identifier', $saved_identifier);
             $action = ($this->payzen_request->get('amount') == 0) ? 'REGISTER_UPDATE' : 'REGISTER_UPDATE_PAY';
@@ -249,9 +316,11 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
         }
 
         $this->payzen_request->set('page_action', $action);
-
-        // Payment schedule is managed by WooCommerce Subscriptions.
         $this->payzen_request->addExtInfo('wcs_scheduled', true);
+
+        if (isset($_POST['update_all_subscriptions_payment_method']) && $_POST['update_all_subscriptions_payment_method']) {
+            $this->payzen_request->addExtInfo('update_identifier_all', true);
+        }
     }
 
     public function payzen_order_needs_payment($is_active, $order)
@@ -288,18 +357,7 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
             set_transient($this->id . '_change_payment_' . $order_id, $_POST[$this->id . '_old_pm']);
         }
 
-        $order = new WC_Order($order_id);
-
-        if (version_compare($woocommerce->version, '2.1.0', '<')) {
-            $pay_url = add_query_arg('order', self::get_order_property($order, 'id'), add_query_arg('key', self::get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
-        } else {
-            $pay_url = $order->get_checkout_payment_url(true);
-        }
-
-        return array(
-            'result' => 'success',
-            'redirect' => $pay_url
-        );
+        return parent::process_payment($order_id);
     }
 
     public function process_subscription_payment($renewal_total, WC_Order $renewal_order)
@@ -315,6 +373,7 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
         $subscription = reset($subscriptions); // Get first subscription.
         if (! $subscription) {
             $this->log("No subscription found for renewal order #{$renewal_order_id}.");
+
             return;
         }
 
@@ -324,6 +383,9 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
             $this->set_error($renewal_order, $subscription, $error_msg);
 
             $this->log("Error while processing renewal payment for subscription #{$subscription->get_id()}, renewal order #{$renewal_order_id}: private key is not configured.");
+
+            $renewal_order->update_status('failed');
+
             return;
         }
 
@@ -334,6 +396,8 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
 
             $error_msg = __('Customer has no valid identifier. Subscription renewal cannot be processed.', 'woo-payzen-payment');
             $this->set_error($renewal_order, $subscription, $error_msg);
+
+            $renewal_order->update_status('failed');
 
             return;
         }
@@ -360,6 +424,8 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
         if (! $payment_result) {
             $error_msg = sprintf(__('An error has occurred during the renewal of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen');
             $this->set_error($renewal_order, $subscription, $error_msg);
+
+            $renewal_order->update_status('failed');
 
             return;
         }
@@ -552,12 +618,12 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
 
     private function get_identifier($cust_id, $subscription)
     {
-        $saved_identifier = $this->get_cust_identifier($cust_id);
+        $saved_identifier = $subscription->get_meta('payzen_token');
         if (! $saved_identifier) {
-            $saved_identifier = $subscription->get_meta('payzen_token');
+            $saved_identifier = $this->get_cust_identifier($cust_id);
         }
 
-        if ($this->check_identifier($cust_id, $this->id, $saved_identifier)) {
+        if ($saved_identifier && $this->check_identifier($cust_id, $this->id, $saved_identifier)) {
             return $saved_identifier;
         }
 
@@ -581,7 +647,8 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
         }
     }
 
-    public function process_admin_options() {
+    public function process_admin_options()
+    {
         parent::process_admin_options();
 
         $subscription_settings = get_option('woocommerce_payzensubscription_settings', null);
@@ -631,5 +698,31 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
             $settings['enabled'] = 'yes';
             update_option('woocommerce_' . $this->id . '_settings', $settings);
         }
+    }
+
+    public function use_wallet($cust_id = null)
+    {
+        global $woocommerce;
+
+        if (! $this->is_embedded_payment(false)) {
+            return false;
+        }
+
+        if (! $cust_id) {
+            $cust_id = self::get_customer_property($woocommerce->customer, 'id');
+        }
+
+        return ! is_null($cust_id);
+    }
+
+    public function is_embedded_payment($only_smartform = true)
+    {
+        $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
+        if (! $key) {
+            return false;
+        }
+
+        $modes = array('SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS');
+        return in_array($this->get_option('card_data_mode'), $modes);
     }
 }

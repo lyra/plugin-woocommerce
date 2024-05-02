@@ -39,7 +39,8 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             'subscription_payment_method_change_customer',
             'gateway_scheduled_payments',
             'subscription_suspension',
-            'subscription_reactivation'
+            'subscription_reactivation',
+            'tokenization'
         );
 
         // Init common vars.
@@ -110,6 +111,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         unset($this->form_fields['payment_cards']);
         unset($this->form_fields['card_data_mode']);
         unset($this->form_fields['payment_by_token']);
+        unset($this->form_fields['use_customer_wallet']);
 
         // By default, disable Subscription payment submodule.
         $this->form_fields['enabled']['default'] = 'no';
@@ -172,6 +174,9 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
     {
         parent::payment_fields();
 
+        wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), self::PLUGIN_VERSION);
+        wp_enqueue_style('payzen');
+
         if ($this->subscriptions_handler && $this->subscriptions_handler->is_subscription_update()) {
             $order_id = get_query_var('order-pay');
             $order = new WC_Order((int) $order_id);
@@ -203,13 +208,14 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         $saved_subsc_masked_pan = $card_brand_logo ? $card_brand_logo . '<b style="vertical-align: middle;">' . substr($saved_subsc_masked_pan, strpos($saved_subsc_masked_pan, '|') + 1) . '</b>'
             : ' <b>' . str_replace('|',' ', $saved_subsc_masked_pan) . '</b>';
+        $saved_masked_pan = str_replace('X', '', $saved_masked_pan);
 
         return '<div id="' . $this->id . '_payment_by_token_description">
                   <ul>
                       <li style="list-style-type: none;">
                           <span>' .
                               sprintf(__('You will pay with your stored means of payment %s', 'woo-payzen-payment'), $saved_subsc_masked_pan)
-                              . ' (<a href="' . esc_url(wc_get_account_endpoint_url($this->get_option('woocommerce_saved_cards_endpoint', 'ly_saved_cards'))) . '">' . __('manage your payment means', 'woo-payzen-payment') . '</a>).
+                              . ' (<a href="' . esc_url(wc_get_account_endpoint_url('payment-methods')) . '">' . __('manage your payment means', 'woo-payzen-payment') . '</a>).
                           </span>
                       </li>
                   </ul>
