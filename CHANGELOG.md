@@ -1,3 +1,6 @@
+= 1.13.1, 2024-05-14:
+- Bug fix: Fix error related to product description format.
+
 = 1.13.0, 2024-05-02:
 - [embedded] Use customer wallet functionality to manage payment by token.
 - [smartform] Use customer wallet functionality with Smartform to manage subscription payment with WooCommerce Subscriptions.
