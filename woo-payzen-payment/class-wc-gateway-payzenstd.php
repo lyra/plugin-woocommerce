@@ -2344,6 +2344,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
     protected function send_cart_data($order)
     {
+        $notAllowed = '#[^A-Z0-9ÁÀÂÄÉÈÊËÍÌÎÏÓÒÔÖÚÙÛÜÇ ]#ui';
+
         $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
 
         // Add cart products info.
@@ -2355,8 +2357,11 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             $product_tax_amount = $item_data['total_tax'] / $qty;
             $product_tax_rate = $product_amount ? round($product_tax_amount / $product_amount * 100, 4) : 0;
 
+            $product_label = preg_replace($notAllowed, ' ', $item_data['name']);
+            $product_label = substr($product_label, 0, 255);
+
             $this->payzen_request->addProduct(
-                $item_data['name'],
+                $product_label,
                 $currency->convertAmountToInteger($product_amount + $product_tax_amount), // Amount with taxes.
                 $qty,
                 $item_data['product_id'],
