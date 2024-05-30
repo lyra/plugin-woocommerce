@@ -37,10 +37,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-8.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.13.1';
+    const PLUGIN_VERSION = '1.13.2';
     const GATEWAY_VERSION = 'V2';
 
-    const HEADER_ERROR_500 = 'HTTP/1.1 500 Internal Server Error';
     const LOG_FOLDER = 'wp-content/uploads/wc-logs/';
 
     protected $admin_page;
@@ -1597,7 +1596,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             if ($from_server) {
                 $this->log('IPN URL PROCESS END');
 
-                header(self::HEADER_ERROR_500, true, 500);
                 die($payzen_response->getOutputForGateway('auth_fail'));
             } else {
                 // Fatal error, empty cart.
@@ -1706,7 +1704,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             if ($from_server) {
                 $this->log('IPN URL PROCESS END');
 
-                header(self::HEADER_ERROR_500, true, 500);
                 die($payzen_response->getOutputForGateway('order_not_found'));
             } else {
                 // Fatal error, empty cart.
@@ -2000,7 +1997,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 if ($from_server) {
                     $this->log('IPN URL PROCESS END');
 
-                    header(self::HEADER_ERROR_500, true, 500);
                     die($payzen_response->getOutputForGateway('payment_ko_on_order_ok'));
                 } else {
                     // Fatal error, empty cart.
