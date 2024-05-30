@@ -2537,7 +2537,6 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             if ($from_server_rest) {
                 $this->log('SERVER URL PROCESS END');
 
-                header(WC_Gateway_Payzen::HEADER_ERROR_500, true, 500);
                 die('<span style="display:none">KO-Invalid IPN request received.'."\n".'</span>');
             } else {
                 // Fatal error, empty cart.
@@ -2563,7 +2562,6 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             if ($from_server_rest) {
                 $this->log('SERVER URL PROCESS END');
 
-                header(WC_Gateway_Payzen::HEADER_ERROR_500, true, 500);
                 die('<span style="display:none">KO-An error occurred while computing the signature.'."\n".'</span>');
             } else {
                 // Fatal error, empty cart.
@@ -2583,7 +2581,6 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             if ($from_server_rest) {
                 $this->log('SERVER URL PROCESS END');
 
-                header(WC_Gateway_Payzen::HEADER_ERROR_500, true, 500);
                 die('<span style="display:none">KO-Invalid IPN request received.'."\n".'</span>');
             } else {
                 // Fatal error, empty cart.

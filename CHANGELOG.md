@@ -1,3 +1,6 @@
+= 1.13.2, 2024-05-30:
+- Rollback using 500 http code on error for IPN calls.
+
 = 1.13.1, 2024-05-14:
 - Bug fix: Fix error related to product description format.
 
