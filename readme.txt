@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 6.5
 WC requires at least: 2.0
 WC tested up to: 8.8
-Stable tag: 1.13.2
+Stable tag: 1.13.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.13.3, 2024-07-01:
+- [technical] Enabled some features by plugin variant.
 
 = 1.13.2, 2024-05-30:
 - Rollback using 500 http code on error for IPN calls.

@@ -1,3 +1,6 @@
+= 1.13.3, 2024-07-01:
+- [technical] Enabled some features by plugin variant.
+
 = 1.13.2, 2024-05-30:
 - Rollback using 500 http code on error for IPN calls.
 
