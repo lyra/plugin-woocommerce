@@ -1,3 +1,7 @@
+= 1.14.0, 2024-09-10:
+- [sepa] Adding SEPA submodule.
+- Added compatibilty with WooCommerce 9.x versions.
+
 = 1.13.3, 2024-07-01:
 - [technical] Enabled some features by plugin variant.
 

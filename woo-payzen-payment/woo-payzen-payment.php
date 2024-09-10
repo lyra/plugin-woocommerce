@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.13.3
+ * Version: 1.14.0
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 6.5
+ * Tested up to: 6.6
  * WC requires at least: 2.0
- * WC tested up to: 8.8
+ * WC tested up to: 9.2
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -53,7 +53,8 @@ $payzen_plugin_features = array(
     'multi' => true,
     'choozeo' => false,
     'klarna' => true,
-    'franfinance' => true
+    'franfinance' => true,
+    'sepa' => true
 );
 
 /* Check requirements. */
@@ -87,6 +88,7 @@ function woocommerce_payzen_uninstallation()
     delete_option('woocommerce_payzenchoozeo_settings');
     delete_option('woocommerce_payzenklarna_settings');
     delete_option('woocommerce_payzenfranfinance_settings');
+    delete_option('woocommerce_payzensepa_settings');
     delete_option('woocommerce_payzenregroupedother_settings');
     delete_option('woocommerce_payzensubscription_settings');
     delete_option('woocommerce_payzenwcssubscription_settings');
@@ -129,6 +131,10 @@ function woocommerce_payzen_init()
         require_once 'class-wc-gateway-payzenfranfinance.php';
     }
 
+    if ($payzen_plugin_features['sepa'] && ! class_exists('WC_Gateway_PayzenSepa')) {
+        require_once 'class-wc-gateway-payzensepa.php';
+    }
+
     if (! class_exists('WC_Gateway_PayzenRegroupedOther')) {
         require_once 'class-wc-gateway-payzenregroupedother.php';
     }
@@ -147,6 +153,8 @@ function woocommerce_payzen_init()
 
     require_once 'includes/sdk-autoload.php';
     require_once 'includes/PayzenRestTools.php';
+    require_once 'includes/PayzenSubscriptionTools.php';
+    require_once 'includes/class-wc-payzen-sepa-payment-token.php';
     require_once 'includes/PayzenTools.php';
 
     // Restore WC notices in case of IFRAME or POST as return mode.
@@ -183,6 +191,10 @@ function woocommerce_payzen_woocommerce_block_support()
 
                 if ($payzen_plugin_features['klarna']) {
                     $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenklarna'));
+                }
+
+                if ($payzen_plugin_features['sepa']) {
+                    $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzensepa'));
                 }
 
                 if ($payzen_plugin_features['subscr']) {
@@ -236,6 +248,10 @@ function woocommerce_payzen_add_method($methods)
 
     if ($payzen_plugin_features['franfinance']) {
         $methods[] = 'WC_Gateway_PayzenFranfinance';
+    }
+
+    if ($payzen_plugin_features['sepa']) {
+        $methods[] = 'WC_Gateway_PayzenSepa';
     }
 
     $methods[] = 'WC_Gateway_PayzenWcsSubscription';
@@ -447,17 +463,26 @@ function payzen_send_support_email_on_order($order)
         <?php
             }
 
-            //$payzen_renewal_subscription_error_msg
             if ($payzen_update_subscription_error_msg) {
                 delete_transient('payzen_update_subscription_error_msg');
         ?>
-                jQuery('#lost-connection-notice').after('<div class="error notice is-dismissible"><p><?php echo addslashes($payzen_update_subscription_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__('Dismiss this notice.', 'woocommerce') ?></span></button></div>');
+                var element = '#lost-connection-notice';
+                if (! jQuery(element).length) {
+                   element = "#order_data";
+                }
+
+                jQuery(element').after('<div class="error notice is-dismissible"><p><?php echo addslashes($payzen_update_subscription_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__('Dismiss this notice.', 'woocommerce') ?></span></button></div>');
             <?php
             }
             if ($payzen_renewal_error_msg) {
                 delete_transient('payzen_renewal_error_msg');
                 ?>
-                    jQuery('#lost-connection-notice').after('<div class="error notice is-dismissible"><p><?php echo addslashes($payzen_renewal_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__('Dismiss this notice.', 'woocommerce') ?></span></button></div>');
+                    var element = '#lost-connection-notice';
+                    if (! jQuery(element).length) {
+                        element = "#order_data";
+                    }
+
+                    jQuery(element).after('<div class="error notice is-dismissible"><p><?php echo addslashes($payzen_renewal_error_msg); ?></p><button type="button" class="notice-dismiss" onclick="this.parentElement.remove()"><span class="screen-reader-text"><?php echo esc_html__('Dismiss this notice.', 'woocommerce') ?></span></button></div>');
             <?php } ?>
             });
         </script>
@@ -621,3 +646,14 @@ function payzen_online_cancel($order_id)
 
 // Do online cancel after local cancellation.
 add_action('woocommerce_cancelled_order', 'payzen_online_cancel');
+
+function payzen_payment_token_deleted($token_id, $token) {
+    if (strpos($token->get_gateway_id(), 'payzen') !== 0) {
+        return;
+    }
+
+    $payzen_gateway = new WC_Gateway_Payzen();
+    $payzen_gateway->delete_identifier_online($token->get_token(), $token->get_user_id(),  $token->get_gateway_id(), false);
+}
+
+add_action('woocommerce_payment_token_deleted', 'payzen_payment_token_deleted', 10, 2);

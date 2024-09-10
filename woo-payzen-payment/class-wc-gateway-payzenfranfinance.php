@@ -21,7 +21,7 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
     public function __construct()
     {
         $this->id = 'payzenfranfinance';
-        $this->icon = apply_filters('woocommerce_payzenfranfinance_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/franfinance.png');
+        $this->icon = apply_filters('woocommerce_payzenfranfinance_icon', self::LOGO_URL . 'franfinance.png');
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME. ' - ' . __('Franfinance payment', 'woo-payzen-payment');
 
