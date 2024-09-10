@@ -30,7 +30,7 @@ class PayzenRefundProcessor implements RefundProcessor
         return new WP_Error(
             'payzen_error', sprintf($this->translate('There was a problem initiating an automatic refund. (ERROR %1$s)'), $errorCode),
             $message
-            );
+        );
     }
 
     /**

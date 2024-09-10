@@ -66,37 +66,42 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
 
     public function get_supported_features()
     {
-        if ($this->name === 'payzensubscription') {
-            return array(
-                'products',
-                'subscriptions',
-                'subscription_cancellation',
-                'subscription_payment_method_change',
-                'subscription_amount_changes',
-                'subscription_date_changes',
-                'subscription_payment_method_change_customer',
-                'gateway_scheduled_payments',
-                'subscription_suspension',
-                'subscription_reactivation'
-            );
-        } elseif ($this->get_name() === 'payzenwcssubscription') {
-            return array(
-                'products',
-                'subscriptions',
-                'subscription_cancellation',
-                'subscription_payment_method_change',
-                'subscription_amount_changes',
-                'subscription_date_changes',
-                'subscription_payment_method_change_customer',
-                'subscription_suspension',
-                'subscription_reactivation',
-                'multiple_subscriptions',
-                'subscription_payment_method_change_admin',
-                'subscription_payment_method_delayed_change'
-            );
-        }
+        switch ($this->get_name()) {
+            case 'payzensubscription':
+                return array(
+                    'products',
+                    'subscriptions',
+                    'subscription_cancellation',
+                    'subscription_payment_method_change',
+                    'subscription_amount_changes',
+                    'subscription_date_changes',
+                    'subscription_payment_method_change_customer',
+                    'gateway_scheduled_payments',
+                    'subscription_suspension',
+                    'subscription_reactivation'
+                );
 
-        return parent::get_supported_features();
+            case 'payzenwcssubscription':
+            case 'payzensepa':
+                return array(
+                    'products',
+                    'subscriptions',
+                    'subscription_cancellation',
+                    'subscription_payment_method_change',
+                    'subscription_amount_changes',
+                    'subscription_date_changes',
+                    'subscription_payment_method_change_customer',
+                    'subscription_suspension',
+                    'subscription_reactivation',
+                    'multiple_subscriptions',
+                    'subscription_payment_method_change_admin',
+                    'subscription_payment_method_delayed_change',
+                    'tokenization'
+                );
+
+            default:
+                return parent::get_supported_features();
+        }
     }
 
     /**
@@ -179,6 +184,7 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
         switch ($this->get_name()) {
             case 'payzenklarna':
             case 'payzenfranfinance':
+            case 'payzensepa':
                 $img_url = WC_Gateway_Payzen::LOGO_URL . substr($this->get_name(), strlen('payzen')) . '.png';
                 break;
 
@@ -206,6 +212,7 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
             case 'payzenstd':
             case 'payzenmulti':
             case 'payzenfranfinance':
+            case 'payzensepa':
             case 'payzenregroupedother':
             case 'payzenwcssubscription':
                 $data['payment_fields'] = apply_filters('woocommerce_payzen_payment_fields_' . $this->get_name(), null);

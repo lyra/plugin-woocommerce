@@ -1354,6 +1354,12 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 break ;
 
             default:
+                $display_saved_methods = is_checkout() && ! PayzenTools::has_checkout_block();
+                if ($display_saved_methods) {
+                    $this->tokenization_script();
+                    $html .= $this->saved_payment_methods();
+                }
+
                 break;
         }
 
@@ -1477,34 +1483,37 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             $html .= '</li>';
         }
 
+        $pay_with_registered_message = ($this->id === 'payzensepa') ? __('Click here to update the IBAN associated with the SEPA mandate.', 'woo-payzen-payment') :
+            __('Click here to pay with your registered means of payment.', 'woo-payzen-payment');
+
         $html .= '</ul>
 
-              <ul class="payzenstd-view-bottom" style="margin-left: 0; margin-top: 0;">
+              <ul class="' . $this->id . '-view-bottom" style="margin-left: 0; margin-top: 0;">
                   <li style="list-style-type: none; margin: 15px 0px;" class="block ' . $this->id . '-cc-block ' . $this->id . '-id-block">
                       <span>' . __('OR', 'woo-payzen-payment') . '</span>
                   </li>
 
                   <li style="list-style-type: none;" class="block ' . $this->id . '-cc-block">
-                      <a href="javascript: void(0);" onclick="payzenUpdatePaymentBlock(true)">' . __('Click here to pay with your registered means of payment.', 'woo-payzen-payment') . '</a>
+                      <a href="javascript: void(0);" onclick="payzenUpdatePaymentBlock(true, \'' . $this->id . '\')">' . $pay_with_registered_message . '</a>
                   </li>
 
                   <li style="list-style-type: none;" class="block ' . $this->id . '-id-block">
-                      <a href="javascript: void(0);" onclick="payzenUpdatePaymentBlock(false)">' . __('Click here to pay with another means of payment.', 'woo-payzen-payment') . '</a>
+                      <a href="javascript: void(0);" onclick="payzenUpdatePaymentBlock(false, \'' . $this->id . '\')">' . __('Click here to pay with another means of payment.', 'woo-payzen-payment') . '</a>
                   </li>
               </ul>';
 
         $html .= '<script type="text/javascript">
-                  function payzenUpdatePaymentBlock(useIdentifier) {
-                      jQuery("ul.' . $this->id . '-view-top li.block").hide();
-                      jQuery("ul.payzenstd-view-bottom li.block").hide();
+                  function payzenUpdatePaymentBlock(useIdentifier, methodId) {
+                      jQuery("ul." + methodId + "-view-top li.block").hide();
+                      jQuery("ul." + methodId + "-view-bottom li.block").hide();
                       var blockName = useIdentifier ? "id" : "cc";
-                      jQuery("li.' . $this->id . '-" + blockName + "-block").show();
-                      if (typeof payzenUpdateFormToken === "function") {
+                      jQuery("li." + methodId + "-" + blockName + "-block").show();
+                      if ((typeof payzenUpdateFormToken != "undefined") && (typeof window.FORM_TOKEN != "undefined")) {
                           payzenUpdateFormToken(useIdentifier);
                       }
                       jQuery("#payzen_use_identifier").val(useIdentifier);
                   }
-                  payzenUpdatePaymentBlock(true);
+                  payzenUpdatePaymentBlock(true, "' . $this->id . '");
               </script>';
 
         return $html;
@@ -1631,7 +1640,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $jsVars .= 'window.PAYZEN_SF_COMPACT_MODE = new Boolean(' . $compact_mode . ');';
         $jsVars .= 'window.PAYZEN_GROUPING_THRESHOLD = "' . (is_numeric($groupingThreshold) ? $groupingThreshold : 'false') . '";';
         $jsVars .= 'window.PAYZEN_HIDE_SINGLE_BUTTON = new Boolean(' . $hide_single_payment_button . ');';
-        $jsVars .= 'window.PAYZEN_DELETE_CARD_URL = "'. add_query_arg('wc-api', 'WC_Gateway_Payzen_Delete_Saved_Card', home_url('/')). '";';
+        $jsVars .= 'window.PAYZEN_DELETE_CARD_URL = "'. add_query_arg('wc-api', 'WC_Gateway_Payzen_Delete_Saved_Identifier', home_url('/')). '";';
 
         $show_add_payment_method_link = false;
         if (is_add_payment_method_page()) {

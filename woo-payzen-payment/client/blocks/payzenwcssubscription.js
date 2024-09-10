@@ -106,7 +106,7 @@ var displayFields = function () {
         });
     }
 
-    payzenUpdatePaymentBlock(true);
+    payzenUpdatePaymentBlock(true, PAYMENT_METHOD_NAME);
 };
 
 var onButtonClick = function (e) {

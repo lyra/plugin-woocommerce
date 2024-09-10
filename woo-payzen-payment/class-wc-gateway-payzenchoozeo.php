@@ -21,7 +21,7 @@ class WC_Gateway_PayzenChoozeo extends WC_Gateway_PayzenStd
     public function __construct()
     {
         $this->id = 'payzenchoozeo';
-        $this->icon = apply_filters('woocommerce_payzenchoozeo_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/choozeo.png');
+        $this->icon = apply_filters('woocommerce_payzenchoozeo_icon', self::LOGO_URL . 'choozeo.png');
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME. ' - ' . __('Choozeo payment', 'woo-payzen-payment');
 

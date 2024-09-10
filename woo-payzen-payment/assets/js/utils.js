@@ -30,14 +30,14 @@ var payzenstd_get_card = function () {
     payzen_get_selected_option(['payzenstd_card_type']);
 };
 
-var payzenUpdatePaymentBlock = function (useIdentifier) {
-    jQuery("ul.payzenstd-view-top li.block").hide();
-    jQuery("ul.payzenstd-view-bottom li.block").hide();
+var payzenUpdatePaymentBlock = function (useIdentifier, methodId) {
+    jQuery("ul." + methodId + "-view-top li.block").hide();
+    jQuery("ul." + methodId + "-view-bottom li.block").hide();
 
     var blockName = useIdentifier ? "id" : "cc";
-    jQuery("li.payzenstd-" + blockName + "-block").show();
+    jQuery("li." + methodId + "-" + blockName + "-block").show();
 
-    if (typeof window.FORM_TOKEN != 'undefined') {
+    if ((methodId !== "payzensepa") && (typeof window.FORM_TOKEN != 'undefined')) {
         payzenUpdateFormToken(useIdentifier);
     }
 
