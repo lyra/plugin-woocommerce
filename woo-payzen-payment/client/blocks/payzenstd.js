@@ -80,6 +80,14 @@ registerPaymentMethod({
 });
 
 var displayFields = function () {
+    if (jQuery(submitButton).length == 0) {
+        return;
+    }
+
+    if (! jQuery("#radio-control-wc-payment-method-options-payzenstd").is(":checked")) {
+        return;
+    }
+
     switch (payzen_data?.payment_mode) {
         case 'REST':
         case 'SMARTFORM':

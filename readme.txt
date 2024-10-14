@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 6.6
 WC requires at least: 2.0
 WC tested up to: 9.2
-Stable tag: 1.14.0
+Stable tag: 1.14.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,10 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.14.1, 2024-10-14:
+- [embedded] Bug fix: Fix error related to JS form overload.
+- [embedded] Bug fix: Fix error related to embedded form display.
 
 = 1.14.0, 2024-09-10:
 - [sepa] Adding SEPA submodule.

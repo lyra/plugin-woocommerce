@@ -102,8 +102,6 @@ var payzenDrawRestPaymentFields = function(formToken, first) {
         jQuery("#payzenwcssubscription_rest_wrapper").html(fields);
     }
 
-    KR.renderElements();
-
     var payzenFormConfig = { language: PAYZEN_LANGUAGE, formToken: formToken };
     if (PAYZEN_HIDE_SINGLE_BUTTON == true) {
         payzenFormConfig['form'] = { smartform: { singlePaymentButton: { visibility: false }}};

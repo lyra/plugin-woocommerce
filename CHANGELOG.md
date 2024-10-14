@@ -1,3 +1,7 @@
+= 1.14.1, 2024-10-14:
+- [embedded] Bug fix: Fix error related to JS form overload.
+- [embedded] Bug fix: Fix error related to embedded form display.
+
 = 1.14.0, 2024-09-10:
 - [sepa] Adding SEPA submodule.
 - Added compatibilty with WooCommerce 9.x versions.
