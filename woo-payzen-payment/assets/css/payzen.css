@@ -40,6 +40,10 @@ button.kr-popin-button {
     display: none !important;
 }
 
+.woocommerce-MyAccount-content .woocommerce-info {
+    display: none !important;
+}
+
 div.kr-smart-form-list-section-name {
     font-weight: bold !important;
 }

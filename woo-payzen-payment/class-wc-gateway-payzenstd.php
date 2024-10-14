@@ -1519,6 +1519,15 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         return $html;
     }
 
+    private function load_embedded_form()
+    {
+        if (is_add_payment_method_page() || self::order_created_from_bo()) {
+            return true;
+        }
+
+        return $this->load_by_ajax_call();
+    }
+
     /**
      * Return true if fields are loaded by AJAX call.
      *
@@ -1651,49 +1660,53 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         set_transient('payzen_js_vars_' . wp_get_session_token(), $jsVars);
         $html .= $jsVars;
 
-        $html .= 'var formIsValidated = false;
-            jQuery(document).ready(function() {
-                if (typeof IDENTIFIER_FORM_TOKEN === "undefined") {
-                    setTimeout(function () {
-                        payzenUpdateFormToken(false);
-                    }, 300);
-                }
-                var popin = (jQuery(".kr-popin-button").length > 0);
-                jQuery("#add_payment_method").submit(function(event) {
-                    if (! jQuery("#payment_method_' . $this->id . '").is(":checked")) {
-                        return true;
+        if ($this->load_embedded_form()) {
+            /* load form */
+            $html .= 'var formIsValidated = false;
+                jQuery(document).ready(function() {
+                    if (typeof IDENTIFIER_FORM_TOKEN === "undefined") {
+                        setTimeout(function () {
+                            payzenUpdateFormToken(false);
+                        }, 300);
                     }
-                    event.preventDefault();
-                    jQuery("div.blockUI.blockOverlay").hide();
-                     if (PAYZEN_HIDE_SINGLE_BUTTON) {
-                         KR.openSelectedPaymentMethod();
-                     } else {
-                        KR.submit();
-                     }
-                });
-                jQuery("#place_order").click(function(event) {
-                    if (! jQuery("#payment_method_' . $this->id . '").is(":checked")) {
-                        return true;
-                    }
-                    var useIdentifier = jQuery("#payzen_use_identifier").length && jQuery("#payzen_use_identifier").val() === "true";
-                    if ((! useIdentifier) && (! popin)  && (! PAYZEN_HIDE_SINGLE_BUTTON) && (! ' . $hide_smart_button_popin . ')) {
-                        if (formIsValidated) {
-                            formIsValidated = false;
+                    var popin = (jQuery(".kr-popin-button").length > 0);
+                    jQuery("#add_payment_method").submit(function(event) {
+                        if (! jQuery("#payment_method_' . $this->id . '").is(":checked")) {
                             return true;
                         }
                         event.preventDefault();
-                        KR.validateForm().then(function(v) {
-                            // There is no errors.
-                            formIsValidated = true;
-                            jQuery("#place_order").click();
-                        }).catch(function(v) {
-                            // Display error message.
-                            var result = v.result;
-                            return result.doOnError();
-                        });
-                    }
-                });
-            });';
+                        jQuery("div.blockUI.blockOverlay").hide();
+                        if (PAYZEN_HIDE_SINGLE_BUTTON) {
+                            KR.openSelectedPaymentMethod();
+                        } else {
+                            KR.submit();
+                        }
+                    });
+                    jQuery("#place_order").click(function(event) {
+                        if (! jQuery("#payment_method_' . $this->id . '").is(":checked")) {
+                            return true;
+                        }
+                        var useIdentifier = jQuery("#payzen_use_identifier").length && jQuery("#payzen_use_identifier").val() === "true";
+                        if ((! useIdentifier) && (! popin)  && (! PAYZEN_HIDE_SINGLE_BUTTON) && (! ' . $hide_smart_button_popin . ')) {
+                            if (formIsValidated) {
+                                formIsValidated = false;
+                                return true;
+                            }
+                            event.preventDefault();
+                            KR.validateForm().then(function(v) {
+                                // There is no errors.
+                                formIsValidated = true;
+                                jQuery("#place_order").click();
+                            }).catch(function(v) {
+                                // Display error message.
+                                var result = v.result;
+                                return result.doOnError();
+                            });
+                        }
+                    });
+                });';
+        }
+
         $html .= '</script>';
 
         return $html;

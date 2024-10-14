@@ -80,6 +80,14 @@ registerPaymentMethod({
 });
 
 var displayFields = function () {
+    if (jQuery(submitButton).length == 0) {
+        return;
+    }
+
+    if (! jQuery("#radio-control-wc-payment-method-options-payzenwcssubscription").is(":checked")) {
+        return;
+    }
+
     if (payzen_data?.vars) {
         delete(window.FORM_TOKEN);
         delete(window.PAYZEN_HIDE_SINGLE_BUTTON);
@@ -190,7 +198,7 @@ var submitKR = function (KR) {
 
     var popin = (jQuery(".kr-smart-form-modal-button").length > 0) || (jQuery(".kr-popin-button").length > 0);
 
-    if (popin | smartbuttonAll) {
+    if (popin || smartbuttonAll) {
         KR.openPopin();
         unblock();
     } else if (hideButton) {
