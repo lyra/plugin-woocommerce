@@ -112,6 +112,17 @@ var displayFields = function () {
                 }
             }
         });
+
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach((mutation) => {
+                if ((mutation.type == "characterData") && (mutation.target.nodeName == "#text")) {
+                    refreshTempToken();
+                }
+            });
+        });
+
+        var target = document.querySelector('.wc-block-components-totals-footer-item');
+        observer.observe(target, {characterData: true, childList: true, subtree: true});
     }
 
     payzenUpdatePaymentBlock(true, PAYMENT_METHOD_NAME);
@@ -130,9 +141,9 @@ var onButtonClick = function (e) {
     jQuery('.kr-form-error').html('');
     window.PAYZEN_BUTTON_TEXT = jQuery(submitButton).text();
 
-    document.cookie = 'payzenwcssubscription_force_redir=; Max-Age=0; path=/; domain=' + location.host;
+    document.cookie = PAYMENT_METHOD_NAME + '_force_redir=; Max-Age=0; path=/; domain=' + location.host;
     if (typeof window.FORM_TOKEN == 'undefined') {
-        document.cookie = 'payzenwcssubscription_force_redir="true"; path=/; domain=' + location.host;
+        document.cookie = PAYMENT_METHOD_NAME + '_force_redir="true"; path=/; domain=' + location.host;
         return true;
     }
 
@@ -237,6 +248,24 @@ var validateKR = function(KR) {
         var result = v.result;
         result.doOnError();
     });
+};
+
+var refreshTempToken = function () {
+    if (jQuery("#radio-control-wc-payment-method-options-" + PAYMENT_METHOD_NAME).is(":checked")) {
+        jQuery.ajax({
+            method: 'POST',
+            url: payzen_data?.temporary_token_url,
+            success: function(data) {
+                var parsed = JSON.parse(data);
+                KR.setFormConfig({
+                    language: window.PAYZEN_LANGUAGE,
+                    formToken: parsed.formToken
+                }).then(function(v) {
+                    KR = v.KR;
+                });
+            }
+        });
+    }
 };
 
 var first = true;

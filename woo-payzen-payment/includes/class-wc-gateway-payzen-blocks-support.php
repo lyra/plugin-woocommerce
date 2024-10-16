@@ -226,6 +226,7 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
                         if ($vars = get_transient('payzen_js_vars_' . wp_get_session_token())) {
                             $data['vars'] = $vars;
                             $data['hide_smartbutton'] = get_transient('payzen_hide_smartbutton_' . wp_get_session_token());
+                            $data['temporary_token_url'] = add_query_arg('wc-api', 'WC_Gateway_' . ucfirst($this->get_name()) . '_Temporary_Form_Token', home_url('/'));
                             $data['token_url'] = add_query_arg('wc-api', 'WC_Gateway_' . ucfirst($this->get_name()) . '_Form_Token', home_url('/'));
 
                             delete_transient('payzen_js_vars_' . wp_get_session_token());
