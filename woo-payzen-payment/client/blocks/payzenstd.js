@@ -118,6 +118,17 @@ var displayFields = function () {
                         }
                     }
                 });
+
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach((mutation) => {
+                        if ((mutation.type == "characterData") && (mutation.target.nodeName == "#text")) {
+                            refreshTempToken();
+                        }
+                    });
+                });
+
+                var target = document.querySelector('.wc-block-components-totals-footer-item');
+                observer.observe(target, {characterData: true, childList: true, subtree: true});
             }
 
             break; 
@@ -130,7 +141,7 @@ var displayFields = function () {
 };
 
 var onButtonClick = function (e) {
-    if (! jQuery("#radio-control-wc-payment-method-options-payzenstd").is(":checked")) {
+    if (! jQuery("#radio-control-wc-payment-method-options-" + PAYMENT_METHOD_NAME).is(":checked")) {
         return true;
     }
 
@@ -142,7 +153,7 @@ var onButtonClick = function (e) {
     jQuery('.kr-form-error').html('');
     window.PAYZEN_BUTTON_TEXT = jQuery(submitButton).text();
 
-    document.cookie = 'payzenstd_force_redir=; Max-Age=0; path=/; domain=' + location.host;
+    document.cookie = PAYMENT_METHOD_NAME + '_force_redir=; Max-Age=0; path=/; domain=' + location.host;
     document.cookie = 'payzen_use_identifier=; Max-Age=0; path=/; domain=' + location.host;
 
     if (jQuery("#payzen_use_identifier")) {
@@ -167,7 +178,7 @@ var onButtonClick = function (e) {
         case 'SMARTFORMEXT':
         case 'SMARTFORMEXTNOLOGOS':
             if (typeof window.FORM_TOKEN == 'undefined') {
-                document.cookie = 'payzenstd_force_redir="true"; path=/; domain=' + location.host;
+                document.cookie = PAYMENT_METHOD_NAME + '_force_redir="true"; path=/; domain=' + location.host;
                 break;
             }
 
@@ -251,8 +262,8 @@ var submitKR = function (KR, popin) {
          unblock();
      } else {
          jQuery('#payzen_rest_processing').css('display', 'block');
-         jQuery('ul.payzenstd-view-top li.block').hide();
-         jQuery('ul.payzenstd-view-bottom').hide();
+         jQuery('ul.' + PAYMENT_METHOD_NAME + '-view-top li.block').hide();
+         jQuery('ul.' + PAYMENT_METHOD_NAME + '-view-bottom').hide();
 
          KR.submit();
       }
@@ -283,6 +294,24 @@ var validateKR = function(KR) {
     return true;
 };
 
+var refreshTempToken = function () {
+    if (jQuery("#radio-control-wc-payment-method-options-" + PAYMENT_METHOD_NAME).is(":checked")) {
+        jQuery.ajax({
+            method: 'POST',
+            url: payzen_data?.temporary_token_url,
+            success: function(data) {
+                var parsed = JSON.parse(data);
+                KR.setFormConfig({
+                    language: window.PAYZEN_LANGUAGE,
+                    formToken: parsed.formToken
+                }).then(function(v) {
+                    KR = v.KR;
+                });
+            }
+        });
+    }
+};
+
 var first = true;
 var initFields = function() {
     if (! first) {
@@ -290,7 +319,7 @@ var initFields = function() {
 
         jQuery(submitButton).on('click', onButtonClick);
         jQuery('input[type=radio][name=radio-control-wc-payment-method-options]').change(function(e) {
-            if (this.value === 'payzenstd') {
+            if (this.value === PAYMENT_METHOD_NAME) {
                 displayFields();
             }
         });

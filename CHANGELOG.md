@@ -1,3 +1,7 @@
+= 1.14.2, 2024-10-16:
+- Bug fix: Fix redirection to payment gateway.
+- [embedded] Bug fix: Fix updating form token on shipping method change.
+
 = 1.14.1, 2024-10-14:
 - [embedded] Bug fix: Fix error related to JS form overload.
 - [embedded] Bug fix: Fix error related to embedded form display.

@@ -108,6 +108,9 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
         // Notification from REST payment action.
         add_action('woocommerce_api_wc_gateway_payzen_notify_rest', array($this, 'payzen_rest_notify_response'));
 
+        // Rest payment generate temporary token.
+        add_action('woocommerce_api_wc_gateway_' . $this->id . '_temporary_form_token', array($this, 'payzen_refresh_temporary_token'));
+
         // Rest payment generate token.
         add_action('woocommerce_api_wc_gateway_' . $this->id . '_form_token', array($this, 'payzen_refresh_form_token'));
 
