@@ -94,6 +94,9 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         // Notification from REST payment action.
         add_action('woocommerce_api_wc_gateway_payzen_notify_rest', array($this, 'payzen_rest_notify_response'));
 
+        // Rest payment generate temporary token.
+        add_action('woocommerce_api_wc_gateway_' . $this->id . '_temporary_form_token', array($this, 'payzen_refresh_temporary_token'));
+
         // Rest payment generate token.
         add_action('woocommerce_api_wc_gateway_' . $this->id . '_form_token', array($this, 'payzen_refresh_form_token'));
 
@@ -1354,10 +1357,12 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 break ;
 
             default:
-                $display_saved_methods = is_checkout() && ! PayzenTools::has_checkout_block();
-                if ($display_saved_methods) {
-                    $this->tokenization_script();
-                    $html .= $this->saved_payment_methods();
+                if (($this->id === 'payzensepa') & $this->can_use_alias($cust_id)) {
+                    $display_saved_methods = is_checkout() && ! PayzenTools::has_checkout_block();
+                    if ($display_saved_methods) {
+                        $this->tokenization_script();
+                        $html .= $this->saved_payment_methods();
+                    }
                 }
 
                 break;
@@ -2023,7 +2028,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         global $woocommerce;
 
         // Get order ID from session.
-        $order_id = $woocommerce->session->get('order_awaiting_payment') ? $woocommerce->session->get('order_awaiting_payment') : $woocommerce->session->get('store_api_draft_order');
+        $order_id = $woocommerce->session->get('store_api_draft_order') ? $woocommerce->session->get('store_api_draft_order') : $woocommerce->session->get('order_awaiting_payment');
         $order = new WC_Order($order_id);
 
         // Set flag about use of saved identifier.
@@ -2034,6 +2039,27 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $this->payzen_fill_request($order);
 
         if ($token = $this->get_form_token($order, $_POST['use_identifier'] === 'true')) {
+            $result = array('result' => 'success', 'formToken' => $token);
+        } else {
+            $result = array('result' => 'error');
+        }
+
+        @ob_clean();
+        echo json_encode($result);
+        die();
+    }
+
+    public function payzen_refresh_temporary_token()
+    {
+        global $woocommerce;
+
+        $email = method_exists($woocommerce->customer, 'get_billing_email') ? $woocommerce->customer->get_billing_email() : $woocommerce->customer->user_email;
+
+        $this->log("Updating form token for user #{$email}.");
+
+        if ($token = $this->get_temporary_form_token($_POST['use_identifier'] === 'true')) {
+            $this->log("Form token updated for user #{$email}.");
+
             $result = array('result' => 'success', 'formToken' => $token);
         } else {
             $result = array('result' => 'error');
@@ -2169,7 +2195,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             delete_transient($this->id . '_current_order_pay');
         } else {
             // Get order ID from session.
-            $order_id = $woocommerce->session->get('order_awaiting_payment') ? $woocommerce->session->get('order_awaiting_payment') : $woocommerce->session->get('store_api_draft_order');
+            $order_id = $woocommerce->session->get('store_api_draft_order') ? $woocommerce->session->get('store_api_draft_order') : $woocommerce->session->get('order_awaiting_payment');
         }
 
         if (! $order_id) {
