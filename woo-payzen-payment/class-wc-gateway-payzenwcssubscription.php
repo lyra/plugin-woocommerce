@@ -207,6 +207,10 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
             return false;
         }
 
+        if (wcs_cart_contains_renewal()) {
+            return true;
+        }
+
         if (! $this->subscriptions_handler->cart_contains_subscription($woocommerce->cart)) {
             return false;
         }

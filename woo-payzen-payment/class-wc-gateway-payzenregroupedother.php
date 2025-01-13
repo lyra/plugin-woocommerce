@@ -295,7 +295,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                             optionLine += '<td style="padding: 0px;">';
                             optionLine += '<select style="width: ' + width + 'px;" name="' + inputName + '" id="' + inputName + '">';
                             optionLine += '<?php foreach ($cards as $key => $value) {
-                                                    echo '<option value="' . $key . '">' . $value . '</option>';
+                                                    echo '<option value="' . $key . '">' . addslashes($value) . '</option>';
                                                 } ?>';
 
                             optionLine = optionLine.replace('<option value="'+value+'"', '<option value="'+value+'" selected');
