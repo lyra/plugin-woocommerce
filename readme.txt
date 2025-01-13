@@ -2,10 +2,10 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 6.6
+Tested up to: 6.7
 WC requires at least: 2.0
-WC tested up to: 9.3
-Stable tag: 1.14.2
+WC tested up to: 9.5
+Stable tag: 1.14.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,12 @@ The payment plugin has the following features:
 
 == Changelog ==
 
+= 1.14.3, 2025-01-13:
+- Bug fix: Fix payment method availability for manual payment of failed subscription renewals.
+- Bug fix: Fix errors when jQuery Migrate is disabled.
+- Update all domains payment means.
+- Update all domains supported currencies.
+
 = 1.14.2, 2024-10-16:
 - Bug fix: Fix redirection to payment gateway.
 - [embedded] Bug fix: Fix updating form token on shipping method change.
@@ -52,7 +58,7 @@ The payment plugin has the following features:
 
 = 1.14.0, 2024-09-10:
 - [sepa] Adding SEPA submodule.
-- Added compatibilty with WooCommerce 9.x versions.
+- Added compatibility with WooCommerce 9.x versions.
 
 = 1.13.3, 2024-07-01:
 - [technical] Enabled some features by plugin variant.

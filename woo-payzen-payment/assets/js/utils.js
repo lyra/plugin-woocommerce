@@ -16,9 +16,9 @@ var payzen_get_selected_option = function(elementNames) {
         let element = 'input[name="'+ name + '"]';
         let option = jQuery(element);
 
-        if (option.size() == 0) {
+        if (option.length == 0) {
             continue;
-        } else if (option.size() > 1) {
+        } else if (option.length > 1) {
             option = jQuery(element + ':checked');
         }
 
