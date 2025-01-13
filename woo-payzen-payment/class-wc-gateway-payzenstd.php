@@ -903,6 +903,10 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 WC_Gateway_PayzenSubscription::SUBSCRIPTIONS_HANDLER;
             $subscriptions_handler = Payzen_Subscriptions_Loader::getInstance($handler);
 
+            if (function_exists('wcs_cart_contains_renewal') && wcs_cart_contains_renewal()) {
+                return false;
+            }
+
             if ($subscriptions_handler && $subscriptions_handler->cart_contains_subscription($woocommerce->cart)) {
                 return false;
             }

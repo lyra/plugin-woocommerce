@@ -80,11 +80,8 @@ registerPaymentMethod({
 });
 
 var displayFields = function () {
-    if (jQuery(submitButton).length == 0) {
-        return;
-    }
-
-    if (! jQuery("#radio-control-wc-payment-method-options-payzenwcssubscription").is(":checked")) {
+    var checkedMethod = jQuery("input[type=radio][name=radio-control-wc-payment-method-options]:checked").val();
+    if (checkedMethod !== PAYMENT_METHOD_NAME) {
         return;
     }
 
@@ -268,20 +265,17 @@ var refreshTempToken = function () {
     }
 };
 
-var first = true;
 var initFields = function() {
-    if (! first) {
+    if (jQuery(submitButton).length > 0) {
         displayFields();
-
         jQuery(submitButton).on('click', onButtonClick);
+
         jQuery('input[type=radio][name=radio-control-wc-payment-method-options]').change(function(e) {
             if (this.value === PAYMENT_METHOD_NAME) {
                 displayFields();
             }
         });
     }
-
-    first = false;
 };
 
 jQuery(document).on('ready', initFields);

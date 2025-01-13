@@ -1,3 +1,9 @@
+= 1.14.3, 2025-01-13:
+- Bug fix: Fix payment method availability for manual payment of failed subscription renewals.
+- Bug fix: Fix errors when jQuery Migrate is disabled.
+- Update all domains payment means.
+- Update all domains supported currencies.
+
 = 1.14.2, 2024-10-16:
 - Bug fix: Fix redirection to payment gateway.
 - [embedded] Bug fix: Fix updating form token on shipping method change.
@@ -8,7 +14,7 @@
 
 = 1.14.0, 2024-09-10:
 - [sepa] Adding SEPA submodule.
-- Added compatibilty with WooCommerce 9.x versions.
+- Added compatibility with WooCommerce 9.x versions.
 
 = 1.13.3, 2024-07-01:
 - [technical] Enabled some features by plugin variant.
