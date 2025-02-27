@@ -420,7 +420,5 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $first = $option['first'] ? round(($option['first'] / 100) * $amount) : null;
         $this->payzen_request->setMultiPayment($amount, $first, $option['count'], $option['period']);
         $this->payzen_request->set('contracts', (isset($option['contract']) && $option['contract']) ? 'CB=' . $option['contract'] : null);
-
-        delete_transient('payzenmulti_option_' . self::get_order_property($order, 'id'));
     }
 }
