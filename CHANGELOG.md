@@ -1,3 +1,6 @@
+= 1.14.4, 2025-02-27:
+- Bug fix: Fix error related to payment options management.
+
 = 1.14.3, 2025-01-13:
 - Bug fix: Fix payment method availability for manual payment of failed subscription renewals.
 - Bug fix: Fix errors when jQuery Migrate is disabled.
