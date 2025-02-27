@@ -435,7 +435,5 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
             $fees = $option['fees'] ? 'Y' : 'N';
             $this->payzen_request->set('acquirer_transient_data', '{"FRANFINANCE":{"FEES_' . $option['count'] . 'X":"' . $fees . '"}}');
         }
-
-        delete_transient('payzenfranfinance_option_' . self::get_order_property($order, 'id'));
     }
 }

@@ -736,8 +736,6 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         if (isset($option['send_cart_data']) && ($option['send_cart_data'] === 'y')) {
             $this->send_cart_data($order);
         }
-
-        delete_transient($this->id . '_card_type_' . $order_id);
     }
 
     public function get_mean($code)

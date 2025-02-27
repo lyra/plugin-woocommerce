@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-9.x';
     const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.14.3';
+    const PLUGIN_VERSION = '1.14.4';
     const GATEWAY_VERSION = 'V2';
 
     const LOG_FOLDER = 'wp-content/uploads/wc-logs/';
@@ -1749,6 +1749,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             delete_transient('payzen_token_data_identifier_' . $payzen_response->getExtInfo('session_id'));
             delete_transient('payzen_token_' . $payzen_response->getExtInfo('session_id'));
             delete_transient('payzen_token_identifier_' . $payzen_response->getExtInfo('session_id'));
+            delete_transient('payzenfranfinance_option_' . $order_id);
+            delete_transient('payzenmulti_option_' . $order_id);
+            delete_transient('payzenregroupedother_card_type_' . $order_id);
 
             // Add order note.
             self::payzen_add_order_note($payzen_response, $order);
