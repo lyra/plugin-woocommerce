@@ -36,8 +36,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     const LANGUAGE = 'fr';
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-9.x';
-    const SUPPORT_EMAIL = 'support@payzen.eu';
-    const PLUGIN_VERSION = '1.14.4';
+    const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
+    const PLUGIN_VERSION = '1.15.0';
     const GATEWAY_VERSION = 'V2';
 
     const LOG_FOLDER = 'wp-content/uploads/wc-logs/';
@@ -563,7 +563,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'rest_settings' => array(
                 'title' => __('REST API keys', 'woo-payzen-payment'),
                 'type' => 'title',
-                'description' => sprintf(__('REST API keys are available in your %s Back Office (menu: Settings > Shops > REST API keys).<br><br>Configure this section if you are using order operations from WooCommerce Back Office, if you are using embedded payment fields/Smartform modes or if you are proposing subscription payment with WooCommerce Subscriptions.', 'woo-payzen-payment'), self::BACKOFFICE_NAME),
+                'description' => sprintf(__('REST API keys are available in your %s Back Office (menu: Settings > Shops > REST API keys).<br><br>Configure this section if you are using order operations from WooCommerce Back Office, if you are using embedded payment fields modes or if you are proposing subscription payment with WooCommerce Subscriptions.', 'woo-payzen-payment'), self::BACKOFFICE_NAME),
              ),
              'test_private_key' => array(
                  'title' => __('Test password', 'woo-payzen-payment'),
@@ -586,7 +586,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'embedded_fields_keys_settings' => array(
                 'title' => '',
                 'type' => 'title',
-                'description' => sprintf(__('Configure this section only if you are using embedded payment fields or Smartform modes.', 'woo-payzen-payment'), self::BACKOFFICE_NAME)
+                'description' => sprintf(__('Configure this section only if you are using embedded payment fields modes.', 'woo-payzen-payment'), self::BACKOFFICE_NAME)
             ),
              'test_public_key' => array(
                  'title' => __('Public test key', 'woo-payzen-payment'),
@@ -1605,8 +1605,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 $this->log('RETURN URL PROCESS END');
 
                 $cart_url = function_exists('wc_get_cart_url') ? wc_get_cart_url() : $woocommerce->cart->get_cart_url();
-                $iframe = $payzen_response->get('action_mode') === 'IFRAME';
-                $this->payzen_redirect($cart_url, $iframe);
+                $this->payzen_redirect($cart_url);
             }
         } else {
             header('HTTP/1.1 200 OK');
@@ -1632,7 +1631,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         $order_id = $payzen_response->get('order_id');
         $from_server = $payzen_response->get('hash') != null || $from_server_rest;
-        $iframe = $payzen_response->get('action_mode') == 'IFRAME';
 
         // Cart URL.
         $cart_url = function_exists('wc_get_cart_url') ? wc_get_cart_url() : $woocommerce->cart->get_cart_url();
@@ -1645,7 +1643,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         $order = wc_get_order($order_id);
 
-        if ($server_rest_abandoned_payment && PayzenTools::is_embedded_payment(false) && empty($payzen_response->getTransStatus())) {
+        if ($server_rest_abandoned_payment && PayzenTools::is_embedded_payment() && empty($payzen_response->getTransStatus())) {
             if (! $order && ($this->get_option('rest_popin') !== 'yes')) {
                 $this->log("Payment abandoned, do nothing.");
                 $this->log('IPN URL PROCESS END');
@@ -1680,9 +1678,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 if (! $payzen_response->isCancelledPayment()) {
                     $this->add_notice(__('Your payment was not accepted. Please, try to re-order.', 'woo-payzen-payment'), 'error');
-                    $this->payzen_redirect($cart_url, $iframe);
+                    $this->payzen_redirect($cart_url);
                 } else {
-                    $this->payzen_redirect($checkout_url, $iframe);
+                    $this->payzen_redirect($checkout_url);
                 }
             }
         }
@@ -1711,7 +1709,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 $this->add_notice(__('An error has occurred in the payment process.', 'woo-payzen-payment'), 'error');
 
                 $this->log('RETURN URL PROCESS END');
-                $this->payzen_redirect($cart_url, $iframe);
+                $this->payzen_redirect($cart_url);
             }
         }
 
@@ -1798,7 +1796,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     }
 
                     $this->log('RETURN URL PROCESS END');
-                    $this->payzen_redirect($this->get_return_url($order), $iframe);
+                    $this->payzen_redirect($this->get_return_url($order));
                 }
             } else {
                 $this->log("Payment failed or cancelled for order #$order_id. {$payzen_response->getLogMessage()}");
@@ -1829,9 +1827,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                     if (! $payzen_response->isCancelledPayment()) {
                         $this->add_notice(__('Your payment was not accepted. Please, try to re-order.', 'woo-payzen-payment'), 'error');
-                        $this->payzen_redirect($cart_url, $iframe);
+                        $this->payzen_redirect($cart_url);
                     } else {
-                        $this->payzen_redirect($checkout_url, $iframe);
+                        $this->payzen_redirect($checkout_url);
                     }
                 }
             }
@@ -1914,7 +1912,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                         $this->add_notice(__('Payment method updated.', 'woo-payzen-payment'));
 
                         $this->log('RETURN URL PROCESS END');
-                        $this->payzen_redirect($subsc_redirect_url ? $subsc_redirect_url : $this->get_return_url($order), $iframe);
+                        $this->payzen_redirect($subsc_redirect_url ? $subsc_redirect_url : $this->get_return_url($order));
                     }
                 } else {
                     if ($from_server) {
@@ -1926,9 +1924,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                         if (! $payzen_response->isCancelledPayment()) {
                             $this->add_notice(__('The payment method can not be changed for that subscription.', 'woo-payzen-payment'), 'error');
 
-                            $this->payzen_redirect($subsc_redirect_url ? $subsc_redirect_url : $cart_url, $iframe);
+                            $this->payzen_redirect($subsc_redirect_url ? $subsc_redirect_url : $cart_url);
                         } else {
-                            $this->payzen_redirect($subsc_redirect_url ? $subsc_redirect_url : $checkout_url, $iframe);
+                            $this->payzen_redirect($subsc_redirect_url ? $subsc_redirect_url : $checkout_url);
                         }
                     }
                 }
@@ -1974,7 +1972,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     die($payzen_response->getOutputForGateway('payment_ok_already_done'));
                 } else {
                     $this->log('RETURN URL PROCESS END');
-                    $this->payzen_redirect($this->get_return_url($order), $iframe);
+                    $this->payzen_redirect($this->get_return_url($order));
                 }
             } elseif (! self::is_successful_action($payzen_response) && ($order_status === 'failed' || $order_status === 'cancelled')) {
                 $this->log("Payment failed confirmed for order #$order_id.");
@@ -1988,9 +1986,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                     if (! $payzen_response->isCancelledPayment()) {
                         $this->add_notice(__('Your payment was not accepted. Please, try to re-order.', 'woo-payzen-payment'), 'error');
-                        $this->payzen_redirect($cart_url, $iframe);
+                        $this->payzen_redirect($cart_url);
                     } else {
-                        $this->payzen_redirect($checkout_url, $iframe);
+                        $this->payzen_redirect($checkout_url);
                     }
                 }
             } else {
@@ -2007,7 +2005,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     $this->add_notice(__('An error has occurred in the payment process.', 'woo-payzen-payment'), 'error');
 
                     $this->log('RETURN URL PROCESS END');
-                    $this->payzen_redirect($cart_url, $iframe);
+                    $this->payzen_redirect($cart_url);
                 }
             }
         }
@@ -2176,7 +2174,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         return isset($customer->$property_name) ? $customer->$property_name : null;
     }
 
-    protected function payzen_redirect($url, $iframe = false)
+    protected function payzen_redirect($url)
     {
         // Save WC Notices to restore them on return page.
         $wc_notices = WC()->session->get('wc_notices', array());
@@ -2185,23 +2183,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             delete_transient('payzen_session_id');
         }
 
-        if (! $iframe) {
-            wp_redirect($url);
-        } else {
-            echo '<div style="text-align: center;">
-                      <img src="' . esc_url(WC_PAYZEN_PLUGIN_URL . 'assets/images/loading_big.gif') . '">
-                  </div>';
-
-            echo '<script type="text/javascript">
-                    var url = "' . $url . '";
-
-                    if (window.top) {
-                      window.top.location = url;
-                    } else {
-                      window.location = url;
-                    }
-                  </script>';
-        }
+        wp_redirect($url);
 
         exit();
     }

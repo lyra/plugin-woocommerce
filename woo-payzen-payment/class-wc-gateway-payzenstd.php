@@ -85,9 +85,6 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         // Generate payment fields filter.
         add_filter('woocommerce_payzen_payment_fields_' . $this->id, array($this, 'get_payment_fields'));
 
-        // Iframe payment endpoint action.
-        add_action('woocommerce_api_wc_gateway_' . $this->id, array($this, 'payzen_generate_iframe_form'));
-
         // Return from REST payment action.
         add_action('woocommerce_api_wc_gateway_' . $this->id . '_rest', array($this, 'payzen_rest_return_response'));
 
@@ -119,7 +116,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             return;
         }
 
-        if ($this->is_embedded_payment(false) && $this->is_available()) {
+        if ($this->is_embedded_payment() && $this->is_available()) {
             $payzen_pub_key = $this->testmode ? $this->get_general_option('test_public_key') : $this->get_general_option('prod_public_key');
 
             $locale = get_locale() ? substr(get_locale(), 0, 2) : null;
@@ -243,7 +240,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
      */
     public function get_description()
     {
-        if ($this->is_embedded_payment(false) && ($this->get_option('rest_popin') !== 'yes') || is_add_payment_method_page()) {
+        if ($this->is_embedded_payment() && ($this->get_option('rest_popin') !== 'yes') || is_add_payment_method_page()) {
             return '';
         } else {
             return parent::get_description();
@@ -268,13 +265,21 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
     }
 
+    public function get_option($key, $empty_value = null)
+    {
+        if ($key === 'card_data_mode') {
+            $option = parent::get_option($key, $empty_value);
+            return ($option === 'REST') ? 'SMARTFORMEXT' : $option;
+        }
+
+        return parent::get_option($key, $empty_value);
+    }
+
     /**
      * Initialise gateway settings form fields.
      */
     public function init_form_fields()
     {
-        global $payzen_plugin_features;
-
         // Load common form fields to concat them with submodule settings.
         parent::init_form_fields();
 
@@ -382,7 +387,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             ),
             'card_data_mode' => array(
                 'custom_attributes' => array(
-                    'onchange' => 'payzenUpdateRestFieldDisplay(false)'
+                    'onchange' => 'payzenUpdateRestFieldDisplay()'
                 ),
                 'title' => __('Payment data entry mode', 'woo-payzen-payment'),
                 'type' => 'select',
@@ -390,24 +395,16 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 'options' => array(
                     'DEFAULT' => __('Card data entry on payment gateway', 'woo-payzen-payment'),
                     'MERCHANT' => __('Card type selection on merchant site', 'woo-payzen-payment'),
-                    'IFRAME' => __('Payment page integrated to checkout process (iframe)', 'woo-payzen-payment'),
+                    'SMARTFORM' =>  __('Embedded payment fields on merchant site (REST API)', 'woo-payzen-payment'),
+                    'SMARTFORMEXT' => __('Embedded payment fields extended on merchant site with logos (REST API)', 'woo-payzen-payment'),
+                    'SMARTFORMEXTNOLOGOS' => __('Embedded payment fields extended on merchant site without logos (REST API)', 'woo-payzen-payment')
                 ),
                 'description' => __('Select how the payment data will be entered by buyer. Think to update payment method description to match your selected mode.', 'woo-payzen-payment'),
                 'class' => 'wc-enhanced-select'
             )
         );
 
-        // Add REST fields if available for payment.
-        if ($payzen_plugin_features['embedded']) {
-            $this->form_fields['card_data_mode']['options']['REST'] = __('Embedded payment fields on merchant site (REST API)', 'woo-payzen-payment');
-            if ($payzen_plugin_features['smartform']) {
-                $this->form_fields['card_data_mode']['options']['SMARTFORM'] = __('Embedded Smartform on merchant site (REST API)', 'woo-payzen-payment');
-                $this->form_fields['card_data_mode']['options']['SMARTFORMEXT'] = __('Embedded Smartform extended on merchant site with logos (REST API)', 'woo-payzen-payment');
-                $this->form_fields['card_data_mode']['options']['SMARTFORMEXTNOLOGOS'] = __('Embedded Smartform extended on merchant site without logos (REST API)', 'woo-payzen-payment');
-            }
-
-            $this->get_rest_fields();
-        }
+        $this->get_rest_fields();
 
         // Add payment by token fields.
         $this->form_fields['payment_by_token'] = array(
@@ -487,7 +484,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 'neon' => 'Neon',
                 'classic' => 'Classic'
             ),
-            'description' => __('Select a theme to use to display the embedded payment fields or the Smartform.', 'woo-payzen-payment'),
+            'description' => __('Select a theme to use to display the embedded payment fields.', 'woo-payzen-payment'),
             'class' => 'wc-enhanced-select'
         );
 
@@ -496,7 +493,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             'label' => __('Enable / disable', 'woo-payzen-payment'),
             'type' => 'checkbox',
             'default' => 'no',
-            'description' => __('If enabled, the Smartform will be displayed in a compact mode.', 'woo-payzen-payment')
+            'description' => __('If enabled, the embedded payment fields will be displayed in a compact mode.', 'woo-payzen-payment')
         );
 
         $this->form_fields['smartform_grouping_threshold'] = array(
@@ -513,7 +510,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 'expiry' => '',
                 'cvv' => ''
             ),
-            'description' => __('Texts to use as placeholders for embedded payment fields, Smartform or Smartform extended.', 'woo-payzen-payment')
+            'description' => __('Texts to use as placeholders for embedded payment fields.', 'woo-payzen-payment')
         );
 
         $this->form_fields['rest_register_card_label'] = array(
@@ -728,12 +725,12 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 payzenUpdateRestFieldDisplay();
             });
 
-            function payzenUpdateRestFieldDisplay(ignoreIframe = true) {
+            function payzenUpdateRestFieldDisplay() {
                 var cardDataMode = jQuery('#<?php echo esc_attr($this->get_field_key('card_data_mode')); ?> option:selected').val();
                 var popinMode = jQuery('#<?php echo esc_attr($this->get_field_key('rest_popin')); ?> option:selected').val();
                 var moduleDescription = jQuery('#<?php echo esc_attr($this->get_field_key('module_settings')); ?>').next().find('tr:nth-child(7)');
 
-                if ((jQuery.inArray(cardDataMode, ['REST', 'SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS']) != -1) && (popinMode !== 'yes')) {
+                if ((jQuery.inArray(cardDataMode, ['SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS']) != -1) && (popinMode !== 'yes')) {
                     moduleDescription.hide();
                 } else {
                     moduleDescription.show();
@@ -742,14 +739,14 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 var customizationTitle = jQuery('#<?php echo esc_attr($this->get_field_key('rest_customization')); ?>');
                 var customizationTable = customizationTitle.next();
 
-                if (jQuery.inArray(cardDataMode, ['REST', 'SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS']) != -1) {
+                if (jQuery.inArray(cardDataMode, ['SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS']) != -1) {
                     customizationTitle.show();
                     customizationTable.find('tr:nth-child(1)').show();
                     if (jQuery.inArray(cardDataMode, ['SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS']) != -1) {
                         customizationTable.find('tr:nth-child(3)').show();
                         customizationTable.find('tr:nth-child(4)').show();
                     } else{
-                        customizationTable.find('tr:nth-child(3)').hide();;
+                        customizationTable.find('tr:nth-child(3)').hide();
                         customizationTable.find('tr:nth-child(4)').hide();
                     }
 
@@ -779,14 +776,6 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                     customizationTable.find('tr:nth-child(7)').hide();
                     customizationTable.find('tr:nth-child(8)').hide();
                     customizationTable.find('tr:nth-child(10').hide();
-
-                    if (! ignoreIframe) {
-                        if ((cardDataMode === 'IFRAME') &&
-                            ! confirm('<?php echo __('Warning, some payment means are not compatible with an integration by iframe. Please consult the documentation for more details.', 'woo-payzen-payment')?>')) {
-                            jQuery('#<?php echo esc_attr($this->get_field_key('card_data_mode')); ?>').val("<?php echo esc_attr($this->get_option('card_data_mode')); ?>");
-                            jQuery('#<?php echo esc_attr($this->get_field_key('card_data_mode')); ?>').trigger('change');
-                        }
-                    }
                 }
             }
 
@@ -801,7 +790,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                         jQuery('#<?php echo esc_attr($this->get_field_key('payment_by_token')); ?>').trigger('change');
                         customizationTable.find('tr:nth-child(6)').hide();
                         customizationTable.find('tr:nth-child(10)').hide();
-                    } else if (jQuery.inArray(cardDataMode, ['REST', 'SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS']) != -1) {
+                    } else if (jQuery.inArray(cardDataMode, ['SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS']) != -1) {
                         customizationTable.find('tr:nth-child(6)').show();
                         customizationTable.find('tr:nth-child(10)').show();
                     } else {
@@ -985,174 +974,30 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 $html .= '</div>';
                 break;
 
-            case 'IFRAME':
-                // Load css and create iframe.
-                wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), self::PLUGIN_VERSION);
-                wp_enqueue_style('payzen');
-
-                // Iframe endpoint URL.
-                $link = add_query_arg('wc-api', 'WC_Gateway_' . $this->id, home_url('/'));
-                $src = add_query_arg('loading', 'true', $link);
-
-                $html .= '<div>
-                         <iframe name="payzen_iframe" id="payzen_iframe" src="' . $src . '" style="display: none;">
-                         </iframe>';
-
-                if ($order = self::order_created_from_bo()) {
-                    set_transient($this->id . '_current_order_pay', self::get_order_property($order, 'id'));
-
-                    $html .= '<script type="text/javascript">';
-                    $html .= "jQuery('#order_review').on('submit', function(e) {
-                        if (! jQuery('#payment_method_" . $this->id . "').is(':checked')) {
-                            return true;
-                        }
-                        e.preventDefault();
-                        // Unblock screen.
-                        jQuery.when().then(function( x ) {
-                            jQuery('#order_review').unblock();
-                        });
-                        jQuery('.payment_method_" . $this->id . " p:first-child').hide();
-                        jQuery('ul." . $this->id . "-view-top li.block').hide();
-                        jQuery('ul." . $this->id . "-view-bottom li.block').hide();
-                        jQuery('#payzen_iframe').show();
-                        jQuery('#payzen_iframe').attr('src', '$link');
-                        jQuery.ajax({
-                            method: 'POST',
-                            url: '" . $process_order_url . "',
-                            data: { 'payzen_order_id': ". self::get_order_property($order, 'id'). " },
-                            success: function(data) {
-                               return;
-                            }
-                       });
-                    });";
-
-                    $html .= "jQuery('input[type=\"radio\"][name=\"payment_method\"][value!=\"" . $this->id . "\"]').click(function() {
-                                jQuery('#order_review').unblock();
-                                jQuery('.payment_method_" . $this->id . " p:first-child').show();
-                                jQuery('li." . $this->id . "-id-block').show();
-                                jQuery('#payzen_iframe').hide();
-                                jQuery('#payzen_iframe').attr('src', '" . $src . "');
-                    });</script>";
-                    break;
-                }
-
-                $html .= '<script type="text/javascript">';
-                $html .= "jQuery('form.checkout').on('checkout_place_order_" . $this->id . "', function() {
-                                jQuery('form.checkout').removeClass('processing').unblock();
-                                jQuery.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-                                    if ((originalOptions.url.indexOf('wc-ajax=checkout') === -1)
-                                        && (originalOptions.url.indexOf('action=woocommerce-checkout') === -1)
-                                        && (originalOptions.url.indexOf('wc-ajax=complete_order') === -1)) {
-                                        return;
-                                    }
-                                    if (options.data.indexOf('payment_method=" . $this->id . "') === -1) {
-                                        return;
-                                    }
-                                    options.success = function(data, status, jqXHR) {
-                                        if (typeof data === 'string') { // For backward compatibility.
-                                            // Get the valid JSON only from the returned string.
-                                            if (data.indexOf('<!--WC_START-->') >= 0)
-                                                data = data.split('<!--WC_START-->')[1];
-                                            if (data.indexOf('<!--WC_END-->') >= 0)
-                                                data = data.split('<!--WC_END-->')[0];
-                                            // Parse.
-                                            data = jQuery.parseJSON(data);
-                                        }
-                                        var result = (data && data.result) ? data.result : false;
-                                        if (result !== 'success') {
-                                            originalOptions.success.call(null, data, status, jqXHR);
-                                            return;
-                                        }
-                                        // Unblock screen.
-                                        jQuery('form.checkout').unblock();
-                                        jQuery('.payment_method_" . $this->id . " p:first-child').hide();
-                                        jQuery('ul." . $this->id . "-view-top li.block').hide();
-                                        jQuery('ul." . $this->id . "-view-bottom li.block').hide();
-                                        jQuery('#payzen_iframe').show();
-                                        jQuery('#payzen_iframe').attr('src', '$link');
-                                        jQuery(window).unbind('beforeunload');
-                                    };
-                                });
-                                // For WooCommerce 7.5.
-                                const _fetch = window.fetch;
-                                window.fetch = (...args) => {
-                                    let [url, options] = args;
-                                    let data = options.body;
-                                    return Promise.resolve(_fetch.apply(window, args))
-                                      .then(async (response) => {
-                                        if ((url.indexOf('wc-ajax=checkout') == -1)
-                                            && (url.indexOf('action=woocommerce-checkout') == -1)) {
-                                            return response;
-                                        }
-                                        if (data.indexOf('payment_method=" . $this->id . "') == -1) {
-                                            return response;
-                                        }
-                                        var status = (response && response.ok) ? response.ok : false;
-                                        if (! status) {
-                                            return response;
-                                        }
-                                        var result = '';
-                                        await response.clone().json().then(data => {
-                                            result = data.result;
-                                            return;
-                                        });
-                                        if (result !== 'success') {
-                                            return response;
-                                        }
-                                        // Unblock screen.
-                                        jQuery('form.checkout').unblock();
-                                        jQuery('.payment_method_" . $this->id . " p:first-child').hide();
-                                        jQuery('ul." . $this->id . "-view-top li.block').hide();
-                                        jQuery('ul." . $this->id . "-view-bottom li.block').hide();
-                                        jQuery('#payzen_iframe').show();
-                                        jQuery('#payzen_iframe').attr('src', '$link');
-                                        jQuery(window).unbind('beforeunload');
-                                        return response;
-                                    });
-                                }
-                            });";
-
-                $html .= "jQuery('input[type=\"radio\"][name=\"payment_method\"][value!=\"" . $this->id . "\"]').click(function() {
-                                jQuery('form.checkout').removeClass('processing').unblock();
-                                jQuery('.payment_method_" . $this->id . " p:first-child').show();
-                                jQuery('li." . $this->id . "-id-block').show();
-                                jQuery('#payzen_iframe').hide();
-                                jQuery('#payzen_iframe').attr('src', '" . $src . "');
-                            });";
-                $html .= "</script>";
-                $html .= "</div>";
-                break;
-
-            case 'REST':
             case 'SMARTFORM':
             case 'SMARTFORMEXT':
             case 'SMARTFORMEXTNOLOGOS':
-                if (is_add_payment_method_page()) {
-                    $option = 'SMARTFORM';
-                }
-
                 wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), self::PLUGIN_VERSION);
                 wp_enqueue_style('payzen');
 
                 $hide_smart_button_popin = 'false';
                 $hide_single_payment_button = 'false';
                 $sf_form_config_js = '';
-                if ($option !== 'REST') {
-                    if ($this->get_option('rest_popin') === 'yes') {
-                        $hide_smart_button_popin = 'true';
-                    } else {
-                        $sf_form_config_js = 'form: { smartform: { singlePaymentButton: { visibility: false } } },';
-                        $hide_single_payment_button = 'true';
-                    }
 
-                    $groupingThreshold = $this->get_option('smartform_grouping_threshold');
-                    if (($this->get_option('smartform_compact_mode') === 'yes') && is_numeric($groupingThreshold)) {
-                        $sf_form_config_js .= "cardForm: { layout: 'compact' }, smartForm: { layout: 'compact',  groupingThreshold : " . $groupingThreshold . " },";
-                    } elseif ($this->get_option('smartform_compact_mode') === 'yes') {
-                        $sf_form_config_js .= "cardForm: { layout: 'compact' }, smartForm: { layout: 'compact' },";
-                    } elseif (is_numeric($groupingThreshold)) {
-                        $sf_form_config_js .= "smartForm: { groupingThreshold : " . $groupingThreshold . " },";
-                    }
+                if ($this->get_option('rest_popin') === 'yes') {
+                    $hide_smart_button_popin = 'true';
+                } else {
+                    $sf_form_config_js = 'form: { smartform: { singlePaymentButton: { visibility: false } } },';
+                    $hide_single_payment_button = 'true';
+                }
+
+                $groupingThreshold = $this->get_option('smartform_grouping_threshold');
+                if (($this->get_option('smartform_compact_mode') === 'yes') && is_numeric($groupingThreshold)) {
+                    $sf_form_config_js .= "cardForm: { layout: 'compact' }, smartForm: { layout: 'compact',  groupingThreshold : " . $groupingThreshold . " },";
+                } elseif ($this->get_option('smartform_compact_mode') === 'yes') {
+                    $sf_form_config_js .= "cardForm: { layout: 'compact' }, smartForm: { layout: 'compact' },";
+                } elseif (is_numeric($groupingThreshold)) {
+                    $sf_form_config_js .= "smartForm: { groupingThreshold : " . $groupingThreshold . " },";
                 }
 
                 $check_smart_button_js = "var smartbuttonMethod = '';
@@ -1169,7 +1014,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                             }
                         }
                         var popin = jQuery('.kr-popin-button').length > 0;
-                        if ((! popin) && (! smartbuttonAll) && (smartbuttonMethod.length <= 0)) {
+                        if ((! popin) && (!smartbuttonAll) && (typeof smartbuttonMethod === 'undefined')) {
                             if(! " . $hide_single_payment_button . ") {
                                 if(! " . $hide_smart_button_popin . ") {
                                     jQuery('#payzen_rest_processing').css('display', 'block');
@@ -1185,7 +1030,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                         } else if ( " . $hide_single_payment_button . ") {
                             KR.openSelectedPaymentMethod();
                             jQuery('form.checkout').removeClass('processing').unblock();
-                        } else if (smartbuttonMethod.length > 0) {
+                        } else if (typeof smartbuttonMethod !== 'unefined') {
                             KR.openPaymentMethod(smartbuttonMethod);
                             jQuery('form.checkout').removeClass('processing').unblock();
                         } else {
@@ -1423,7 +1268,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             return false;
         }
 
-        if (! $this->is_embedded_payment(false)) {
+        if (! $this->is_embedded_payment()) {
             return false;
         }
 
@@ -1438,8 +1283,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
     {
         global $woocommerce;
 
-        $embedded = in_array($this->get_option('card_data_mode'), array('REST', 'SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS', 'IFRAME')) && ! empty($payment_fields);
-        $embedded_fields = $this->is_embedded_payment(false) && ($this->get_option('rest_popin') !== 'yes') && ! empty($payment_fields);
+        $embedded = in_array($this->get_option('card_data_mode'), array('SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS')) && ! empty($payment_fields);
+        $embedded_fields = $this->is_embedded_payment() && ($this->get_option('rest_popin') !== 'yes') && ! empty($payment_fields);
 
         if ($order= self::order_created_from_bo()) {
             $cust_id = self::get_order_property($order, 'user_id');
@@ -1584,7 +1429,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $groupingThreshold = '';
         $sfStyle = '';
 
-        if ($this->is_embedded_payment(false)) {
+        if ($this->is_embedded_payment()) {
             if ($this->get_option('rest_popin') === 'yes') {
                 $popin_attr = 'kr-popin';
             }
@@ -1596,7 +1441,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                 $sfExpanded = 'kr-no-card-logo-header';
                 $single_payment_button = isset($wp->query_vars['add-payment-method']) ? 'kr-single-payment-button' : '';
                 $popin_attr = '';
-            } elseif ($option !== 'REST') {
+            } else {
                 $groupingThreshold = $this->get_option('smartform_grouping_threshold');
                 $compact_mode = ($this->get_option('smartform_compact_mode') === 'yes') ? 'true' : 'false';
                 if ($this->get_option('rest_popin') === 'yes') {
@@ -1608,11 +1453,6 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             }
 
             switch ($option) {
-                case 'REST':
-                    $krMode = 'kr-embedded';
-                    $cards_form = 'true';
-                    break;
-
                 case 'SMARTFORM':
                     $krMode = 'kr-smart-form';
                     break;
@@ -2095,7 +1935,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $force_redir = isset($_POST['payzen_force_redir']) || (isset($_COOKIE[$this->id. '_force_redir']) && ! empty($_COOKIE[$this->id. '_force_redir']));
 
         // If ($_POST || $_COOKIE)['payzen_force_redir'] is set, force payment by redirection.
-        if ($this->is_embedded_payment(false) && ! $force_redir || $this->get_option('card_data_mode') === 'IFRAME') {
+        if ($this->is_embedded_payment() && ! $force_redir) {
             $return = array(
                 'result' => 'success',
                 'messages' => '<div></div>'
@@ -2181,60 +2021,6 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $form .= "</script>";
 
         echo $form;
-    }
-
-    public function payzen_generate_iframe_form()
-    {
-        global $woocommerce;
-
-        if (isset($_GET['loading']) && $_GET['loading']) {
-            echo '<div style="text-align: center;">
-                      <img src="' . esc_url(WC_PAYZEN_PLUGIN_URL . 'assets/images/loading_big.gif') . '">
-                  </div>';
-            die();
-        }
-
-        // Check if it's an order created from WordPress BO.
-        if ($order_id = get_transient($this->id . '_current_order_pay')) {
-            delete_transient($this->id . '_current_order_pay');
-        } else {
-            // Get order ID from session.
-            $order_id = $woocommerce->session->get('store_api_draft_order') ? $woocommerce->session->get('store_api_draft_order') : $woocommerce->session->get('order_awaiting_payment');
-        }
-
-        if (! $order_id) {
-            die();
-        }
-
-        if (isset($_COOKIE['payzen_use_identifier'])) {
-            set_transient($this->id . '_use_identifier_' . $order_id, $_COOKIE['payzen_use_identifier'] === 'true');
-        }
-
-        $order = new WC_Order((int)$order_id);
-        $this->payzen_fill_request($order);
-
-        // Hide logos below payment fields.
-        $this->payzen_request->set('theme_config', '3DS_LOGOS=false;');
-
-        $this->payzen_request->set('action_mode', 'IFRAME');
-        $this->payzen_request->set('redirect_enabled', '1');
-        $this->payzen_request->set('redirect_success_timeout', '0');
-        $this->payzen_request->set('redirect_error_timeout', '0');
-
-        // Log data that will be sent to payment gateway.
-        $this->log('Data to be sent to payment gateway : ' . print_r($this->payzen_request->getRequestFieldsArray(true /* To hide sensitive data. */), true));
-
-        $form = '<form action="' . esc_url($this->payzen_request->get('platform_url')) . '" method="post" id="' . $this->id . '_payment_iframe_form">';
-        $form .= $this->payzen_request->getRequestHtmlFields();
-        $form .= '</form>';
-
-        $form .= '<script type="text/javascript">';
-        $form .= "function payzen_submit_form() {document.getElementById('" . $this->id . "_payment_iframe_form').submit();}";
-        $form .= "if (window.addEventListener) { window.addEventListener('load', payzen_submit_form, false);} else if (window.attachEvent) { window.attachEvent('onload', payzen_submit_form);}";
-        $form .= "</script>";
-
-        echo $form;
-        die();
     }
 
     /**
@@ -2789,7 +2575,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         return $count > 1;
     }
 
-    public function is_embedded_payment($only_smartform = true)
+    public function is_embedded_payment()
     {
         if ($this->id !== 'payzenstd') {
             return false;
@@ -2800,6 +2586,6 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             return false;
         }
 
-        return PayzenTools::is_embedded_payment($only_smartform);
+        return PayzenTools::is_embedded_payment();
     }
 }

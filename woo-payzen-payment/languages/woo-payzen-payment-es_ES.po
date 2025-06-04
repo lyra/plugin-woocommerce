@@ -1,11 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PayZen for WooCommerce 1.14.4\n"
+"Project-Id-Version: PayZen for WooCommerce 1.15.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-09 14:20+0200\n"
-"PO-Revision-Date: 2024-08-29 14:58+0200\n"
+"PO-Revision-Date: 2025-04-25 11:45+0200\n"
 "Last-Translator: \n"
-"Language-Team: Lyra Network <support@payzen.eu>\n"
+"Language-Team: Lyra Network <https://payzen.io/fr-FR/support/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 3.4.1\n"
+"X-Generator: Poedit 3.5\n"
 "X-Poedit-SearchPath-0: ..\n"
 
 #: ../class-wc-gateway-payzen.php:77 ../class-wc-gateway-payzen.php:88 ../woo-payzen-payment.php:300
@@ -170,8 +170,8 @@ msgstr "CONFIGURACIÓN BASE"
 msgid "Logs"
 msgstr "Registros"
 
-#: ../class-wc-gateway-payzen.php:493 ../class-wc-gateway-payzen.php:685 ../class-wc-gateway-payzen.php:751 ../class-wc-gateway-payzenregroupedother.php:123
-#: ../class-wc-gateway-payzenstd.php:289 ../class-wc-gateway-payzenstd.php:473 ../class-wc-gateway-payzenstd.php:493
+#: ../class-wc-gateway-payzen.php:493 ../class-wc-gateway-payzen.php:685 ../class-wc-gateway-payzen.php:751 ../class-wc-gateway-payzenregroupedother.php:123 ../class-wc-gateway-payzenstd.php:289
+#: ../class-wc-gateway-payzenstd.php:473 ../class-wc-gateway-payzenstd.php:493
 msgid "Enable / disable"
 msgstr "Habilitar/deshabilitar"
 
@@ -234,11 +234,11 @@ msgstr "Algoritmo de firma"
 #: ../class-wc-gateway-payzen.php:544
 #, php-format
 msgid ""
-"Algorithm used to compute the payment form signature. Selected algorithm must be the same as one configured in the %s Back Office.<br /><b>The HMAC-SHA-256 "
-"algorithm should not be activated if it is not yet available in the %s Back Office, the feature will be available soon.</b>"
+"Algorithm used to compute the payment form signature. Selected algorithm must be the same as one configured in the %s Back Office.<br /><b>The HMAC-SHA-256 algorithm should not be activated "
+"if it is not yet available in the %s Back Office, the feature will be available soon.</b>"
 msgstr ""
-"Algoritmo usado para calcular la firma del formulario de pago. El algoritmo seleccionado debe ser el mismo que el configurado en el Back Office %s.<br /><b>El "
-"algoritmo HMAC-SHA-256 no se debe activar si aún no está disponible en el Back Office %s, la función estará disponible pronto.</b>"
+"Algoritmo usado para calcular la firma del formulario de pago. El algoritmo seleccionado debe ser el mismo que el configurado en el Back Office %s.<br /><b>El algoritmo HMAC-SHA-256 no se "
+"debe activar si aún no está disponible en el Back Office %s, la función estará disponible pronto.</b>"
 
 #: ../class-wc-gateway-payzen.php:548
 msgid "Instant Payment Notification URL"
@@ -264,12 +264,11 @@ msgstr "Claves de API REST"
 #: ../class-wc-gateway-payzen.php:566
 #, php-format
 msgid ""
-"REST API keys are available in your %s Back Office (menu: Settings > Shops > REST API keys).<br><br>Configure this section if you are using order operations from "
-"WooCommerce Back Office, if you are using embedded payment fields/Smartform modes or if you are proposing subscription payment with WooCommerce Subscriptions."
+"REST API keys are available in your %s Back Office (menu: Settings > Shops > REST API keys).<br><br>Configure this section if you are using order operations from WooCommerce Back Office, if "
+"you are using embedded payment fields modes or if you are proposing subscription payment with WooCommerce Subscriptions."
 msgstr ""
-"Las claves de API REST están disponibles en el Back Office %s (menú: Configuración > Tiendas > Claves de API REST).<br><br>Configure esta sección si está "
-"utilizando operaciones de pedido desde el Back Office de WooCommerce, si está utilizando los modos campos de pago incrustados/Smartform o si propose el pago por "
-"subscripción con WooCommerce Subscriptions."
+"Las claves de API REST están disponibles en el Back Office %s (menú: Configuración > Tiendas > Claves de API REST).<br><br>Configure esta sección si está utilizando operaciones de pedido "
+"desde el Back Office de WooCommerce, si está utilizando los modos campos de pago incrustados o si propose el pago por subscripción con WooCommerce Subscriptions."
 
 #: ../class-wc-gateway-payzen.php:569
 msgid "Test password"
@@ -284,8 +283,8 @@ msgid "API REST server URL"
 msgstr "URL del servidor API REST"
 
 #: ../class-wc-gateway-payzen.php:589
-msgid "Configure this section only if you are using embedded payment fields or Smartform modes."
-msgstr "Configure esta sección solos si está utilizando los modos campos de pago incrustados o Smartform."
+msgid "Configure this section only if you are using embedded payment fields modes."
+msgstr "Configure esta sección solos si está utilizando los modos campos de pago incrustados."
 
 #: ../class-wc-gateway-payzen.php:592
 msgid "Public test key"
@@ -314,8 +313,7 @@ msgstr "URL de notificación de API REST"
 #: ../class-wc-gateway-payzen.php:626
 #, php-format
 msgid "URL to copy into your %s Back Office > Settings > Notification rules.<br>In multistore mode, notification URL is the same for all the stores."
-msgstr ""
-"URL a copiar en el Back Office %s > Configuración > Reglas de notificación.<br />En modo multitienda, la URL de notificación es la misma para todas las tiendas."
+msgstr "URL a copiar en el Back Office %s > Configuración > Reglas de notificación.<br />En modo multitienda, la URL de notificación es la misma para todas las tiendas."
 
 #: ../class-wc-gateway-payzen.php:632 ../class-wc-gateway-payzenstd.php:349
 msgid "PAYMENT PAGE"
@@ -365,11 +363,11 @@ msgstr "Gestionar el 3DS"
 
 #: ../class-wc-gateway-payzen.php:675
 msgid ""
-"Amount below which customer could be exempt from strong authentication. Needs subscription to «Selective 3DS1» or «Frictionless 3DS2» options. For more "
-"information, refer to the module documentation."
+"Amount below which customer could be exempt from strong authentication. Needs subscription to «Selective 3DS1» or «Frictionless 3DS2» options. For more information, refer to the module "
+"documentation."
 msgstr ""
-"Monto por debajo del cual el comprador podría estar exento de de la autenticación fuerte. Requiere suscripción a la opción «Selective 3DS1» o a la opción "
-"«Frictionless 3DS2». Para más información, consulte la documentación del módulo."
+"Monto por debajo del cual el comprador podría estar exento de de la autenticación fuerte. Requiere suscripción a la opción «Selective 3DS1» o a la opción «Frictionless 3DS2». Para más "
+"información, consulte la documentación del módulo."
 
 #: ../class-wc-gateway-payzen.php:680
 msgid "RETURN OPTIONS"
@@ -445,8 +443,7 @@ msgstr "OPCIONES ADICIONALES"
 
 #: ../class-wc-gateway-payzen.php:761
 msgid "Configure this section if you are using advanced risk assessment module or if you are proposing payment means requiring cart data (Franfinance or Klarna)."
-msgstr ""
-"Configure esta sección si usa el módulo de evaluación de riesgos avanzada o si propose medios de pago que requieren datos del carrito (Franfinance o Klarna)."
+msgstr "Configure esta sección si usa el módulo de evaluación de riesgos avanzada o si propose medios de pago que requieren datos del carrito (Franfinance o Klarna)."
 
 #: ../class-wc-gateway-payzen.php:767
 msgid "Category mapping"
@@ -468,20 +465,17 @@ msgstr "Categoría de %s"
 #: ../class-wc-gateway-payzen.php:789
 #, php-format
 msgid "Match each product category with a %s product category. <br /><b>Entries marked with * are newly added and must be configured.</b>"
-msgstr ""
-"Haga coincidir cada categoría de producto con una categoría de producto de %s. <br /><b>Las entradas marcadas con * son agregadas recientemente y se deben "
-"configurar.</b>"
+msgstr "Haga coincidir cada categoría de producto con una categoría de producto de %s. <br /><b>Las entradas marcadas con * son agregadas recientemente y se deben configurar.</b>"
 
 #: ../class-wc-gateway-payzen.php:793
 #, php-format
 msgid ""
-"Define the %s information about all shipping methods.<br /><b>Method title: </b>The label of the shipping method.<br /><b>Type: </b>The delivery type of shipping "
-"method.<br /><b>Rapidity: </b>Select the delivery rapidity.<br /><b>Delay: </b>Select the delivery delay if rapidity is &laquo; Priority &raquo;.<br /><b>Entries "
-"marked with * are newly added and must be configured.</b>"
+"Define the %s information about all shipping methods.<br /><b>Method title: </b>The label of the shipping method.<br /><b>Type: </b>The delivery type of shipping method.<br /><b>Rapidity: </"
+"b>Select the delivery rapidity.<br /><b>Delay: </b>Select the delivery delay if rapidity is &laquo; Priority &raquo;.<br /><b>Entries marked with * are newly added and must be configured.</b>"
 msgstr ""
-"Defina la información de %s sobre todos los métodos de envío.<br /><b>Título del método: </b>La etiqueta del método de envío .<br /><b>Tipo: </b>El tipo de "
-"entrega del método de envío.<br /><b>Rapidez: </b>Seleccione la rapidez de la entrega.<br /><b>Plazo: </b>Seleccione el plazo de entrega si la rapidez es &laquo; "
-"Prioritario &raquo;.<br /><b>Las entradas marcadas con * son agregadas recientemente y se deben configurar.</b>"
+"Defina la información de %s sobre todos los métodos de envío.<br /><b>Título del método: </b>La etiqueta del método de envío .<br /><b>Tipo: </b>El tipo de entrega del método de envío.<br /"
+"><b>Rapidez: </b>Seleccione la rapidez de la entrega.<br /><b>Plazo: </b>Seleccione el plazo de entrega si la rapidez es &laquo; Prioritario &raquo;.<br /><b>Las entradas marcadas con * son "
+"agregadas recientemente y se deben configurar.</b>"
 
 #: ../class-wc-gateway-payzen.php:798
 msgid "Method title"
@@ -551,8 +545,8 @@ msgstr "Inmediato"
 msgid "24/7"
 msgstr "24/7"
 
-#: ../class-wc-gateway-payzen.php:1603 ../class-wc-gateway-payzen.php:1711 ../class-wc-gateway-payzen.php:2004 ../class-wc-gateway-payzenstd.php:2547
-#: ../class-wc-gateway-payzenstd.php:2572 ../class-wc-gateway-payzenstd.php:2591
+#: ../class-wc-gateway-payzen.php:1603 ../class-wc-gateway-payzen.php:1711 ../class-wc-gateway-payzen.php:2004 ../class-wc-gateway-payzenstd.php:2547 ../class-wc-gateway-payzenstd.php:2572
+#: ../class-wc-gateway-payzenstd.php:2591
 msgid "An error has occurred in the payment process."
 msgstr "Ocurrió un error en el proceso de pago."
 
@@ -570,11 +564,11 @@ msgstr ""
 
 #: ../class-wc-gateway-payzen.php:1719
 msgid ""
-"<p><u>GOING INTO PRODUCTION</u></p>You want to know how to put your shop into production mode, please read chapters « Proceeding to test phase » and « Shifting "
-"the shop to production mode » in the documentation of the module."
+"<p><u>GOING INTO PRODUCTION</u></p>You want to know how to put your shop into production mode, please read chapters « Proceeding to test phase » and « Shifting the shop to production mode » "
+"in the documentation of the module."
 msgstr ""
-"<p><u>IR A PRODUCTION</u></p>Si desea saber cómo poner su tienda en modo production, lea los capítulos « Proceder a la fase de prueba » y « Paso de una tienda al "
-"modo producción » en la documentación del módulo."
+"<p><u>IR A PRODUCTION</u></p>Si desea saber cómo poner su tienda en modo production, lea los capítulos « Proceder a la fase de prueba » y « Paso de una tienda al modo producción » en la "
+"documentación del módulo."
 
 #: ../class-wc-gateway-payzen.php:1790
 #, php-format
@@ -583,11 +577,11 @@ msgstr "La validación automática no ha funcionado. ¿Configuró correctamente 
 
 #: ../class-wc-gateway-payzen.php:1792
 msgid ""
-"For understanding the problem, please read the documentation of the module : <br />&nbsp;&nbsp;&nbsp;- Chapter &laquo; To read carefully before going further "
-"&raquo;<br />&nbsp;&nbsp;&nbsp;- Chapter &laquo; Notification URL settings &raquo;"
+"For understanding the problem, please read the documentation of the module : <br />&nbsp;&nbsp;&nbsp;- Chapter &laquo; To read carefully before going further &raquo;<br />&nbsp;&nbsp;&nbsp;- "
+"Chapter &laquo; Notification URL settings &raquo;"
 msgstr ""
-"Para entender el problema, lea la documentación del módulo: <br />&nbsp;&nbsp;&nbsp;- Capítulo &laquo; Leer detenidamente antes de continuar &raquo;<br />&nbsp;"
-"&nbsp;&nbsp;- Capítulo &laquo; Configuración de la URL de notificación &raquo;"
+"Para entender el problema, lea la documentación del módulo: <br />&nbsp;&nbsp;&nbsp;- Capítulo &laquo; Leer detenidamente antes de continuar &raquo;<br />&nbsp;&nbsp;&nbsp;- Capítulo &laquo; "
+"Configuración de la URL de notificación &raquo;"
 
 #: ../class-wc-gateway-payzen.php:1911
 msgid "Payment method updated."
@@ -676,18 +670,16 @@ msgstr "Pago con Choozeo sin gastos"
 msgid "CHOOZEO PAYMENT OPTIONS"
 msgstr "OPCIONES DE PAGO CON CHOOZEO"
 
-#: ../class-wc-gateway-payzenchoozeo.php:112 ../class-wc-gateway-payzenfranfinance.php:118 ../class-wc-gateway-payzenmulti.php:129
-#: ../class-wc-gateway-payzenregroupedother.php:143 ../class-wc-gateway-payzenregroupedother.php:206
+#: ../class-wc-gateway-payzenchoozeo.php:112 ../class-wc-gateway-payzenfranfinance.php:118 ../class-wc-gateway-payzenmulti.php:129 ../class-wc-gateway-payzenregroupedother.php:143
+#: ../class-wc-gateway-payzenregroupedother.php:206
 msgid "Label"
 msgstr "Etiqueta"
 
-#: ../class-wc-gateway-payzenchoozeo.php:117 ../class-wc-gateway-payzenfranfinance.php:134 ../class-wc-gateway-payzenmulti.php:134
-#: ../class-wc-gateway-payzenregroupedother.php:153
+#: ../class-wc-gateway-payzenchoozeo.php:117 ../class-wc-gateway-payzenfranfinance.php:134 ../class-wc-gateway-payzenmulti.php:134 ../class-wc-gateway-payzenregroupedother.php:153
 msgid "Min amount"
 msgstr "Monto mínimo"
 
-#: ../class-wc-gateway-payzenchoozeo.php:122 ../class-wc-gateway-payzenfranfinance.php:139 ../class-wc-gateway-payzenmulti.php:139
-#: ../class-wc-gateway-payzenregroupedother.php:158
+#: ../class-wc-gateway-payzenchoozeo.php:122 ../class-wc-gateway-payzenfranfinance.php:139 ../class-wc-gateway-payzenmulti.php:139 ../class-wc-gateway-payzenregroupedother.php:158
 msgid "Max amount"
 msgstr "Monto máximo"
 
@@ -739,15 +731,13 @@ msgstr "Pago en %s veces"
 #: ../class-wc-gateway-payzenfranfinance.php:151
 #, php-format
 msgid ""
-"Click on « Add » button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend (the %c pattern will be replaced "
-"by payments count).<br /><b>Count: </b>Total number of payments.<br /><b>Fees: </b>Choose whether or not to apply fees.<br /><b>Min. amount: </b>Minimum amount "
-"to enable the payment option.<br /><b>Max. amount: </b>Maximum amount to enable the payment option.<br /><b>Do not forget to click on « Save » button to save "
-"your modifications.</b>"
+"Click on « Add » button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend (the %c pattern will be replaced by payments count).<br /"
+"><b>Count: </b>Total number of payments.<br /><b>Fees: </b>Choose whether or not to apply fees.<br /><b>Min. amount: </b>Minimum amount to enable the payment option.<br /><b>Max. amount: </"
+"b>Maximum amount to enable the payment option.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"
 msgstr ""
-"Haga clic en el botón « Agregar » para configurar una o más opciones de pago.<br /><b>Etiqueta: </b>La etiqueta de opción a mostrar en el frontend (el patrón %c "
-"se reemplazara por el conteo de pagos).</b><b>Conteo: </b>Número total de pagos.<br /><b>Gastos: </b>Habilita o desabilita la aplicación de los gastos.<br /"
-"><b>Monto mínimo: </b>Monto mínimo para habilitar la opción de pago.<br /><b>Monto máximo: </b>Monto máximo para habilitar la opción de pago..<br /><b>No olvide "
-"hacer clic en el botón « Guardar » para guardar sus modificaciones.</b>"
+"Haga clic en el botón « Agregar » para configurar una o más opciones de pago.<br /><b>Etiqueta: </b>La etiqueta de opción a mostrar en el frontend (el patrón %c se reemplazara por el conteo "
+"de pagos).</b><b>Conteo: </b>Número total de pagos.<br /><b>Gastos: </b>Habilita o desabilita la aplicación de los gastos.<br /><b>Monto mínimo: </b>Monto mínimo para habilitar la opción de "
+"pago.<br /><b>Monto máximo: </b>Monto máximo para habilitar la opción de pago..<br /><b>No olvide hacer clic en el botón « Guardar » para guardar sus modificaciones.</b>"
 
 #: ../class-wc-gateway-payzenfranfinance.php:207
 msgid "Without fees"
@@ -783,11 +773,11 @@ msgstr "Pago en cuotas"
 
 #: ../class-wc-gateway-payzenmulti.php:43
 msgid ""
-"ATTENTION: The payment in installments feature activation is subject to the prior agreement of Société Générale.<br />If you enable this feature while you have "
-"not the associated option, an error 10000 – INSTALLMENTS_NOT_ALLOWED or 07 - PAYMENT_CONFIG will occur and the buyer will not be able to pay."
+"ATTENTION: The payment in installments feature activation is subject to the prior agreement of Société Générale.<br />If you enable this feature while you have not the associated option, an "
+"error 10000 – INSTALLMENTS_NOT_ALLOWED or 07 - PAYMENT_CONFIG will occur and the buyer will not be able to pay."
 msgstr ""
-"ATENCIÓN: La activación de la función de pago en cuotas está sujeta al acuerdo previo de Societé Générale.<br />Si habilita esta función cuando no tiene la "
-"opción asociada, ocurrirá un error 10000 – INSTALLMENTS_NOT_ALLOWED o 07 - PAYMENT_CONFIG y el comprador no podrá pagar."
+"ATENCIÓN: La activación de la función de pago en cuotas está sujeta al acuerdo previo de Societé Générale.<br />Si habilita esta función cuando no tiene la opción asociada, ocurrirá un error "
+"10000 – INSTALLMENTS_NOT_ALLOWED o 07 - PAYMENT_CONFIG y el comprador no podrá pagar."
 
 #: ../class-wc-gateway-payzenmulti.php:88
 msgid "Enables / disables multiple payment."
@@ -819,15 +809,15 @@ msgstr "OPCIONES DE PAGO MÚLTIPLE"
 
 #: ../class-wc-gateway-payzenmulti.php:123
 msgid ""
-"Click on \"Add\" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </b>Minimum "
-"amount to enable the payment option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Count: </b>Total number of payments.<br /"
-"><b>Period: </b>Delay (in days) between payments.<br /><b>1st payment: </b>Amount of first payment, in percentage of total amount. If empty, all payments will "
-"have the same amount.<br /><b>Do not forget to click on \"Save\" button to save your modifications.</b>"
+"Click on \"Add\" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </b>Minimum amount to enable the payment "
+"option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Count: </b>Total number of payments.<br /><b>Period: </b>Delay (in days) between payments.<br /><b>1st "
+"payment: </b>Amount of first payment, in percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do not forget to click on \"Save\" button to save your "
+"modifications.</b>"
 msgstr ""
-"Haga clic en el botón \"Agregar\" para configurar una o más opciones de pago.<br /><b>Etiqueta: </b>La etiqueta de opción a mostrar en el frontend.<br /><b>Monto "
-"mínimo: </b>Monto mínimo para habilitar la opción de pago.<br /><b>Monto máximo: </b>Monto máximo para habilitar la opción de pago.<br /><b>Conteo: </b>Número "
-"total de pagos.<br /><b>Periodo: </b>Plazo (en días) entre pagos.<br /><b>Primer pago: </b>Monto del primer pago, en porcentaje del monto total. Si está vacío, "
-"todos los pagos tendrán el mismo monto.<br /><b>No olvide hacer clic en el botón \"Guardar\" para guardar sus modificaciones.</b>"
+"Haga clic en el botón \"Agregar\" para configurar una o más opciones de pago.<br /><b>Etiqueta: </b>La etiqueta de opción a mostrar en el frontend.<br /><b>Monto mínimo: </b>Monto mínimo para "
+"habilitar la opción de pago.<br /><b>Monto máximo: </b>Monto máximo para habilitar la opción de pago.<br /><b>Conteo: </b>Número total de pagos.<br /><b>Periodo: </b>Plazo (en días) entre "
+"pagos.<br /><b>Primer pago: </b>Monto del primer pago, en porcentaje del monto total. Si está vacío, todos los pagos tendrán el mismo monto.<br /><b>No olvide hacer clic en el botón "
+"\"Guardar\" para guardar sus modificaciones.</b>"
 
 #: ../class-wc-gateway-payzenmulti.php:145
 msgid "Contract"
@@ -835,17 +825,15 @@ msgstr "Afiliación"
 
 #: ../class-wc-gateway-payzenmulti.php:149
 msgid ""
-"Click on \"Add\" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </b>Minimum "
-"amount to enable the payment option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Contract: </b>ID of the contract to use with "
-"the option (leave blank preferably).<br /><b>Count: </b>Total number of payments.<br /><b>Period: </b>Delay (in days) between payments.<br /><b>1st payment: </"
-"b>Amount of first payment, in percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do not forget to click on \"Save\" button to "
-"save your modifications.</b>"
+"Click on \"Add\" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </b>Minimum amount to enable the payment "
+"option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Contract: </b>ID of the contract to use with the option (leave blank preferably).<br /><b>Count: </b>Total "
+"number of payments.<br /><b>Period: </b>Delay (in days) between payments.<br /><b>1st payment: </b>Amount of first payment, in percentage of total amount. If empty, all payments will have the "
+"same amount.<br /><b>Do not forget to click on \"Save\" button to save your modifications.</b>"
 msgstr ""
-"Haga clic en el botón \"Agregar\" para configurar una o más opciones de pago.<br /><b>Etiqueta: </b>La etiqueta de opción a mostrar en el frontend.<br /><b>Monto "
-"mínimo: </b>Monto mínimo para habilitar la opción de pago.<br /><b>Monto máximo: </b>Monto máximo para habilitar la opción de pago.<br /><b>Afiliación: </b>ID de "
-"la afiliación a usar con la opción (dejar en blanco preferiblemente).<br /><b>Conteo: </b>Número total de pagos.<br /><b>Periodo: </b>Plazo (en días) entre pagos."
-"<br /><b>Primer pago: </b>Monto del primer pago, en porcentaje del monto total. Si está vacío, todos los pagos tendrán el mismo monto.<br /><b>No olvide hacer "
-"clic en el botón \"Guardar\" para guardar sus modificaciones.</b>"
+"Haga clic en el botón \"Agregar\" para configurar una o más opciones de pago.<br /><b>Etiqueta: </b>La etiqueta de opción a mostrar en el frontend.<br /><b>Monto mínimo: </b>Monto mínimo para "
+"habilitar la opción de pago.<br /><b>Monto máximo: </b>Monto máximo para habilitar la opción de pago.<br /><b>Afiliación: </b>ID de la afiliación a usar con la opción (dejar en blanco "
+"preferiblemente).<br /><b>Conteo: </b>Número total de pagos.<br /><b>Periodo: </b>Plazo (en días) entre pagos.<br /><b>Primer pago: </b>Monto del primer pago, en porcentaje del monto total. "
+"Si está vacío, todos los pagos tendrán el mismo monto.<br /><b>No olvide hacer clic en el botón \"Guardar\" para guardar sus modificaciones.</b>"
 
 #: ../class-wc-gateway-payzenmulti.php:158
 msgid "Period"
@@ -894,7 +882,7 @@ msgstr "Plazo de captura "
 
 #: ../class-wc-gateway-payzenregroupedother.php:179
 msgid "Embedded mode"
-msgstr "Modo incorporado"
+msgstr "Modo incrustado"
 
 #: ../class-wc-gateway-payzenregroupedother.php:185
 msgid "Cart data"
@@ -907,11 +895,11 @@ msgstr "Medios de pago"
 #: ../class-wc-gateway-payzenregroupedother.php:197
 #, php-format
 msgid ""
-"Click on « Add » button to add one or more new payment means.<br /><b>Code: </b>The code of the means of payment as expected by %s gateway.<br /><b>Label: </"
-"b>The default label of the means of payment.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"
+"Click on « Add » button to add one or more new payment means.<br /><b>Code: </b>The code of the means of payment as expected by %s gateway.<br /><b>Label: </b>The default label of the means "
+"of payment.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"
 msgstr ""
-"Haga clic en el botón « Agregar » para agregar uno o más medios de pago nuevos.<br /><b>Código: </b>El código del medio de pago cómo esperado por la pasarela %s."
-"<br /><b>Etiqueta: </b>La etiqueta predeterminada del medio de pago.<br /><b>No olvide hacer clic en el botón « Guardar » para guardar sus modificaciones.</b>"
+"Haga clic en el botón « Agregar » para agregar uno o más medios de pago nuevos.<br /><b>Código: </b>El código del medio de pago cómo esperado por la pasarela %s.<br /><b>Etiqueta: </b>La "
+"etiqueta predeterminada del medio de pago.<br /><b>No olvide hacer clic en el botón « Guardar » para guardar sus modificaciones.</b>"
 
 #: ../class-wc-gateway-payzenregroupedother.php:201
 msgid "Code"
@@ -933,13 +921,11 @@ msgstr "Esto controla la descripción que el usuario ve durante el pago. Se usa 
 msgid "Click to add countries."
 msgstr "Haga clic para agregar países."
 
-#: ../class-wc-gateway-payzenregroupedother.php:354 ../class-wc-gateway-payzensepa.php:138 ../class-wc-gateway-payzenstd.php:419
-#: ../class-wc-gateway-payzenstd.php:431
+#: ../class-wc-gateway-payzenregroupedother.php:354 ../class-wc-gateway-payzensepa.php:138 ../class-wc-gateway-payzenstd.php:419 ../class-wc-gateway-payzenstd.php:431
 msgid "No"
 msgstr "No"
 
-#: ../class-wc-gateway-payzenregroupedother.php:354 ../class-wc-gateway-payzensepa.php:137 ../class-wc-gateway-payzenstd.php:418
-#: ../class-wc-gateway-payzenstd.php:430
+#: ../class-wc-gateway-payzenregroupedother.php:354 ../class-wc-gateway-payzensepa.php:137 ../class-wc-gateway-payzenstd.php:418 ../class-wc-gateway-payzenstd.php:430
 msgid "Yes"
 msgstr "Sí"
 
@@ -974,12 +960,8 @@ msgstr "Pago por token"
 
 #: ../class-wc-gateway-payzensepa.php:140 ../class-wc-gateway-payzenstd.php:421
 #, php-format
-msgid ""
-"The payment by token allows to pay orders without re-entering bank data at each payment. The \"Payment by token\" option should be enabled on your %s store to "
-"use this feature."
-msgstr ""
-"El pago por token permite pagar pedidos sin reingresar datos bancarios en cada pago. La opción \"Pago por token\" debe estar habilitada en su tienda %s para usar "
-"esta función."
+msgid "The payment by token allows to pay orders without re-entering bank data at each payment. The \"Payment by token\" option should be enabled on your %s store to use this feature."
+msgstr "El pago por token permite pagar pedidos sin reingresar datos bancarios en cada pago. La opción \"Pago por token\" debe estar habilitada en su tienda %s para usar esta función."
 
 #: ../class-wc-gateway-payzensepa.php:178
 msgid "One-off SEPA direct debit"
@@ -1094,31 +1076,21 @@ msgstr "Ingreso de datos de la tarjeta en el portal de pago"
 msgid "Card type selection on merchant site"
 msgstr "Selección del tipo de tarjeta en el sitio web vendedor"
 
-#: ../class-wc-gateway-payzenstd.php:390
-msgid "Payment page integrated to checkout process (iframe)"
-msgstr "Página de pago integrada al proceso de pago (iframe)"
-
 #: ../class-wc-gateway-payzenstd.php:392
 msgid "Select how the payment data will be entered by buyer. Think to update payment method description to match your selected mode."
-msgstr ""
-"Seleccione la forma en que el comprador ingresará los datos de pago. Considere actualizar la descripción del método de pago para que coincida con el módulo "
-"seleccionado."
+msgstr "Seleccione la forma en que el comprador ingresará los datos de pago. Considere actualizar la descripción del método de pago para que coincida con el módulo seleccionado."
 
 #: ../class-wc-gateway-payzenstd.php:399
 msgid "Embedded payment fields on merchant site (REST API)"
 msgstr "Campos de pago incrustados en el sitio web vendedor (API REST)"
 
-#: ../class-wc-gateway-payzenstd.php:401
-msgid "Embedded Smartform on merchant site (REST API)"
-msgstr "Smartform incorporado en el sitio web vendedor (API REST)"
-
 #: ../class-wc-gateway-payzenstd.php:402
-msgid "Embedded Smartform extended on merchant site with logos (REST API)"
-msgstr "Smartform extendido incorporado en el sitio web vendedor (API REST)"
+msgid "Embedded payment fields extended on merchant site with logos (REST API)"
+msgstr "Campos de pago extendidos incrustados en el sitio web vendedor (API REST)"
 
 #: ../class-wc-gateway-payzenstd.php:403
-msgid "Embedded Smartform extended on merchant site without logos (REST API)"
-msgstr "Smartform extendido incorporado en el sitio web vendedor con logotipos (API REST)"
+msgid "Embedded payment fields extended on merchant site without logos (REST API)"
+msgstr "Campos de pago extendidos incrustados en el sitio web vendedor con logotipos (API REST)"
 
 #: ../class-wc-gateway-payzenstd.php:426
 msgid "Use buyer wallet to manage tokens"
@@ -1126,11 +1098,11 @@ msgstr "Usar el wallet de comprador para gestionar tokens"
 
 #: ../class-wc-gateway-payzenstd.php:433
 msgid ""
-"A wallet allows a buyer to store multiple payment cards and choose which one to use at the time of purchase, without having to enter a card number. The buyer can "
-"request the deletion of a card stored in his wallet at any time."
+"A wallet allows a buyer to store multiple payment cards and choose which one to use at the time of purchase, without having to enter a card number. The buyer can request the deletion of a "
+"card stored in his wallet at any time."
 msgstr ""
-"Un wallet (billetera electrónica) permite que el comprador pueda almacenar varias tarjetas de pago y elegir la que desea utilizar en el momento de la compra, sin "
-"tener que ingresar su número de tarjeta. El comprador puede solicitar la eliminación de una tarjeta almacenada en su billetera en cualquier momento."
+"Un wallet (billetera electrónica) permite que el comprador pueda almacenar varias tarjetas de pago y elegir la que desea utilizar en el momento de la compra, sin tener que ingresar su número "
+"de tarjeta. El comprador puede solicitar la eliminación de una tarjeta almacenada en su billetera en cualquier momento."
 
 #: ../class-wc-gateway-payzenstd.php:467
 msgid "CUSTOMIZATION"
@@ -1149,16 +1121,16 @@ msgid "Theme"
 msgstr "Tema"
 
 #: ../class-wc-gateway-payzenstd.php:487
-msgid "Select a theme to use to display the embedded payment fields or the Smartform."
-msgstr "Seleccione un tema para usar para mostrar los campos de pago incrustados o el Smartform."
+msgid "Select a theme to use to display the embedded payment fields."
+msgstr "Seleccione un tema para usar para mostrar los campos de pago incrustados."
 
 #: ../class-wc-gateway-payzenstd.php:492
 msgid "Compact mode"
 msgstr "Modo compacto"
 
 #: ../class-wc-gateway-payzenstd.php:496
-msgid "If enabled, the Smartform will be displayed in a compact mode."
-msgstr "Si está habilitado, el Smartform se mostrará en un modo compacto."
+msgid "If enabled, the embedded payment fields will be displayed in a compact mode."
+msgstr "Si está habilitado, los campos de pago incrustados se mostrará en un modo compacto."
 
 #: ../class-wc-gateway-payzenstd.php:500
 msgid "Payment means grouping threshold"
@@ -1173,8 +1145,8 @@ msgid "Custom fields placeholders"
 msgstr "Marcadores de posición personalizados de compos"
 
 #: ../class-wc-gateway-payzenstd.php:513
-msgid "Texts to use as placeholders for embedded payment fields, Smartform or Smartform extended."
-msgstr "Textos a usar como marcadores de posición para campos de pago incrustados, Smartform o Smartform extendido."
+msgid "Texts to use as placeholders for embedded payment fields."
+msgstr "Textos a usar como marcadores de posición para campos de pago incrustados."
 
 #: ../class-wc-gateway-payzenstd.php:517
 msgid "Register card label"
@@ -1207,10 +1179,6 @@ msgstr "Fecha de expiración"
 #: ../class-wc-gateway-payzenstd.php:619
 msgid "CVV"
 msgstr "CVV"
-
-#: ../class-wc-gateway-payzenstd.php:782
-msgid "Warning, some payment means are not compatible with an integration by iframe. Please consult the documentation for more details."
-msgstr "Advertencia, algunos medios de pago no son compatibles con una integración por iframe. Consulte la documentación para obtener más detalles."
 
 #: ../class-wc-gateway-payzenstd.php:796
 #, php-format
@@ -1295,12 +1263,10 @@ msgid "Custom"
 msgstr "Personalizada"
 
 #: ../class-wc-gateway-payzensubscription.php:133
-msgid ""
-"If you buy subscriptions on your site, choose the solution you use to manage them. If you choose \"Custom\", your developper may develop a subscriptions adapter "
-"for our plugin."
+msgid "If you buy subscriptions on your site, choose the solution you use to manage them. If you choose \"Custom\", your developper may develop a subscriptions adapter for our plugin."
 msgstr ""
-"Si compra suscripciones en su sitio, elija la solución que utiliza para administrarlas. Si elige \"Personalizada\", su desarrollador puede desarrollar un "
-"adaptador de suscripciones para nuestro plugin."
+"Si compra suscripciones en su sitio, elija la solución que utiliza para administrarlas. Si elige \"Personalizada\", su desarrollador puede desarrollar un adaptador de suscripciones para "
+"nuestro plugin."
 
 #: ../class-wc-gateway-payzensubscription.php:304
 #, php-format
@@ -1311,8 +1277,8 @@ msgstr "La suscripción se cancela solo en WooCommerce. Considere cancelar la su
 msgid "An error occurred during the cancellation of the subscription. Please contact customer support."
 msgstr "Ocurrió un error durante la cancelación de la suscripción. Comuníquese con el servicio de atención al cliente.."
 
-#: ../class-wc-gateway-payzensubscription.php:347 ../class-wc-gateway-payzensubscription.php:384 ../class-wc-gateway-payzensubscription.php:412
-#: ../class-wc-gateway-payzensubscription.php:420 ../class-wc-gateway-payzensubscription.php:457 ../class-wc-gateway-payzensubscription.php:493
+#: ../class-wc-gateway-payzensubscription.php:347 ../class-wc-gateway-payzensubscription.php:384 ../class-wc-gateway-payzensubscription.php:412 ../class-wc-gateway-payzensubscription.php:420
+#: ../class-wc-gateway-payzensubscription.php:457 ../class-wc-gateway-payzensubscription.php:493
 #, php-format
 msgid "An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details."
 msgstr "Ocurrió un error durante la cancelación o actualización de la suscripción. Consulte los registros de %s para obtener más detalles."
@@ -1322,8 +1288,7 @@ msgstr "Ocurrió un error durante la cancelación o actualización de la suscrip
 msgid "Subscription is updated only in WooCommerce. Please, consider making necessary changes in %s Back Office."
 msgstr "La suscripción se actualiza solo en WooCommerce. Considere hacer los cambios necesarios en el Back Office %s."
 
-#: ../class-wc-gateway-payzensubscription.php:535 ../class-wc-gateway-payzensubscription.php:538 ../class-wc-gateway-payzensubscription.php:562
-#: ../class-wc-gateway-payzenwcssubscription.php:343
+#: ../class-wc-gateway-payzensubscription.php:535 ../class-wc-gateway-payzensubscription.php:538 ../class-wc-gateway-payzensubscription.php:562 ../class-wc-gateway-payzenwcssubscription.php:343
 #, php-format
 msgid "Warning! %s plugin must be installed and activated for the subscription payment method to work."
 msgstr "Advertencia! El plugin %s debe estar instalado y activado para que funcione el pago de la suscripción."
@@ -1401,42 +1366,37 @@ msgstr "Configure los campos obligatorios."
 
 #, php-format
 msgid ""
-"Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of "
-"payment: </b>Choose the means of payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. Leave blank to "
-"authorize all countries.<br /><b>Min. amount: </b>Minimum amount to enable the means of payment.<br /><b>Max. amount: </b>Maximum amount to enable the means of "
-"payment.<br /><b>Validation mode: </b>If manual is selected, you will have to confirm payments manually in your %s Back Office.<br /><b>Capture delay: </b>The "
-"number of days before the bank capture. Enter value only if different from %s general configuration.<br /><b>Embedded mode: </b>If you enable this option, the "
-"payment mean will be displayed in the Smartform. Attention, not all available payment means are supported by the Smartform. For more information, refer to the "
-"module documentation.<br /><b>Cart data: </b>If you disable this option, the shopping cart details will not be sent to the gateway. Attention, in some cases, "
-"this option has to be enabled. For more information, refer to the module documentation.<br /><b>Do not forget to click on « Save » button to save your "
-"modifications.</b>"
+"Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of payment: </b>Choose the means of "
+"payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. Leave blank to authorize all countries.<br /><b>Min. amount: </b>Minimum amount to "
+"enable the means of payment.<br /><b>Max. amount: </b>Maximum amount to enable the means of payment.<br /><b>Validation mode: </b>If manual is selected, you will have to confirm payments "
+"manually in your %s Back Office.<br /><b>Capture delay: </b>The number of days before the bank capture. Enter value only if different from %s general configuration.<br /><b>Embedded mode: </"
+"b>If you enable this option, the payment mean will be displayed in the embedded payment fields. Attention, not all available payment means are supported by the embedded payment. For more "
+"information, refer to the module documentation.<br /><b>Cart data: </b>If you disable this option, the shopping cart details will not be sent to the gateway. Attention, in some cases, this "
+"option has to be enabled. For more information, refer to the module documentation.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"
 msgstr ""
-"Haga clic en el botón « Agregar » para configurar un o más medios de pago.<br /><b>Etiqueta: </b>La etiqueta del medio de pago a mostrar en su sitio.<br /"
-"><b>Medio de pago: </b>Elija el medio de pago que desea ofrecer.<br /><b>Países: </b>Países donde estarán disponibles los medios de pago. Deje en blanco para "
-"permitir todos los países.<br /><b>Monto mínimo: </b>Monto mínimopara habilitar el medio de pago.<br /><b>Monto máximo: </b>Monto máximo para habilitar el medio "
-"de pago.<br /><b>Modo de validación: </b>Si se selecciona manual, deberá confirmar los pagos manualmente en su Back Office %s.<br /><b>Plazo de captura: </b>El "
-"número de días antes de la captura por el adquirente. Ingrese el valor solo si es diferente a la configuración general de %s.<br /><b>Modo incorporado: </b>Si "
-"activa esta opción, el método de pago se mostrará en un Smartform. Atención, no todos los medios de pago disponibles son compatibles con Smartform. Para más "
-"información, consulte la documentación del módulo.<br /><b>Datos del carrito: </b>Si deshabilita esta opción, los detalles del carrito de la compra no se "
-"enviarán a la puerta de enlace. Atención, en algunos casos, esta opción tiene que estar habilitada. Para más información, consulte la documentación del módulo."
-"<br /><b>No olvide hacer clic en el botón « Guardar» para guardar sus modificaciones.</b>"
+"Haga clic en el botón « Agregar » para configurar un o más medios de pago.<br /><b>Etiqueta: </b>La etiqueta del medio de pago a mostrar en su sitio.<br /><b>Medio de pago: </b>Elija el medio "
+"de pago que desea ofrecer.<br /><b>Países: </b>Países donde estarán disponibles los medios de pago. Deje en blanco para permitir todos los países.<br /><b>Monto mínimo: </b>Monto mínimopara "
+"habilitar el medio de pago.<br /><b>Monto máximo: </b>Monto máximo para habilitar el medio de pago.<br /><b>Modo de validación: </b>Si se selecciona manual, deberá confirmar los pagos "
+"manualmente en su Back Office %s.<br /><b>Plazo de captura: </b>El número de días antes de la captura por el adquirente. Ingrese el valor solo si es diferente a la configuración general de %s."
+"<br /><b>Modo incrustado: </b>Si activa esta opción, el método de pago se mostrará en campos de pago incrustados. Atención, no todos los medios de pago disponibles son compatibles con el pago "
+"incrustado. Para más información, consulte la documentación del módulo.<br /><b>Datos del carrito: </b>Si deshabilita esta opción, los detalles del carrito de la compra no se enviarán a la "
+"puerta de enlace. Atención, en algunos casos, esta opción tiene que estar habilitada. Para más información, consulte la documentación del módulo.<br /><b>No olvide hacer clic en el botón "
+"« Guardar» para guardar sus modificaciones.</b>"
 
 #, php-format
 msgid ""
-"Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of "
-"payment: </b>Choose the means of payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. Leave blank to "
-"authorize all countries.<br /><b>Min. amount: </b>Minimum amount to enable the means of payment.<br /><b>Max. amount: </b>Maximum amount to enable the means of "
-"payment.<br /><b>Validation mode: </b>If manual is selected, you will have to confirm payments manually in your %s Back Office.<br /><b>Capture delay: </b>The "
-"number of days before the bank capture. Enter value only if different from %s general configuration.<br /><b>Cart data: </b>If you disable this option, the "
-"shopping cart details will not be sent to the gateway. Attention, in some cases, this option has to be enabled. For more information, refer to the module "
+"Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of payment: </b>Choose the means of "
+"payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. Leave blank to authorize all countries.<br /><b>Min. amount: </b>Minimum amount to "
+"enable the means of payment.<br /><b>Max. amount: </b>Maximum amount to enable the means of payment.<br /><b>Validation mode: </b>If manual is selected, you will have to confirm payments "
+"manually in your %s Back Office.<br /><b>Capture delay: </b>The number of days before the bank capture. Enter value only if different from %s general configuration.<br /><b>Cart data: </b>If "
+"you disable this option, the shopping cart details will not be sent to the gateway. Attention, in some cases, this option has to be enabled. For more information, refer to the module "
 "documentation.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"
 msgstr ""
-"Haga clic en el botón « Agregar » para configurar un o más medios de pago.<br /><b>Etiqueta: </b>La etiqueta del medio de pago a mostrar en su sitio.<br /"
-"><b>Medio de pago: </b>Elija el medio de pago que desea ofrecer.<br /><b>Países: </b>Países donde estarán disponibles los medios de pago. Deje en blanco para "
-"permitir todos los países.<br /><b>Monto mínimo: </b>Monto mínimopara habilitar el medio de pago.<br /><b>Monto máximo: </b>Monto máximo para habilitar el medio "
-"de pago.<br /><b>Modo de validación: </b>Si se selecciona manual, deberá confirmar los pagos manualmente en su Back Office %s.<br /><b>Plazo de captura: </b>El "
-"número de días antes de la captura por el adquirente. Ingrese el valor solo si es diferente a la configuración general de %s.<br /><b>Datos del carrito: </b>Si "
-"deshabilita esta opción, los detalles del carrito de la compra no se enviarán a la puerta de enlace. Atención, en algunos casos, esta opción tiene que estar "
+"Haga clic en el botón « Agregar » para configurar un o más medios de pago.<br /><b>Etiqueta: </b>La etiqueta del medio de pago a mostrar en su sitio.<br /><b>Medio de pago: </b>Elija el medio "
+"de pago que desea ofrecer.<br /><b>Países: </b>Países donde estarán disponibles los medios de pago. Deje en blanco para permitir todos los países.<br /><b>Monto mínimo: </b>Monto mínimopara "
+"habilitar el medio de pago.<br /><b>Monto máximo: </b>Monto máximo para habilitar el medio de pago.<br /><b>Modo de validación: </b>Si se selecciona manual, deberá confirmar los pagos "
+"manualmente en su Back Office %s.<br /><b>Plazo de captura: </b>El número de días antes de la captura por el adquirente. Ingrese el valor solo si es diferente a la configuración general de %s."
+"<br /><b>Datos del carrito: </b>Si deshabilita esta opción, los detalles del carrito de la compra no se enviarán a la puerta de enlace. Atención, en algunos casos, esta opción tiene que estar "
 "habilitada. Para más información, consulte la documentación del módulo.<br /><b>No olvide hacer clic en el botón « Guardar» para guardar sus modificaciones.</b>"
 
 #: ../includes/Lyranetwork/payzen/Sdk/Refund/Api.php:119

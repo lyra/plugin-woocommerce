@@ -86,7 +86,6 @@ var displayFields = function () {
     }
 
     switch (payzen_data?.payment_mode) {
-        case 'REST':
         case 'SMARTFORM':
         case 'SMARTFORMEXT':
         case 'SMARTFORMEXTNOLOGOS':
@@ -163,14 +162,6 @@ var onButtonClick = function (e) {
             payzenstd_get_card();
             break;
 
-        case 'IFRAME':
-             window.IFRAME_LINK = payzen_data?.link;
-             window.IFRAME_SRC = payzen_data?.src;
-             payzenstd_show_iframe();
-
-             break;
-
-        case 'REST':
         case 'SMARTFORM':
         case 'SMARTFORMEXT':
         case 'SMARTFORMEXTNOLOGOS':
@@ -310,7 +301,7 @@ var refreshTempToken = function () {
 };
 
 var initFields = function() {
-    if (jQuery(submitButton).length > 0) {
+    payzenWaitForElement('input[type=radio][name=radio-control-wc-payment-method-options]').then((elm) => {
         displayFields();
         jQuery(submitButton).on('click', onButtonClick);
 
@@ -319,8 +310,7 @@ var initFields = function() {
                 displayFields();
             }
         });
-    }
+    });
 };
 
-jQuery(document).on('ready', initFields);
 jQuery(window).on('load', initFields);

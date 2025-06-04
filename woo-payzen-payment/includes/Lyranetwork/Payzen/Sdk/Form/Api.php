@@ -223,7 +223,7 @@ class Api
             'CDGP' => 'Carte Privilège', 'CDISCOUNT' => 'CDiscount', 'CHQ_DEJ' => 'Chèque Déjeuner', 'COF3XCB' => 'Cofinoga 3 fois CB',
             'COF3XCB_SB' => 'Cofinoga 3 fois CB Sandbox', 'COFIDIS_3X_BE' => 'Cofidis en 3 fois', 'COFIDIS_3X_FR' => 'Cofidis en 3 fois',
             'COFIDIS_4X_ES' => 'Cofidis en 4 vencimientos', 'COFIDIS_4X_FR' => 'Cofidis en 4 fois', 'COFIDIS_DFPAY_FR' => 'Cofidis Pay Later',
-            'COFIDIS_LOAN_BE' => 'Cofidis en 6-12-18 fois', 'COFIDIS_LOAN_CB' => 'Cofidis en 5-12 fois', 'COFIDIS_LOAN_BE' => 'Cofidis en 6-12-18 fois',
+            'COFIDIS_LOAN_BE' => 'Cofidis en 6-12-18 fois', 'COFIDIS_LOAN_CB' => 'Cofidis en 5-12 fois',
             'COFIDIS_LOAN_ES' => 'Cofidis en 6-12-24 vencimientos', 'COFIDIS_LOAN_FR' => 'Amortissable', 'COFIDIS_LOAN_IT' => 'Cofidis Pagodil',
             'COFIDIS_PAY_FR' => 'Cofidis Pay', 'COFINOGA' => 'Cofinoga', 'COM_BARRY_CDX' => 'Carte Cadeau Comtesse du Barry',
             'COM_BARRY_CDX_SB' => 'Carte Cadeau Comtesse du Barry (sandbox)', 'CONECS' => 'Conecs', 'CONFORAMA' => 'Conforama',
@@ -231,7 +231,8 @@ class Api
             'CVCO' => 'Chèque-Vacances Connect', 'DINERS' => 'Diners', 'DISCOVER' => 'Discover', 'ECCARD' => 'EC Card',
             'EDENRED' => 'Ticket Restaurant', 'EDENRED_CC' => 'Ticket Cheque Consommation', 'EDENRED_EC' => 'Ticket EcoCheque',
             'EDENRED_SC' => 'Ticket Sport & Culture', 'EDENRED_TC' => 'Ticket Compliments', 'EDENRED_TR' => 'Ticket Restaurant', 'ELO' => 'Elo',
-            'ELV' => 'ELV', 'FRANFINANCE_3X' => 'Paiement en 3 fois', 'FRANFINANCE_4X' => 'Paiement en 4 fois', 'FULLCB3X' => 'Paiement en 3 fois CB',
+            'ELV' => 'ELV', 'FLOA_10X' => 'Floa en 10 fois', 'FLOA_3X' => 'Floa en 3 fois', 'FLOA_4X' => 'Floa en 4 fois', 'FLOA_PAYLATER' => 'Floa Pay Later',
+            'FRANFINANCE_3X' => 'Paiement en 3 fois', 'FRANFINANCE_4X' => 'Paiement en 4 fois', 'FULLCB3X' => 'Paiement en 3 fois CB',
             'FULLCB4X' => 'Paiement en 4 fois CB', 'GEMO_CDX' => 'Carte Cadeau Gémo', 'GEMO_CDX_SB' => 'Carte Cadeau Gémo (sandbox)',
             'GIROPAY' => 'Giropay', 'GOOGLEPAY' => 'Google Pay', 'HIPER' => 'Hiper', 'HIPERCARD' => 'Hipercard', 'IDEAL' => 'iDEAL',
             'ILLICADO' => 'Carte Illicado', 'ILLICADO_SB' => 'Carte Illicado (sandbox)', 'IP_WIRE' => 'Virement SEPA',
@@ -249,7 +250,7 @@ class Api
             'PAYPAL_BNPL' => 'PayPal Pay Later', 'PAYPAL_BNPL_SB' => 'PayPal Pay Later Sandbox',
             'PAYPAL_SB' => 'PayPal Sandbox', 'PICWIC' => 'Carte Picwic', 'PICWIC_SB' => 'Carte Picwic (sandbox)',
             'POSTFINANCE' => 'PostFinance Card', 'POSTFINANCE_EFIN' => 'PostFinance E-Finance', 'PRESTO' => 'Presto',
-            'PRZELEWY24' => 'Przelewy24', 'S-MONEY' => 'S-money', 'SCT' => 'Virement SEPA', 'SDD' => 'Prélèvement SEPA',
+            'PRZELEWY24' => 'Przelewy24', 'S-MONEY' => 'S-money', 'SAMSUNG_PAY' => 'Samsung Pay', 'SCT' => 'Virement SEPA', 'SDD' => 'Prélèvement SEPA',
             'SODEXO' => 'Pass Restaurant', 'SOFICARTE' => 'Soficarte', 'SOFORT_BANKING' => 'Sofort', 'SOROCRED' => 'Sorocred',
             'SYGMA' => 'Sygma', 'TRUFFAUT_CDX' => 'Carte Cadeau Truffaut', 'VILLAVERDE' => 'Carte Cadeau VillaVerde',
             'VILLAVERDE_SB' => 'Carte Cadeau VillaVerde (sandbox)', 'WECHAT' => 'WeChat Pay'
@@ -369,37 +370,47 @@ class Api
     }
 
     /**
-     * Format a given list of e-mails separated by commas and render them as HTML links.
-     * @param string $emails
+     * Format a given list of e-mails / URLs separated by commas and render them as HTML links.
+     * @param string $links
      * @return string
      */
-    public static function formatSupportEmails($emails)
+    public static function formatSupportEmails($links, $label = "Click here")
     {
         $formatted = '';
 
-        $parts = explode(', ', $emails);
+        $parts = explode(', ', $links);
         foreach ($parts as $part) {
-            $elts = explode(':', $part);
-            if (count($elts) === 2) {
-                $label = trim($elts[0]) . ': ';
-                $email = $elts[1];
-            } elseif (count($elts) === 1) {
-                $label = '';
-                $email = $elts[0];
+            if (strpos($part, '@')) {
+                $elts = explode(':', $part);
+                if (count($elts) === 2) {
+                    $label = trim($elts[0]) . ': ';
+                    $email = $elts[1];
+                } elseif (count($elts) === 1) {
+                    $label = '';
+                    $email = $elts[0];
+                } else {
+                    throw new \InvalidArgumentException("Invalid support e-mails string passed: {$links}.");
+                }
+
+                $email = trim($email);
+
+                if (! empty($formatted)) {
+                    $formatted .= '<br />';
+                }
+
+                $formatted .= $label . '<a href="mailto:' . $email . '">' . $email . '</a>';
             } else {
-                throw new \InvalidArgumentException("Invalid support e-mails string passed: {$emails}.");
+                $link = trim($part);
+                $formatted .= '<a href="'. $link.'" target="_blank" rel="noopener noreferrer">' . $label . '</a>';
             }
-
-            $email = trim($email);
-
-            if (! empty($formatted)) {
-                $formatted .= '<br />';
-            }
-
-            $formatted .= $label . '<a href="mailto:' . $email . '">' . $email . '</a>';
         }
 
         return $formatted;
+    }
+
+    public static function getSupportComponentEmail()
+    {
+        return '###COMPONENT_EMAIL###';
     }
 
     /**
