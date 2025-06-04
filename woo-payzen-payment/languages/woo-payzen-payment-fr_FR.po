@@ -1,11 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PayZen for WooCommerce 1.14.4\n"
+"Project-Id-Version: PayZen for WooCommerce 1.15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-09 14:13+0200\n"
-"PO-Revision-Date: 2024-08-29 14:57+0200\n"
+"POT-Creation-Date: 2025-04-25 10:58+0200\n"
+"PO-Revision-Date: 2025-04-25 11:45+0200\n"
 "Last-Translator: \n"
-"Language-Team: Lyra Network <support@payzen.eu>\n"
+"Language-Team: Lyra Network <https://payzen.io/fr-FR/support/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 3.4.1\n"
+"X-Generator: Poedit 3.5\n"
 "X-Poedit-SearchPath-0: ..\n"
 
 #: ../class-wc-gateway-payzen.php:77 ../class-wc-gateway-payzen.php:88 ../woo-payzen-payment.php:300
@@ -38,8 +38,7 @@ msgstr "La configuration de votre module %s est réinitialisée avec succès."
 #: ../class-wc-gateway-payzen.php:282
 #, php-format
 msgid "The module works by sending users to %s in order to select their payment mean and enter their payment information."
-msgstr ""
-"Le module fonctionne en redirigeant les utilisateurs vers %s, afin de sélectionner leur moyen de paiement et de saisir leurs informations de paiement."
+msgstr "Le module fonctionne en redirigeant les utilisateurs vers %s, afin de sélectionner leur moyen de paiement et de saisir leurs informations de paiement."
 
 #: ../class-wc-gateway-payzen.php:294
 msgid "Reset configuration"
@@ -172,7 +171,7 @@ msgid "Logs"
 msgstr "Logs"
 
 #: ../class-wc-gateway-payzen.php:493 ../class-wc-gateway-payzen.php:685 ../class-wc-gateway-payzen.php:751 ../class-wc-gateway-payzenregroupedother.php:123
-#: ../class-wc-gateway-payzenstd.php:289 ../class-wc-gateway-payzenstd.php:473 ../class-wc-gateway-payzenstd.php:493
+#: ../class-wc-gateway-payzenstd.php:300 ../class-wc-gateway-payzenstd.php:477 ../class-wc-gateway-payzenstd.php:497
 msgid "Enable / disable"
 msgstr "Activer / désactiver"
 
@@ -235,12 +234,11 @@ msgstr "Algorithme de signature"
 #: ../class-wc-gateway-payzen.php:544
 #, php-format
 msgid ""
-"Algorithm used to compute the payment form signature. Selected algorithm must be the same as one configured in the %s Back Office.<br /><b>The HMAC-"
-"SHA-256 algorithm should not be activated if it is not yet available in the %s Back Office, the feature will be available soon.</b>"
+"Algorithm used to compute the payment form signature. Selected algorithm must be the same as one configured in the %s Back Office.<br /><b>The HMAC-SHA-256 algorithm "
+"should not be activated if it is not yet available in the %s Back Office, the feature will be available soon.</b>"
 msgstr ""
-"Algorithme utilisé pour calculer la signature du formulaire de paiement. L'algorithme sélectionné doit être le même que celui configuré sur le Back "
-"Office %s.<br /><b>Le HMAC-SHA-256 ne doit pas être activé si celui-ci n'est pas encore disponible depuis le Back Office %s, la fonctionnalité sera "
-"disponible prochainement.</b>"
+"Algorithme utilisé pour calculer la signature du formulaire de paiement. L'algorithme sélectionné doit être le même que celui configuré sur le Back Office %s.<br /><b>Le "
+"HMAC-SHA-256 ne doit pas être activé si celui-ci n'est pas encore disponible depuis le Back Office %s, la fonctionnalité sera disponible prochainement.</b>"
 
 #: ../class-wc-gateway-payzen.php:548
 msgid "Instant Payment Notification URL"
@@ -266,13 +264,12 @@ msgstr "Clés d'API REST"
 #: ../class-wc-gateway-payzen.php:566
 #, php-format
 msgid ""
-"REST API keys are available in your %s Back Office (menu: Settings > Shops > REST API keys).<br><br>Configure this section if you are using order "
-"operations from WooCommerce Back Office, if you are using embedded payment fields/Smartform modes or if you are proposing subscription payment with "
-"WooCommerce Subscriptions."
+"REST API keys are available in your %s Back Office (menu: Settings > Shops > REST API keys).<br><br>Configure this section if you are using order operations from "
+"WooCommerce Back Office, if you are using embedded payment fields modes or if you are proposing subscription payment with WooCommerce Subscriptions."
 msgstr ""
-"Les clés de l'API REST sont disponibles dans votre Back Office %s (menu: Paramétrage > Boutiques > Clés d'API REST).<br>Configurez cette section si vous "
-"utilisez les opérations sur les commandes depuis le Back Office WooCommerce, si vous utilisez les modes champs de paiement embarqués/Smartform ou si vous "
-"proposez le paiement par abonnement avec WooCommerce Subscriptions."
+"Les clés de l'API REST sont disponibles dans votre Back Office %s (menu: Paramétrage > Boutiques > Clés d'API REST).<br>Configurez cette section si vous utilisez les "
+"opérations sur les commandes depuis le Back Office WooCommerce, si vous utilisez les modes champs de paiement embarqués ou si vous proposez le paiement par abonnement "
+"avec WooCommerce Subscriptions."
 
 #: ../class-wc-gateway-payzen.php:569
 msgid "Test password"
@@ -287,8 +284,8 @@ msgid "API REST server URL"
 msgstr "URL du serveur de l'API REST"
 
 #: ../class-wc-gateway-payzen.php:589
-msgid "Configure this section only if you are using embedded payment fields or Smartform modes."
-msgstr "Configurez cette section seulement si vous utilisez les modes champs de paiement embarqués ou Smartform."
+msgid "Configure this section only if you are using embedded payment fields modes."
+msgstr "Configurez cette section seulement si vous utilisez les modes champs de paiement embarqués."
 
 #: ../class-wc-gateway-payzen.php:592
 msgid "Public test key"
@@ -318,10 +315,9 @@ msgstr "URL de notification de l'API REST"
 #, php-format
 msgid "URL to copy into your %s Back Office > Settings > Notification rules.<br>In multistore mode, notification URL is the same for all the stores."
 msgstr ""
-"URL à copier dans le Back Office %s > Paramétrage > Règles de notifications.<br />En mode multi-boutique, l'URL de notification est la même pour toutes "
-"les boutiques."
+"URL à copier dans le Back Office %s > Paramétrage > Règles de notifications.<br />En mode multi-boutique, l'URL de notification est la même pour toutes les boutiques."
 
-#: ../class-wc-gateway-payzen.php:632 ../class-wc-gateway-payzenstd.php:349
+#: ../class-wc-gateway-payzen.php:632 ../class-wc-gateway-payzenstd.php:360
 msgid "PAYMENT PAGE"
 msgstr "PAGE DE PAIEMENT"
 
@@ -341,7 +337,7 @@ msgstr "Langues disponibles"
 msgid "Languages available on the payment page. If you do not select any, all the supported languages will be available."
 msgstr "Sélectionner les langues à proposer sur la page de paiement. Ne rien sélectionner pour utiliser la configuration de la plateforme."
 
-#: ../class-wc-gateway-payzen.php:652 ../class-wc-gateway-payzenstd.php:353
+#: ../class-wc-gateway-payzen.php:652 ../class-wc-gateway-payzenstd.php:364
 msgid "Capture delay"
 msgstr "Délai avant remise en banque"
 
@@ -350,11 +346,11 @@ msgstr "Délai avant remise en banque"
 msgid "The number of days before the bank capture (adjustable in your %s Back Office)."
 msgstr "Le nombre de jours avant la remise en banque (paramétrable sur votre Back Office %s)."
 
-#: ../class-wc-gateway-payzen.php:658 ../class-wc-gateway-payzenregroupedother.php:168 ../class-wc-gateway-payzenstd.php:359
+#: ../class-wc-gateway-payzen.php:658 ../class-wc-gateway-payzenregroupedother.php:168 ../class-wc-gateway-payzenstd.php:370
 msgid "Validation mode"
 msgstr "Mode de validation"
 
-#: ../class-wc-gateway-payzen.php:662 ../class-wc-gateway-payzenstd.php:363
+#: ../class-wc-gateway-payzen.php:662 ../class-wc-gateway-payzenstd.php:374
 #, php-format
 msgid "If manual is selected, you will have to confirm payments manually in your %s Back Office."
 msgstr "En mode manuel, vous devrez confirmer les paiements dans le Back Office %s."
@@ -369,11 +365,11 @@ msgstr "Gérer le 3DS"
 
 #: ../class-wc-gateway-payzen.php:675
 msgid ""
-"Amount below which customer could be exempt from strong authentication. Needs subscription to «Selective 3DS1» or «Frictionless 3DS2» options. For more "
-"information, refer to the module documentation."
+"Amount below which customer could be exempt from strong authentication. Needs subscription to «Selective 3DS1» or «Frictionless 3DS2» options. For more information, refer "
+"to the module documentation."
 msgstr ""
-"Montant en dessous duquel l'acheteur pourrait être exempté de l'authentification forte. Nécessite la souscription à l'option «Selective 3DS1» ou "
-"l'option  «Frictionless 3DS2». Pour plus d'informations, reportez-vous à la documentation du module."
+"Montant en dessous duquel l'acheteur pourrait être exempté de l'authentification forte. Nécessite la souscription à l'option «Selective 3DS1» ou l'option  «Frictionless "
+"3DS2». Pour plus d'informations, reportez-vous à la documentation du module."
 
 #: ../class-wc-gateway-payzen.php:680
 msgid "RETURN OPTIONS"
@@ -448,11 +444,10 @@ msgid "ADDITIONAL OPTIONS"
 msgstr "OPTIONS AVANCÉES"
 
 #: ../class-wc-gateway-payzen.php:761
-msgid ""
-"Configure this section if you are using advanced risk assessment module or if you are proposing payment means requiring cart data (Franfinance or Klarna)."
+msgid "Configure this section if you are using advanced risk assessment module or if you are proposing payment means requiring cart data (Franfinance or Klarna)."
 msgstr ""
-"Configurez cette section si vous utilisez le module de gestion de risques avancé ou si vous proposez des moyens de paiement qui nécessitent les données "
-"du panier (Franfinance, Klarna)."
+"Configurez cette section si vous utilisez le module de gestion de risques avancé ou si vous proposez des moyens de paiement qui nécessitent les données du panier "
+"(Franfinance, Klarna)."
 
 #: ../class-wc-gateway-payzen.php:767
 msgid "Category mapping"
@@ -474,20 +469,18 @@ msgstr "Catégorie %s"
 #: ../class-wc-gateway-payzen.php:789
 #, php-format
 msgid "Match each product category with a %s product category. <br /><b>Entries marked with * are newly added and must be configured.</b>"
-msgstr ""
-"Faire la correspondance entre chaque catégorie produit et une catégorie %s. <br /><b>Les entrées marquées par * sont nouvelles et doivent être "
-"configurées.</b>"
+msgstr "Faire la correspondance entre chaque catégorie produit et une catégorie %s. <br /><b>Les entrées marquées par * sont nouvelles et doivent être configurées.</b>"
 
 #: ../class-wc-gateway-payzen.php:793
 #, php-format
 msgid ""
-"Define the %s information about all shipping methods.<br /><b>Method title: </b>The label of the shipping method.<br /><b>Type: </b>The delivery type of "
-"shipping method.<br /><b>Rapidity: </b>Select the delivery rapidity.<br /><b>Delay: </b>Select the delivery delay if rapidity is &laquo; Priority &raquo;."
-"<br /><b>Entries marked with * are newly added and must be configured.</b>"
+"Define the %s information about all shipping methods.<br /><b>Method title: </b>The label of the shipping method.<br /><b>Type: </b>The delivery type of shipping method."
+"<br /><b>Rapidity: </b>Select the delivery rapidity.<br /><b>Delay: </b>Select the delivery delay if rapidity is &laquo; Priority &raquo;.<br /><b>Entries marked with * "
+"are newly added and must be configured.</b>"
 msgstr ""
-"Définir les informations %s sur les méthodes de livraison utilisées.<br /><b>Titre de la méthode: </b>Le nom de la méthode livraison.<br /><b>Type: </"
-"b>Le type de transport.<br /><b>Rapidité: </b>Sélectionner la rapidité de livraison.<br /><b>Délai: </b>Sélectionner le délai de livraison si la vitesse "
-"est &laquo; Priorité &raquo;.<br /><b>Les entrées marquées par * sont nouvelles et doivent être configurées.</b>"
+"Définir les informations %s sur les méthodes de livraison utilisées.<br /><b>Titre de la méthode: </b>Le nom de la méthode livraison.<br /><b>Type: </b>Le type de "
+"transport.<br /><b>Rapidité: </b>Sélectionner la rapidité de livraison.<br /><b>Délai: </b>Sélectionner le délai de livraison si la vitesse est &laquo; Priorité &raquo;."
+"<br /><b>Les entrées marquées par * sont nouvelles et doivent être configurées.</b>"
 
 #: ../class-wc-gateway-payzen.php:798
 msgid "Method title"
@@ -557,12 +550,12 @@ msgstr "Immédiat"
 msgid "24/7"
 msgstr "24h/24, 7j/7"
 
-#: ../class-wc-gateway-payzen.php:1603 ../class-wc-gateway-payzen.php:1711 ../class-wc-gateway-payzen.php:2004 ../class-wc-gateway-payzenstd.php:2547
-#: ../class-wc-gateway-payzenstd.php:2572 ../class-wc-gateway-payzenstd.php:2591
+#: ../class-wc-gateway-payzen.php:1603 ../class-wc-gateway-payzen.php:1711 ../class-wc-gateway-payzen.php:2007 ../class-wc-gateway-payzenstd.php:2586
+#: ../class-wc-gateway-payzenstd.php:2611 ../class-wc-gateway-payzenstd.php:2630
 msgid "An error has occurred in the payment process."
 msgstr "Une erreur est survenue durant le processus de paiement."
 
-#: ../class-wc-gateway-payzen.php:1682 ../class-wc-gateway-payzen.php:1828 ../class-wc-gateway-payzen.php:1987
+#: ../class-wc-gateway-payzen.php:1682 ../class-wc-gateway-payzen.php:1831 ../class-wc-gateway-payzen.php:1990
 msgid "Your payment was not accepted. Please, try to re-order."
 msgstr "Votre paiement n'a pas été accepté. Veuillez repasser votre commande."
 
@@ -576,93 +569,93 @@ msgstr ""
 
 #: ../class-wc-gateway-payzen.php:1719
 msgid ""
-"<p><u>GOING INTO PRODUCTION</u></p>You want to know how to put your shop into production mode, please read chapters « Proceeding to test phase » and « "
-"Shifting the shop to production mode » in the documentation of the module."
+"<p><u>GOING INTO PRODUCTION</u></p>You want to know how to put your shop into production mode, please read chapters « Proceeding to test phase » and « Shifting the shop "
+"to production mode » in the documentation of the module."
 msgstr ""
-"<p><u>PASSAGE EN PRODUCTION</u></p>Vous souhaitez savoir comment passer votre boutique en production, merci de consulter les chapitres « Procéder à la "
-"phase des tests » et « Passage d'une boutique en mode production » de la documentation du module."
+"<p><u>PASSAGE EN PRODUCTION</u></p>Vous souhaitez savoir comment passer votre boutique en production, merci de consulter les chapitres « Procéder à la phase des tests » "
+"et « Passage d'une boutique en mode production » de la documentation du module."
 
-#: ../class-wc-gateway-payzen.php:1790
+#: ../class-wc-gateway-payzen.php:1793
 #, php-format
 msgid "The automatic validation has not worked. Have you correctly set up the notification URL in the %s Back Office?"
 msgstr "La validation automatique n'a pas fonctionné. Avez-vous configuré correctement l'URL de notification dans le Back Office %s ?"
 
-#: ../class-wc-gateway-payzen.php:1792
+#: ../class-wc-gateway-payzen.php:1795
 msgid ""
-"For understanding the problem, please read the documentation of the module : <br />&nbsp;&nbsp;&nbsp;- Chapter &laquo; To read carefully before going "
-"further &raquo;<br />&nbsp;&nbsp;&nbsp;- Chapter &laquo; Notification URL settings &raquo;"
+"For understanding the problem, please read the documentation of the module : <br />&nbsp;&nbsp;&nbsp;- Chapter &laquo; To read carefully before going further &raquo;<br /"
+">&nbsp;&nbsp;&nbsp;- Chapter &laquo; Notification URL settings &raquo;"
 msgstr ""
-"Afin de comprendre la problématique, reportez vous à la documentation du module: <br />&nbsp;&nbsp;&nbsp;- Chapitre &laquo; A lire attentivement avant "
-"d'aller loin &raquo;<br />&nbsp;&nbsp;&nbsp;- Chapitre &laquo; Paramétrage de l'URL de notification &raquo;"
+"Afin de comprendre la problématique, reportez vous à la documentation du module: <br />&nbsp;&nbsp;&nbsp;- Chapitre &laquo; A lire attentivement avant d'aller loin &raquo;"
+"<br />&nbsp;&nbsp;&nbsp;- Chapitre &laquo; Paramétrage de l'URL de notification &raquo;"
 
-#: ../class-wc-gateway-payzen.php:1911
+#: ../class-wc-gateway-payzen.php:1914
 msgid "Payment method updated."
 msgstr "Méthode de paiement mise à jour."
 
-#: ../class-wc-gateway-payzen.php:1924
+#: ../class-wc-gateway-payzen.php:1927
 msgid "The payment method can not be changed for that subscription."
 msgstr "La méthode de paiement ne peut être modifiée pour cet abonnement."
 
-#: ../class-wc-gateway-payzen.php:2120 ../class-wc-gateway-payzen.php:2122
+#: ../class-wc-gateway-payzen.php:2123 ../class-wc-gateway-payzen.php:2125
 msgid "Payment"
 msgstr "Paiement"
 
-#: ../class-wc-gateway-payzen.php:2215
+#: ../class-wc-gateway-payzen.php:2218
 msgid "Card brand chosen by buyer."
 msgstr "Marque de carte choisie par l'acheteur."
 
-#: ../class-wc-gateway-payzen.php:2217
+#: ../class-wc-gateway-payzen.php:2220
 msgid "Default card brand used."
 msgstr "Marque de carte par défaut utilisée."
 
-#: ../class-wc-gateway-payzen.php:2226
+#: ../class-wc-gateway-payzen.php:2229
 msgid "3DS authentication: "
 msgstr "Authentification 3DS: "
 
-#: ../class-wc-gateway-payzen.php:2232
+#: ../class-wc-gateway-payzen.php:2235
 msgid "3DS certificate: "
 msgstr "Certificat 3DS: "
 
-#: ../class-wc-gateway-payzen.php:2237
+#: ../class-wc-gateway-payzen.php:2240
 msgid "Authentication type: "
 msgstr "Type d'authentification: "
 
-#: ../class-wc-gateway-payzen.php:2247
+#: ../class-wc-gateway-payzen.php:2250
 #, php-format
 msgid "Transaction ID: %s."
 msgstr "Numéro de transaction: %s."
 
-#: ../class-wc-gateway-payzen.php:2251
+#: ../class-wc-gateway-payzen.php:2254
 #, php-format
 msgid "Transaction UUID: %s."
 msgstr "UUID de transaction: %s."
 
-#: ../class-wc-gateway-payzen.php:2257
+#: ../class-wc-gateway-payzen.php:2260
 #, php-format
 msgid "Transaction status: %s."
 msgstr "Statut de la transaction: %s."
 
-#: ../class-wc-gateway-payzen.php:2421
+#: ../class-wc-gateway-payzen.php:2436
 msgid "On Hold"
 msgstr "En attente"
 
-#: ../class-wc-gateway-payzen.php:2422
+#: ../class-wc-gateway-payzen.php:2437
 msgid "Processing"
 msgstr "En cours"
 
-#: ../class-wc-gateway-payzen.php:2423
+#: ../class-wc-gateway-payzen.php:2438
 msgid "Complete"
 msgstr "Terminée"
 
-#: ../class-wc-gateway-payzen.php:2428
+#: ../class-wc-gateway-payzen.php:2443
 msgid "Default"
 msgstr "Par défaut"
 
-#: ../class-wc-gateway-payzen.php:2692
+#: ../class-wc-gateway-payzen.php:2765
 msgid "The stored means of payment could not be deleted."
 msgstr "Le moyen de paiement enregistré n'a pas pu être supprimé."
 
-#: ../class-wc-gateway-payzen.php:2793
+#: ../class-wc-gateway-payzen.php:2862
 msgid "The stored means of payment was successfully deleted."
 msgstr "Le moyen de paiement enregistré a été supprimé avec succès."
 
@@ -745,15 +738,14 @@ msgstr "Paiement en %s fois"
 #: ../class-wc-gateway-payzenfranfinance.php:151
 #, php-format
 msgid ""
-"Click on « Add » button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend (the %c pattern will be "
-"replaced by payments count).<br /><b>Count: </b>Total number of payments.<br /><b>Fees: </b>Choose whether or not to apply fees.<br /><b>Min. amount: </"
-"b>Minimum amount to enable the payment option.<br /><b>Max. amount: </b>Maximum amount to enable the payment option.<br /><b>Do not forget to click on « "
-"Save » button to save your modifications.</b>"
+"Click on « Add » button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend (the %c pattern will be replaced by "
+"payments count).<br /><b>Count: </b>Total number of payments.<br /><b>Fees: </b>Choose whether or not to apply fees.<br /><b>Min. amount: </b>Minimum amount to enable the "
+"payment option.<br /><b>Max. amount: </b>Maximum amount to enable the payment option.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"
 msgstr ""
-"Cliquer sur le bouton « Ajouter » pour configurer une ou plusieurs options de paiement.<br /><b>Libellé: </b>Texte décrivant l'option de paiement (le "
-"code %c sera remplacé par le nombre de paiements).<br /><b>Nombre: </b>Nombre total de paiements.<br /><b>Frais: </b>Choisir d'appliquer ou non les frais."
-"<br /><b>Montant min.: </b>Montant minimum pour proposer l'option.<br /><b>Montant max.: </b>Montant maximum pour proposer l'option.<br /><b>N'oubliez "
-"pas de cliquer sur le bouton « Enregistrer » afin de sauvegarder vos modifications.</b>"
+"Cliquer sur le bouton « Ajouter » pour configurer une ou plusieurs options de paiement.<br /><b>Libellé: </b>Texte décrivant l'option de paiement (le code %c sera "
+"remplacé par le nombre de paiements).<br /><b>Nombre: </b>Nombre total de paiements.<br /><b>Frais: </b>Choisir d'appliquer ou non les frais.<br /><b>Montant min.: </"
+"b>Montant minimum pour proposer l'option.<br /><b>Montant max.: </b>Montant maximum pour proposer l'option.<br /><b>N'oubliez pas de cliquer sur le bouton « Enregistrer » "
+"afin de sauvegarder vos modifications.</b>"
 
 #: ../class-wc-gateway-payzenfranfinance.php:207
 msgid "Without fees"
@@ -789,12 +781,11 @@ msgstr "Paiement en plusieurs fois"
 
 #: ../class-wc-gateway-payzenmulti.php:43
 msgid ""
-"ATTENTION: The payment in installments feature activation is subject to the prior agreement of Société Générale.<br />If you enable this feature while "
-"you have not the associated option, an error 10000 – INSTALLMENTS_NOT_ALLOWED or 07 - PAYMENT_CONFIG will occur and the buyer will not be able to pay."
+"ATTENTION: The payment in installments feature activation is subject to the prior agreement of Société Générale.<br />If you enable this feature while you have not the "
+"associated option, an error 10000 – INSTALLMENTS_NOT_ALLOWED or 07 - PAYMENT_CONFIG will occur and the buyer will not be able to pay."
 msgstr ""
-"ATTENTION: L'activation de la fonctionnalité de paiement en nfois est soumise à accord préalable de Société Générale.<br />Si vous activez cette "
-"fonctionnalité alors que vous ne disposez pas de cette option, une erreur 10000 – INSTALLMENTS_NOT_ALLOWED ou 07 - PAYMENT_CONFIG sera générée et "
-"l'acheteur sera dans l'incapacité de payer."
+"ATTENTION: L'activation de la fonctionnalité de paiement en nfois est soumise à accord préalable de Société Générale.<br />Si vous activez cette fonctionnalité alors que "
+"vous ne disposez pas de cette option, une erreur 10000 – INSTALLMENTS_NOT_ALLOWED ou 07 - PAYMENT_CONFIG sera générée et l'acheteur sera dans l'incapacité de payer."
 
 #: ../class-wc-gateway-payzenmulti.php:88
 msgid "Enables / disables multiple payment."
@@ -826,16 +817,15 @@ msgstr "OPTIONS DE PAIEMENT MULTIPLE"
 
 #: ../class-wc-gateway-payzenmulti.php:123
 msgid ""
-"Click on \"Add\" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </"
-"b>Minimum amount to enable the payment option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Count: </b>Total number of "
-"payments.<br /><b>Period: </b>Delay (in days) between payments.<br /><b>1st payment: </b>Amount of first payment, in percentage of total amount. If "
-"empty, all payments will have the same amount.<br /><b>Do not forget to click on \"Save\" button to save your modifications.</b>"
+"Click on \"Add\" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </b>Minimum amount "
+"to enable the payment option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Count: </b>Total number of payments.<br /><b>Period: </b>Delay "
+"(in days) between payments.<br /><b>1st payment: </b>Amount of first payment, in percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do "
+"not forget to click on \"Save\" button to save your modifications.</b>"
 msgstr ""
-"Cliquer sur le bouton \"Ajouter\" pour configurer une ou plusieurs options de paiement.<br /><b>Libellé: </b>Texte décrivant l'option de paiement "
-"multiple.<br /><b>Montant min: </b>Montant minimum pour proposer l'option.<br /><b>Montant max: </b>Montant maximum pour proposer l'option.<br /"
-"><b>Nombre: </b>Nombre total d'échéances.<br /><b>Période: </b>Délai entre deux échéances (en jours).<br /><b>1er paiement: </b>Montant de la première "
-"échéance en pourcentage du total. Si vide, toutes les échéances auront le même montant.<br /><b>N'oubliez pas de cliquer sur le bouton \"Enregistrer\" "
-"afin de sauvegarder vos modifications.</b>"
+"Cliquer sur le bouton \"Ajouter\" pour configurer une ou plusieurs options de paiement.<br /><b>Libellé: </b>Texte décrivant l'option de paiement multiple.<br /"
+"><b>Montant min: </b>Montant minimum pour proposer l'option.<br /><b>Montant max: </b>Montant maximum pour proposer l'option.<br /><b>Nombre: </b>Nombre total d'échéances."
+"<br /><b>Période: </b>Délai entre deux échéances (en jours).<br /><b>1er paiement: </b>Montant de la première échéance en pourcentage du total. Si vide, toutes les "
+"échéances auront le même montant.<br /><b>N'oubliez pas de cliquer sur le bouton \"Enregistrer\" afin de sauvegarder vos modifications.</b>"
 
 #: ../class-wc-gateway-payzenmulti.php:145
 msgid "Contract"
@@ -843,17 +833,16 @@ msgstr "Contrat"
 
 #: ../class-wc-gateway-payzenmulti.php:149
 msgid ""
-"Click on \"Add\" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </"
-"b>Minimum amount to enable the payment option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Contract: </b>ID of the "
-"contract to use with the option (leave blank preferably).<br /><b>Count: </b>Total number of payments.<br /><b>Period: </b>Delay (in days) between "
-"payments.<br /><b>1st payment: </b>Amount of first payment, in percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do "
-"not forget to click on \"Save\" button to save your modifications.</b>"
+"Click on \"Add\" button to configure one or more payment options.<br /><b>Label: </b>The option label to display on the frontend.<br /><b>Min amount: </b>Minimum amount "
+"to enable the payment option.<br /><b>Max amount: </b>Maximum amount to enable the payment option.<br /><b>Contract: </b>ID of the contract to use with the option (leave "
+"blank preferably).<br /><b>Count: </b>Total number of payments.<br /><b>Period: </b>Delay (in days) between payments.<br /><b>1st payment: </b>Amount of first payment, in "
+"percentage of total amount. If empty, all payments will have the same amount.<br /><b>Do not forget to click on \"Save\" button to save your modifications.</b>"
 msgstr ""
-"Cliquer sur le bouton \"Ajouter\" pour configurer une ou plusieurs options de paiement.<br /><b>Libellé: </b>Texte décrivant l'option de paiement "
-"multiple.<br /><b>Montant min: </b>Montant minimum pour proposer l'option.<br /><b>Montant max: </b>Montant maximum pour proposer l'option.<br /"
-"><b>Contrat: </b>ID du contrat à utiliser avec l'option (laisser vide de préférence).<br /><b>Nombre: </b>Nombre total d'échéances.<br /><b>Période: </"
-"b>Délai entre deux échéances (en jours).<br /><b>1er paiement: </b>Montant de la première échéance en pourcentage du total. Si vide, toutes les échéances "
-"auront le même montant.<br /><b>N'oubliez pas de cliquer sur le bouton \"Enregistrer\" afin de sauvegarder vos modifications.</b>"
+"Cliquer sur le bouton \"Ajouter\" pour configurer une ou plusieurs options de paiement.<br /><b>Libellé: </b>Texte décrivant l'option de paiement multiple.<br /"
+"><b>Montant min: </b>Montant minimum pour proposer l'option.<br /><b>Montant max: </b>Montant maximum pour proposer l'option.<br /><b>Contrat: </b>ID du contrat à "
+"utiliser avec l'option (laisser vide de préférence).<br /><b>Nombre: </b>Nombre total d'échéances.<br /><b>Période: </b>Délai entre deux échéances (en jours).<br /><b>1er "
+"paiement: </b>Montant de la première échéance en pourcentage du total. Si vide, toutes les échéances auront le même montant.<br /><b>N'oubliez pas de cliquer sur le "
+"bouton \"Enregistrer\" afin de sauvegarder vos modifications.</b>"
 
 #: ../class-wc-gateway-payzenmulti.php:158
 msgid "Period"
@@ -876,7 +865,7 @@ msgstr "Autres moyens de paiement"
 msgid "Enables / disables this payment method."
 msgstr "Active / désactive cette méthode de paiement."
 
-#: ../class-wc-gateway-payzenregroupedother.php:115 ../class-wc-gateway-payzensepa.php:115
+#: ../class-wc-gateway-payzenregroupedother.php:115 ../class-wc-gateway-payzensepa.php:150
 msgid "PAYMENT OPTIONS"
 msgstr "OPTIONS DE PAIEMENT"
 
@@ -915,12 +904,12 @@ msgstr "Moyens de paiement"
 #: ../class-wc-gateway-payzenregroupedother.php:197
 #, php-format
 msgid ""
-"Click on « Add » button to add one or more new payment means.<br /><b>Code: </b>The code of the means of payment as expected by %s gateway.<br /"
-"><b>Label: </b>The default label of the means of payment.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"
+"Click on « Add » button to add one or more new payment means.<br /><b>Code: </b>The code of the means of payment as expected by %s gateway.<br /><b>Label: </b>The default "
+"label of the means of payment.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"
 msgstr ""
-"Cliquer sur le bouton « Ajouter » pour ajouter un ou plusieurs nouveaux moyens de paiement.<br /><b>Code: </b>Le code du moyen de paiement tel qu'attendu "
-"par la plateforme %s.<br /><b>Libellé: </b>Le libellé par défaut du moyen de paiement.<br /><b>N'oubliez pas de cliquer sur le bouton « Sauvegarder » "
-"afin de sauvegarder vos modifications.</b>"
+"Cliquer sur le bouton « Ajouter » pour ajouter un ou plusieurs nouveaux moyens de paiement.<br /><b>Code: </b>Le code du moyen de paiement tel qu'attendu par la "
+"plateforme %s.<br /><b>Libellé: </b>Le libellé par défaut du moyen de paiement.<br /><b>N'oubliez pas de cliquer sur le bouton « Sauvegarder » afin de sauvegarder vos "
+"modifications.</b>"
 
 #: ../class-wc-gateway-payzenregroupedother.php:201
 msgid "Code"
@@ -932,27 +921,22 @@ msgstr "Ajouter des moyens de paiement"
 
 #: ../class-wc-gateway-payzenregroupedother.php:225
 msgid "Method title to display on payment means page. Used only if &laquo; Regroup payment means &raquo; option is enabled."
-msgstr ""
-"Titre de la méthode à afficher sur la page des moyens de paiement. Utilisé uniquement si l'option &laquo; Regrouper les moyens de paiement &raquo; est "
-"activée."
+msgstr "Titre de la méthode à afficher sur la page des moyens de paiement. Utilisé uniquement si l'option &laquo; Regrouper les moyens de paiement &raquo; est activée."
 
 #: ../class-wc-gateway-payzenregroupedother.php:230
 msgid "This controls the description which the user sees during checkout. Used only if &laquo; Regroup payment means &raquo; option is enabled."
 msgstr ""
-"Ceci contrôle la description que les utilisateurs verront durant la commande. Utilisé uniquement si l'option &laquo; Regrouper les moyens de paiement "
-"&raquo; est activée."
+"Ceci contrôle la description que les utilisateurs verront durant la commande. Utilisé uniquement si l'option &laquo; Regrouper les moyens de paiement &raquo; est activée."
 
 #: ../class-wc-gateway-payzenregroupedother.php:323 ../class-wc-gateway-payzenregroupedother.php:436
 msgid "Click to add countries."
 msgstr "Cliquez pour ajouter des pays."
 
-#: ../class-wc-gateway-payzenregroupedother.php:354 ../class-wc-gateway-payzensepa.php:138 ../class-wc-gateway-payzenstd.php:419
-#: ../class-wc-gateway-payzenstd.php:431
+#: ../class-wc-gateway-payzenregroupedother.php:354 ../class-wc-gateway-payzensepa.php:173 ../class-wc-gateway-payzenstd.php:423 ../class-wc-gateway-payzenstd.php:435
 msgid "No"
 msgstr "Non"
 
-#: ../class-wc-gateway-payzenregroupedother.php:354 ../class-wc-gateway-payzensepa.php:137 ../class-wc-gateway-payzenstd.php:418
-#: ../class-wc-gateway-payzenstd.php:430
+#: ../class-wc-gateway-payzenregroupedother.php:354 ../class-wc-gateway-payzensepa.php:172 ../class-wc-gateway-payzenstd.php:422 ../class-wc-gateway-payzenstd.php:434
 msgid "Yes"
 msgstr "Oui"
 
@@ -964,328 +948,325 @@ msgstr "Paiement SEPA"
 msgid "Accept payments via SEPA Direct Debit. This method can be used to pay for subscriptions managed by WooCommerce Subscriptions."
 msgstr "Acceptez les paiements par prélèvement SEPA. Cette méthode peut être utilisée pour le paiement des abonnements gérés par WooCommerce Subscriptions."
 
-#: ../class-wc-gateway-payzensepa.php:97
+#: ../class-wc-gateway-payzensepa.php:132
 msgid "Enables / disables SEPA payment."
 msgstr "Activer / désactiver le paiement SEPA."
 
-#: ../class-wc-gateway-payzensepa.php:99
+#: ../class-wc-gateway-payzensepa.php:134
 msgid "Payment with SEPA"
 msgstr "Paiement avec SEPA"
 
-#: ../class-wc-gateway-payzensepa.php:123
+#: ../class-wc-gateway-payzensepa.php:158
 msgid "SEPA direct debit mode"
 msgstr "Mode de prélèvement SEPA"
 
-#: ../class-wc-gateway-payzensepa.php:127
+#: ../class-wc-gateway-payzensepa.php:162
 #, php-format
 msgid "Select SEPA direct debit mode. Attention, the two last choices require the payment by token option on %s."
 msgstr "Sélectionner le mode de prélèvement SEPA. Attention, les deux derniers choix requièrent l'option paiement par identifiant sur %s."
 
-#: ../class-wc-gateway-payzensepa.php:133 ../class-wc-gateway-payzenstd.php:414
+#: ../class-wc-gateway-payzensepa.php:168 ../class-wc-gateway-payzenstd.php:418
 msgid "Payment by token"
 msgstr "Paiement par alias"
 
-#: ../class-wc-gateway-payzensepa.php:140 ../class-wc-gateway-payzenstd.php:421
+#: ../class-wc-gateway-payzensepa.php:175 ../class-wc-gateway-payzenstd.php:425
 #, php-format
 msgid ""
-"The payment by token allows to pay orders without re-entering bank data at each payment. The \"Payment by token\" option should be enabled on your %s "
-"store to use this feature."
+"The payment by token allows to pay orders without re-entering bank data at each payment. The \"Payment by token\" option should be enabled on your %s store to use this "
+"feature."
 msgstr ""
-"Le paiement par alias permet de régler une commande sans ressaisir les données bancaires à chaque paiement. L'option \"Paiement par alias\" doit être "
-"activée sur votre boutique %s pour utiliser cette fonctionnalité."
+"Le paiement par alias permet de régler une commande sans ressaisir les données bancaires à chaque paiement. L'option \"Paiement par alias\" doit être activée sur votre "
+"boutique %s pour utiliser cette fonctionnalité."
 
-#: ../class-wc-gateway-payzensepa.php:178
+#: ../class-wc-gateway-payzensepa.php:213
 msgid "One-off SEPA direct debit"
 msgstr "Prélèvement SEPA ponctuel"
 
-#: ../class-wc-gateway-payzensepa.php:179
+#: ../class-wc-gateway-payzensepa.php:214
 msgid "Register a recurrent SEPA mandate with direct debit"
 msgstr "Enregistrer un mandat SEPA récurrent avec prélèvement"
 
-#: ../class-wc-gateway-payzensepa.php:180
+#: ../class-wc-gateway-payzensepa.php:215
 msgid "Register a recurrent SEPA mandate without direct debit"
 msgstr "Enregistrer un mandat SEPA récurrent sans prélèvement"
+
+#: ../class-wc-gateway-payzensepa.php:344 ../class-wc-gateway-payzensubscription.php:535 ../class-wc-gateway-payzensubscription.php:538
+#: ../class-wc-gateway-payzensubscription.php:562 ../class-wc-gateway-payzenwcssubscription.php:346
+#, php-format
+msgid "Warning! %s plugin must be installed and activated for the subscription payment method to work."
+msgstr "Attention! Le plugin %s doit être installé et activé pour que le paiement par abonnement fonctionne."
+
+#: ../class-wc-gateway-payzensepa.php:395 ../class-wc-gateway-payzenwcssubscription.php:392 ../includes/PayzenSubscriptionTools.php:262
+#, php-format
+msgid "%s token"
+msgstr "Alias %s"
 
 #: ../class-wc-gateway-payzenstd.php:34 ../woo-payzen-payment.php:301
 msgid "Standard payment"
 msgstr "Paiement standard"
 
-#: ../class-wc-gateway-payzenstd.php:284
+#: ../class-wc-gateway-payzenstd.php:295
 msgid "MODULE SETTINGS"
 msgstr "PARAMÈTRES DE BASE"
 
-#: ../class-wc-gateway-payzenstd.php:288
+#: ../class-wc-gateway-payzenstd.php:299
 msgid "Activation"
 msgstr "Activation"
 
-#: ../class-wc-gateway-payzenstd.php:292
+#: ../class-wc-gateway-payzenstd.php:303
 msgid "Enables / disables standard payment."
 msgstr "Activer / désactiver le paiement standard."
 
-#: ../class-wc-gateway-payzenstd.php:295
+#: ../class-wc-gateway-payzenstd.php:306
 msgid "Title"
 msgstr "Titre"
 
-#: ../class-wc-gateway-payzenstd.php:298
+#: ../class-wc-gateway-payzenstd.php:309
 msgid "Payment by credit card"
 msgstr "Paiement par carte bancaire"
 
-#: ../class-wc-gateway-payzenstd.php:301
+#: ../class-wc-gateway-payzenstd.php:312
 msgid "Description"
 msgstr "Description"
 
-#: ../class-wc-gateway-payzenstd.php:304
+#: ../class-wc-gateway-payzenstd.php:315
 msgid "You will enter payment data after order confirmation."
 msgstr "Vous allez saisir les informations de paiement après confirmation de la commande."
 
-#: ../class-wc-gateway-payzenstd.php:310
+#: ../class-wc-gateway-payzenstd.php:321
 msgid "RESTRICTIONS"
 msgstr "RESTRICTIONS"
 
-#: ../class-wc-gateway-payzenstd.php:317
+#: ../class-wc-gateway-payzenstd.php:328
 msgid "Restrict to some countries"
 msgstr "Restreindre à certains pays"
 
-#: ../class-wc-gateway-payzenstd.php:321
+#: ../class-wc-gateway-payzenstd.php:332
 msgid "All allowed countries"
 msgstr "Tous les pays autorisés"
 
-#: ../class-wc-gateway-payzenstd.php:322
+#: ../class-wc-gateway-payzenstd.php:333
 msgid "Specific countries"
 msgstr "Certains pays"
 
-#: ../class-wc-gateway-payzenstd.php:325
+#: ../class-wc-gateway-payzenstd.php:336
 msgid "Buyer's billing countries in which this payment method is available."
 msgstr "Pays de facturation de l'acheteur dans lesquels cette méthode de paiement est disponible."
 
-#: ../class-wc-gateway-payzenstd.php:328
+#: ../class-wc-gateway-payzenstd.php:339
 msgid "Authorized countries"
 msgstr "Pays autorisés"
 
-#: ../class-wc-gateway-payzenstd.php:335
+#: ../class-wc-gateway-payzenstd.php:346
 msgid "Minimum amount"
 msgstr "Montant minimum"
 
-#: ../class-wc-gateway-payzenstd.php:338
+#: ../class-wc-gateway-payzenstd.php:349
 msgid "Minimum amount to activate this payment method."
 msgstr "Montant minimum pour lequel cette méthode de paiement est disponible."
 
-#: ../class-wc-gateway-payzenstd.php:341
+#: ../class-wc-gateway-payzenstd.php:352
 msgid "Maximum amount"
 msgstr "Montant maximum"
 
-#: ../class-wc-gateway-payzenstd.php:344
+#: ../class-wc-gateway-payzenstd.php:355
 msgid "Maximum amount to activate this payment method."
 msgstr "Montant maximum pour lequel cette méthode de paiement est disponible."
 
-#: ../class-wc-gateway-payzenstd.php:356
+#: ../class-wc-gateway-payzenstd.php:367
 #, php-format
 msgid "The number of days before the bank capture. Enter value only if different from %s general configuration."
 msgstr "Le nombre de jours avant la remise en banque. Saisir une valeur seulement si différente de la configuration %s générale."
 
-#: ../class-wc-gateway-payzenstd.php:367
+#: ../class-wc-gateway-payzenstd.php:378
 msgid "Card Types"
 msgstr "Types de carte"
 
-#: ../class-wc-gateway-payzenstd.php:371
+#: ../class-wc-gateway-payzenstd.php:382
 msgid "The card type(s) that can be used for the payment. Select none to use gateway configuration."
 msgstr "Le(s) type(s) de carte pouvant être utilisé(s) pour le paiement. Ne rien sélectionner pour utiliser la configuration de la plateforme."
 
-#: ../class-wc-gateway-payzenstd.php:377
+#: ../class-wc-gateway-payzenstd.php:388
 msgid "ADVANCED OPTIONS"
 msgstr "OPTIONS AVANCÉES"
 
-#: ../class-wc-gateway-payzenstd.php:384
+#: ../class-wc-gateway-payzenstd.php:395
 msgid "Payment data entry mode"
 msgstr "Mode de saisie des données de paiement"
 
-#: ../class-wc-gateway-payzenstd.php:388
+#: ../class-wc-gateway-payzenstd.php:399
 msgid "Card data entry on payment gateway"
 msgstr "Acquisition des données sur la plateforme de paiement"
 
-#: ../class-wc-gateway-payzenstd.php:389
+#: ../class-wc-gateway-payzenstd.php:400
 msgid "Card type selection on merchant site"
 msgstr "Sélection du type de carte sur le site marchand"
-
-#: ../class-wc-gateway-payzenstd.php:390
-msgid "Payment page integrated to checkout process (iframe)"
-msgstr "Page de paiement intégrée au tunnel de commande (iframe)"
-
-#: ../class-wc-gateway-payzenstd.php:392
-msgid "Select how the payment data will be entered by buyer. Think to update payment method description to match your selected mode."
-msgstr ""
-"Sélectionner la manière dont seront saisies les informations de paiement par l'acheteur. Pensez à modifier la description de la méthode de paiement selon "
-"le mode sélectionné."
 
 #: ../class-wc-gateway-payzenstd.php:399
 msgid "Embedded payment fields on merchant site (REST API)"
 msgstr "Champs de paiement embarqués sur le site marchand (API REST)"
 
-#: ../class-wc-gateway-payzenstd.php:401
-msgid "Embedded Smartform on merchant site (REST API)"
-msgstr "Smartform embarqué sur le site marchand (API REST)"
-
-#: ../class-wc-gateway-payzenstd.php:402
-msgid "Embedded Smartform extended on merchant site with logos (REST API)"
-msgstr "Smartform étendu embarqué sur le site marchand avec logos (API REST)"
-
 #: ../class-wc-gateway-payzenstd.php:403
-msgid "Embedded Smartform extended on merchant site without logos (REST API)"
-msgstr "Smartform étendu embarqué sur le site marchand sans logos (API REST)"
+msgid "Embedded payment fields extended on merchant site with logos (REST API)"
+msgstr "Champs de paiement étendus embarqués sur le site marchand avec logos (API REST)"
 
-#: ../class-wc-gateway-payzenstd.php:426
+#: ../class-wc-gateway-payzenstd.php:404
+msgid "Embedded payment fields extended on merchant site without logos (REST API)"
+msgstr "Champs de paiement étendus embarqués sur le site marchand sans logos (API REST)"
+
+#: ../class-wc-gateway-payzenstd.php:406
+msgid "Select how the payment data will be entered by buyer. Think to update payment method description to match your selected mode."
+msgstr ""
+"Sélectionner la manière dont seront saisies les informations de paiement par l'acheteur. Pensez à modifier la description de la méthode de paiement selon le mode "
+"sélectionné."
+
+#: ../class-wc-gateway-payzenstd.php:430
 msgid "Use buyer wallet to manage tokens"
 msgstr "Utiliser le wallet acheteur pour gérer les alias"
 
-#: ../class-wc-gateway-payzenstd.php:433
+#: ../class-wc-gateway-payzenstd.php:437
 msgid ""
-"A wallet allows a buyer to store multiple payment cards and choose which one to use at the time of purchase, without having to enter a card number. The "
-"buyer can request the deletion of a card stored in his wallet at any time."
+"A wallet allows a buyer to store multiple payment cards and choose which one to use at the time of purchase, without having to enter a card number. The buyer can request "
+"the deletion of a card stored in his wallet at any time."
 msgstr ""
-"Un wallet (portefeuille électronique) permet à un acheteur de stocker plusieurs cartes de paiement et de choisir laquelle utiliser au moment de l'achat, "
-"sans avoir à saisir son numéro de carte. L'acheteur peut à tout moment demander la suppression d'une carte enregistrée dans son wallet."
+"Un wallet (portefeuille électronique) permet à un acheteur de stocker plusieurs cartes de paiement et de choisir laquelle utiliser au moment de l'achat, sans avoir à "
+"saisir son numéro de carte. L'acheteur peut à tout moment demander la suppression d'une carte enregistrée dans son wallet."
 
-#: ../class-wc-gateway-payzenstd.php:467
+#: ../class-wc-gateway-payzenstd.php:471
 msgid "CUSTOMIZATION"
 msgstr "PERSONNALISATION"
 
-#: ../class-wc-gateway-payzenstd.php:472
+#: ../class-wc-gateway-payzenstd.php:476
 msgid "Display in a pop-in"
 msgstr "Afficher dans une pop-in"
 
-#: ../class-wc-gateway-payzenstd.php:476
+#: ../class-wc-gateway-payzenstd.php:480
 msgid "If enabled, the selected payment mode will be displayed in a pop-in."
 msgstr "Si activé, le mode de paiement sélectionné sera affiché dans une pop-in."
 
-#: ../class-wc-gateway-payzenstd.php:480
+#: ../class-wc-gateway-payzenstd.php:484
 msgid "Theme"
 msgstr "Thème"
 
-#: ../class-wc-gateway-payzenstd.php:487
-msgid "Select a theme to use to display the embedded payment fields or the Smartform."
-msgstr "Sélectionnez un thème à utiliser pour afficher les champs embarqués ou le Smartform."
+#: ../class-wc-gateway-payzenstd.php:491
+msgid "Select a theme to use to display the embedded payment fields."
+msgstr "Sélectionnez un thème à utiliser pour afficher les champs de paiement embarqués."
 
-#: ../class-wc-gateway-payzenstd.php:492
+#: ../class-wc-gateway-payzenstd.php:496
 msgid "Compact mode"
 msgstr "Mode compact"
 
-#: ../class-wc-gateway-payzenstd.php:496
-msgid "If enabled, the Smartform will be displayed in a compact mode."
-msgstr "Si activé, le Smartform sera affiché en mode compact."
-
 #: ../class-wc-gateway-payzenstd.php:500
+msgid "If enabled, the embedded payment fields will be displayed in a compact mode."
+msgstr "Si activé, les champs de paiement embarqués seront affichés en mode compact."
+
+#: ../class-wc-gateway-payzenstd.php:504
 msgid "Payment means grouping threshold"
 msgstr "Seuil de regroupement des moyens de paiement"
 
-#: ../class-wc-gateway-payzenstd.php:502
+#: ../class-wc-gateway-payzenstd.php:506
 msgid "Number from which payment means will be grouped."
 msgstr "Nombre de moyens de paiement à partir duquel ils vont être regroupés."
 
-#: ../class-wc-gateway-payzenstd.php:506
+#: ../class-wc-gateway-payzenstd.php:510
 msgid "Custom fields placeholders"
 msgstr "Placeholders personnalisés des champs"
 
-#: ../class-wc-gateway-payzenstd.php:513
-msgid "Texts to use as placeholders for embedded payment fields, Smartform or Smartform extended."
-msgstr "Textes à utiliser comme placeholders pour les champs de paiement embarqués, Smartform ou Smartform étendu."
-
 #: ../class-wc-gateway-payzenstd.php:517
+msgid "Texts to use as placeholders for embedded payment fields."
+msgstr "Textes à utiliser comme placeholders pour les champs de paiement embarqués."
+
+#: ../class-wc-gateway-payzenstd.php:521
 msgid "Register card label"
 msgstr "Libellé d'enregistrement de la carte"
 
-#: ../class-wc-gateway-payzenstd.php:519
+#: ../class-wc-gateway-payzenstd.php:523
 msgid "Register my card"
 msgstr "Enregistrer ma carte"
 
-#: ../class-wc-gateway-payzenstd.php:520
+#: ../class-wc-gateway-payzenstd.php:524
 msgid "Label displayed to invite buyers to register their card data."
 msgstr "Libellé affiché pour inviter les acheteurs à enregistrer les données de leurs cartes."
 
-#: ../class-wc-gateway-payzenstd.php:524
+#: ../class-wc-gateway-payzenstd.php:528
 msgid "Payment attempts number for cards"
 msgstr "Nombre de tentatives de paiement par cartes"
 
-#: ../class-wc-gateway-payzenstd.php:526
+#: ../class-wc-gateway-payzenstd.php:530
 msgid "Maximum number of payment by cards retries after a failed payment (between 0 and 2). If blank, the gateway default value is 2."
-msgstr ""
-"Nombre maximum de tentatives de paiement par cartes après un paiement en échec (entre 0 et 2). Si vide, la valeur par défaut de la plateforme est 2."
+msgstr "Nombre maximum de tentatives de paiement par cartes après un paiement en échec (entre 0 et 2). Si vide, la valeur par défaut de la plateforme est 2."
 
-#: ../class-wc-gateway-payzenstd.php:601
+#: ../class-wc-gateway-payzenstd.php:605
 msgid "Card number"
 msgstr "Numéro de carte"
 
-#: ../class-wc-gateway-payzenstd.php:610
+#: ../class-wc-gateway-payzenstd.php:614
 msgid "Expiry date"
 msgstr "Date d'expiration"
 
-#: ../class-wc-gateway-payzenstd.php:619
+#: ../class-wc-gateway-payzenstd.php:623
 msgid "CVV"
 msgstr "CVV"
-
-#: ../class-wc-gateway-payzenstd.php:782
-msgid "Warning, some payment means are not compatible with an integration by iframe. Please consult the documentation for more details."
-msgstr "Attention, certains moyens de paiement ne sont pas compatibles avec une intégration par iframe. Consulter la documentation pour plus de détails."
 
 #: ../class-wc-gateway-payzenstd.php:796
 #, php-format
 msgid "The \"Payment by token\" option should be enabled on your %s store to use this feature.\\n\\nAre you sure you want to enable this feature?"
 msgstr ""
-"L'option \"Paiement par alias\" doit être activée sur votre boutique %s pour utiliser cette fonctionnalité.\\n\\nÊtes-vous sûr de vouloir activer cette "
-"fonctionnalité?"
+"L'option \"Paiement par alias\" doit être activée sur votre boutique %s pour utiliser cette fonctionnalité.\\n\\nÊtes-vous sûr de vouloir activer cette fonctionnalité?"
 
-#: ../class-wc-gateway-payzenstd.php:1469 ../class-wc-gateway-payzensubscription.php:217 ../class-wc-gateway-payzenwcssubscription.php:263
+#: ../class-wc-gateway-payzenstd.php:1479 ../class-wc-gateway-payzensubscription.php:217 ../class-wc-gateway-payzenwcssubscription.php:266
 #, php-format
 msgid "You will pay with your stored means of payment %s"
 msgstr "Vous allez payer avec votre moyen de paiement enregistré %s"
 
-#: ../class-wc-gateway-payzenstd.php:1470 ../class-wc-gateway-payzensubscription.php:218 ../class-wc-gateway-payzenwcssubscription.php:264
+#: ../class-wc-gateway-payzenstd.php:1480 ../class-wc-gateway-payzensubscription.php:218 ../class-wc-gateway-payzenwcssubscription.php:267
 msgid "manage your payment means"
 msgstr "gérez vos moyens de paiement"
 
-#: ../class-wc-gateway-payzenstd.php:1480
+#: ../class-wc-gateway-payzenstd.php:1490
 msgid "Click here to update the IBAN associated with the SEPA mandate."
 msgstr "Cliquez ici pour mettre à jour l'IBAN associé au mandat SEPA."
 
-#: ../class-wc-gateway-payzenstd.php:1481
+#: ../class-wc-gateway-payzenstd.php:1491
 msgid "Click here to pay with your registered means of payment."
 msgstr "Cliquez ici pour payer avec votre moyen de paiement enregistré."
 
-#: ../class-wc-gateway-payzenstd.php:1487
+#: ../class-wc-gateway-payzenstd.php:1497
 msgid "OR"
 msgstr "OU"
 
-#: ../class-wc-gateway-payzenstd.php:1495
+#: ../class-wc-gateway-payzenstd.php:1505
 msgid "Click here to pay with another means of payment."
 msgstr "Cliquez ici pour payer avec un autre moyen de paiement."
 
-#: ../class-wc-gateway-payzenstd.php:2113
+#: ../class-wc-gateway-payzenstd.php:2152
 msgid "Please wait, you will be redirected to the payment gateway."
 msgstr "Merci de patienter, vous allez être redirigé vers la plateforme de paiement."
 
-#: ../class-wc-gateway-payzenstd.php:2116
+#: ../class-wc-gateway-payzenstd.php:2155
 msgid "If nothing happens in 10 seconds, please click the button below."
 msgstr "Si rien ne se passe dans 10 secondes, cliquez sur le bouton ci-dessous."
 
-#: ../class-wc-gateway-payzenstd.php:2124
+#: ../class-wc-gateway-payzenstd.php:2163
 #, php-format
 msgid "Pay via %s"
 msgstr "Payer via %s"
 
-#: ../class-wc-gateway-payzenstd.php:2125
+#: ../class-wc-gateway-payzenstd.php:2164
 msgid "Cancel order &amp; restore cart"
 msgstr "Annuler la cmde &amp; voir le panier"
 
-#: ../class-wc-gateway-payzenstd.php:2209
+#: ../class-wc-gateway-payzenstd.php:2248
 #, php-format
 msgid "The store currency (%s) is not supported by %s."
 msgstr "La devise de votre boutique (%s) n'est pas supportée par %s."
 
-#: ../class-wc-gateway-payzenstd.php:2680
+#: ../class-wc-gateway-payzenstd.php:2719
 #, php-format
 msgid "Online Refund of %1$s - Reason: %2$s."
 msgstr "Remboursement en ligne de %1$s - Raison : %2$s."
 
-#: ../class-wc-gateway-payzensubscription.php:29 ../class-wc-gateway-payzenwcssubscription.php:669
+#: ../class-wc-gateway-payzensubscription.php:29 ../class-wc-gateway-payzenwcssubscription.php:419
 msgid "Subscription payment"
 msgstr "Paiement par abonnement"
 
@@ -1298,7 +1279,7 @@ msgstr "Abonnements gérés par la plateforme %s"
 msgid "Deprecated"
 msgstr "Obsolète"
 
-#: ../class-wc-gateway-payzensubscription.php:118 ../class-wc-gateway-payzenwcssubscription.php:136
+#: ../class-wc-gateway-payzensubscription.php:118 ../class-wc-gateway-payzenwcssubscription.php:139
 msgid "Enables / disables payment by Subscription."
 msgstr "Activer / désactiver le paiement par abonnement."
 
@@ -1312,11 +1293,11 @@ msgstr "Personnalisée"
 
 #: ../class-wc-gateway-payzensubscription.php:133
 msgid ""
-"If you buy subscriptions on your site, choose the solution you use to manage them. If you choose \"Custom\", your developper may develop a subscriptions "
-"adapter for our plugin."
+"If you buy subscriptions on your site, choose the solution you use to manage them. If you choose \"Custom\", your developper may develop a subscriptions adapter for our "
+"plugin."
 msgstr ""
-"Si vous vendez des abonnements sur votre site, sélectionnez la solution que vous utilisez pour les gérer. Si vous choisissez \"Personnalisée\", votre "
-"développeur doit implémenter un adaptateur de gestion d'abonnements pour notre plugin."
+"Si vous vendez des abonnements sur votre site, sélectionnez la solution que vous utilisez pour les gérer. Si vous choisissez \"Personnalisée\", votre développeur doit "
+"implémenter un adaptateur de gestion d'abonnements pour notre plugin."
 
 #: ../class-wc-gateway-payzensubscription.php:304
 #, php-format
@@ -1338,17 +1319,11 @@ msgstr "Une erreur est survenue durant l'annulation ou la mise à jour de l'abon
 msgid "Subscription is updated only in WooCommerce. Please, consider making necessary changes in %s Back Office."
 msgstr "L'abonnement est mis à jour uniquement dans WooCommerce. Pensez à apporter les modifications nécessaires dans le Back Office %s."
 
-#: ../class-wc-gateway-payzensubscription.php:535 ../class-wc-gateway-payzensubscription.php:538 ../class-wc-gateway-payzensubscription.php:562
-#: ../class-wc-gateway-payzenwcssubscription.php:343
-#, php-format
-msgid "Warning! %s plugin must be installed and activated for the subscription payment method to work."
-msgstr "Attention! Le plugin %s doit être installé et activé pour que le paiement par abonnement fonctionne."
-
 #: ../class-wc-gateway-payzensubscription.php:541
 msgid "Warning! You have to implement a subscriptions adapter for our plugin."
 msgstr "Attention! Vous devez implémenter un adaptateur d\\'abonnements pour notre plugin."
 
-#: ../class-wc-gateway-payzensubscription.php:632 ../class-wc-gateway-payzenwcssubscription.php:668
+#: ../class-wc-gateway-payzensubscription.php:632 ../class-wc-gateway-payzenwcssubscription.php:418
 #, php-format
 msgid "This method cannot be enabled. You have to disable \"%s\" method first."
 msgstr "Cette méthode ne peut pas être activée. Vous devez d'abord désactiver la méthode \"%s\"."
@@ -1365,95 +1340,92 @@ msgstr "Abonnements gérés par WooCommerce Subscriptions"
 msgid "Recommended"
 msgstr "Recommandé"
 
-#: ../class-wc-gateway-payzenwcssubscription.php:382
-msgid "Private key is not configured. Subscription renewal cannot be processed."
-msgstr "La clé privée n'est pas configurée. Le renouvellement de l'abonnement ne peut être traité."
-
-#: ../class-wc-gateway-payzenwcssubscription.php:397
-msgid "Customer has no valid identifier. Subscription renewal cannot be processed."
-msgstr "Le client n'a pas d'identifiant valide. Le renouvellement de l'abonnement ne peut être traité."
-
-#: ../class-wc-gateway-payzenwcssubscription.php:425
-#, php-format
-msgid "An error has occurred during the renewal of the subscription. Please consult the %s logs for more details."
-msgstr "Une erreur est survenue durant le renouvellement de l'abonnement. Veuillez consulter les logs de %s pour plus de détails."
-
-#: ../class-wc-gateway-payzenwcssubscription.php:468
-#, php-format
-msgid "Error while processing order: %s"
-msgstr "Erreur lors du traitement de la commande: %s"
-
-#: ../class-wc-gateway-payzenwcssubscription.php:611
-#, php-format
-msgid "%s token"
-msgstr "Alias %s"
-
 #: ../includes/PayzenRestTools.php:191
 #, php-format
 msgid "Unexpected transaction type received (%1$s)."
 msgstr "Type de transaction inattendu reçu (%1$s)."
+
+#: ../includes/PayzenSubscriptionTools.php:46
+msgid "Private key is not configured. Subscription renewal cannot be processed."
+msgstr "La clé privée n'est pas configurée. Le renouvellement de l'abonnement ne peut être traité."
+
+#: ../includes/PayzenSubscriptionTools.php:61
+msgid "Customer has no valid identifier. Subscription renewal cannot be processed."
+msgstr "Le client n'a pas d'identifiant valide. Le renouvellement de l'abonnement ne peut être traité."
+
+#: ../includes/PayzenSubscriptionTools.php:89
+#, php-format
+msgid "An error has occurred during the renewal of the subscription. Please consult the %s logs for more details."
+msgstr "Une erreur est survenue durant le renouvellement de l'abonnement. Veuillez consulter les logs de %s pour plus de détails."
+
+#: ../includes/PayzenSubscriptionTools.php:132
+#, php-format
+msgid "Error while processing order: %s"
+msgstr "Erreur lors du traitement de la commande: %s"
+
+#: ../includes/class-wc-payzen-sepa-payment-token.php:33
+#, php-format
+msgid "%1$s ending in %2$s"
+msgstr "%1$s se terminant par %2$s"
 
 #: ../includes/subscriptions/payzen-wc-subscriptions-subscriptions-handler.php:436
 #, php-format
 msgid "Error: Unable to create renewal order with %s plugin."
 msgstr "Erreur: Impossible de créer une commande renouvellement avec le plugin %s."
 
-#: ../woo-payzen-payment.php:76
+#: ../woo-payzen-payment.php:74
 #, php-format
 msgid "Sorry ! In order to use WooCommerce %s Payment plugin, you need to install and activate the WooCommerce plugin."
 msgstr "Désolé ! Pour utiliser le plugin WooCommerce %s Payment, vous devez installer et activer le plugin WooCommerce."
 
-#: ../woo-payzen-payment.php:495
+#: ../woo-payzen-payment.php:504
 msgid "Thank you for contacting us. Your email has been successfully sent."
 msgstr "Merci de nous contacter. Votre e-mail a été envoyé avec succès."
 
-#: ../woo-payzen-payment.php:497
+#: ../woo-payzen-payment.php:506
 msgid "An error has occurred. Your email was not sent."
 msgstr "Une erreur est survenue. Votre e-mail n'a pas été envoyé."
 
-#: ../woo-payzen-payment.php:500
+#: ../woo-payzen-payment.php:509
 msgid "Please make sure to configure all required fields."
 msgstr "Veuillez configurer les champs obligatoires."
 
 msgid ""
-"Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /"
-"><b>Means of payment: </b>Choose the means of payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. "
-"Leave blank to authorize all countries.<br /><b>Min. amount: </b>Minimum amount to enable the means of payment.<br /><b>Max. amount: </b>Maximum amount "
-"to enable the means of payment.<br /><b>Validation mode: </b>If manual is selected, you will have to confirm payments manually in your %s Back Office."
-"<br /><b>Capture delay: </b>The number of days before the bank capture. Enter value only if different from %s general configuration.<br /><b>Embedded "
-"mode: </b>If you enable this option, the payment mean will be displayed in the Smartform. Attention, not all available payment means are supported by the "
-"Smartform. For more information, refer to the module documentation.<br /><b>Cart data: </b>If you disable this option, the shopping cart details will not "
-"be sent to the gateway. Attention, in some cases, this option has to be enabled. For more information, refer to the module documentation.<br /><b>Do not "
-"forget to click on « Save » button to save your modifications.</b>"
+"Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of payment: </"
+"b>Choose the means of payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. Leave blank to authorize all countries."
+"<br /><b>Min. amount: </b>Minimum amount to enable the means of payment.<br /><b>Max. amount: </b>Maximum amount to enable the means of payment.<br /><b>Validation mode: "
+"</b>If manual is selected, you will have to confirm payments manually in your %s Back Office.<br /><b>Capture delay: </b>The number of days before the bank capture. Enter "
+"value only if different from %s general configuration.<br /><b>Embedded mode: </b>If you enable this option, the payment mean will be displayed in the embedded payment "
+"fields. Attention, not all available payment means are supported by the embedded payment. For more information, refer to the module documentation.<br /><b>Cart data: </"
+"b>If you disable this option, the shopping cart details will not be sent to the gateway. Attention, in some cases, this option has to be enabled. For more information, "
+"refer to the module documentation.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"
 msgstr ""
-"Cliquer sur le bouton « Ajouter » pour configurer un ou plusieurs moyens de paiement.<br /><b>Libellé: </b>Le libellé du moyen de paiement à afficher sur "
-"votre site.<br /><b>Moyen de paiement: </b>Choisir le moyen de paiement que vous voulez proposer.<br /><b>Pays: </b>Pays où le moyen de paiement sera "
-"disponible. Laisser vide pour autoriser tous les pays.<br /><b>Montant min: </b>Montant minimum pour proposer le moyen de paiement.<br /><b>Montant max: "
-"</b>Montant maximum pour proposer le moyen de paiement.<br /><b>Mode de validation: </b>En mode manuel, vous devrez confirmer les paiements dans le Back "
-"Office %s.<br /><b>Délai de remise: </b>Le nombre de jours avant la remise en banque. Saisir une valeur seulement si différente de la configuration %s "
-"générale.<br /><b>Mode embarqué: </b>Si vous activez cette option, le moyen de paiement sera affiché dans le Smartform. À noter que tous les moyens de "
-"paiement ne sont pas supportés par le Smartform. Reportez-vous à la documentation pour plus d'informations.<br /><b>Données panier: </b>Si vous "
-"désactivez cette option, le détail du panier ne sera pas envoyé à la plateforme. A noter que dans certains cas, cette option doit être activée. Reportez-"
-"vous à la documentation pour plus d'informations.<br /><b>N'oubliez pas de cliquer sur le bouton « Enregistrer » afin de sauvegarder vos modifications.</"
-"b>"
+"Cliquer sur le bouton « Ajouter » pour configurer un ou plusieurs moyens de paiement.<br /><b>Libellé: </b>Le libellé du moyen de paiement à afficher sur votre site.<br /"
+"><b>Moyen de paiement: </b>Choisir le moyen de paiement que vous voulez proposer.<br /><b>Pays: </b>Pays où le moyen de paiement sera disponible. Laisser vide pour "
+"autoriser tous les pays.<br /><b>Montant min: </b>Montant minimum pour proposer le moyen de paiement.<br /><b>Montant max: </b>Montant maximum pour proposer le moyen de "
+"paiement.<br /><b>Mode de validation: </b>En mode manuel, vous devrez confirmer les paiements dans le Back Office %s.<br /><b>Délai de remise: </b>Le nombre de jours "
+"avant la remise en banque. Saisir une valeur seulement si différente de la configuration %s générale.<br /><b>Mode embarqué: </b>Si vous activez cette option, le moyen de "
+"paiement sera affiché dans les champs de paiement embarqués. À noter que tous les moyens de paiement ne sont pas supportés par le paiement embarqué. Reportez-vous à la "
+"documentation pour plus d'informations.<br /><b>Données panier: </b>Si vous désactivez cette option, le détail du panier ne sera pas envoyé à la plateforme. A noter que "
+"dans certains cas, cette option doit être activée. Reportez-vous à la documentation pour plus d'informations.<br /><b>N'oubliez pas de cliquer sur le bouton "
+"« Enregistrer » afin de sauvegarder vos modifications.</b>"
 
 msgid ""
-"Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /"
-"><b>Means of payment: </b>Choose the means of payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. "
-"Leave blank to authorize all countries.<br /><b>Min. amount: </b>Minimum amount to enable the means of payment.<br /><b>Max. amount: </b>Maximum amount "
-"to enable the means of payment.<br /><b>Validation mode: </b>If manual is selected, you will have to confirm payments manually in your %s Back Office."
-"<br /><b>Capture delay: </b>The number of days before the bank capture. Enter value only if different from %s general configuration.<br /><b>Cart data: </"
-"b>If you disable this option, the shopping cart details will not be sent to the gateway. Attention, in some cases, this option has to be enabled. For "
-"more information, refer to the module documentation.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"
+"Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of payment: </"
+"b>Choose the means of payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. Leave blank to authorize all countries."
+"<br /><b>Min. amount: </b>Minimum amount to enable the means of payment.<br /><b>Max. amount: </b>Maximum amount to enable the means of payment.<br /><b>Validation mode: "
+"</b>If manual is selected, you will have to confirm payments manually in your %s Back Office.<br /><b>Capture delay: </b>The number of days before the bank capture. Enter "
+"value only if different from %s general configuration.<br /><b>Cart data: </b>If you disable this option, the shopping cart details will not be sent to the gateway. "
+"Attention, in some cases, this option has to be enabled. For more information, refer to the module documentation.<br /><b>Do not forget to click on « Save » button to "
+"save your modifications.</b>"
 msgstr ""
-"Cliquer sur le bouton « Ajouter » pour configurer un ou plusieurs moyens de paiement.<br /><b>Libellé: </b>Le libellé du moyen de paiement à afficher sur "
-"votre site.<br /><b>Moyen de paiement: </b>Choisir le moyen de paiement que vous voulez proposer.<br /><b>Pays: </b>Pays où le moyen de paiement sera "
-"disponible. Laisser vide pour autoriser tous les pays.<br /><b>Montant min: </b>Montant minimum pour proposer le moyen de paiement.<br /><b>Montant max: "
-"</b>Montant maximum pour proposer le moyen de paiement.<br /><b>Mode de validation: </b>En mode manuel, vous devrez confirmer les paiements dans le Back "
-"Office %s.<br /><b>Délai de remise: </b>Le nombre de jours avant la remise en banque. Saisir une valeur seulement si différente de la configuration %s "
-"générale.<br /><b>Données panier: </b>Si vous désactivez cette option, le détail du panier ne sera pas envoyé à la plateforme. A noter que dans certains "
-"cas, cette option doit être activée. Reportez-vous à la documentation pour plus d'informations.<br /><b>N'oubliez pas de cliquer sur le bouton « "
-"Enregistrer » afin de sauvegarder vos modifications.</b>"
+"Cliquer sur le bouton « Ajouter » pour configurer un ou plusieurs moyens de paiement.<br /><b>Libellé: </b>Le libellé du moyen de paiement à afficher sur votre site.<br /"
+"><b>Moyen de paiement: </b>Choisir le moyen de paiement que vous voulez proposer.<br /><b>Pays: </b>Pays où le moyen de paiement sera disponible. Laisser vide pour "
+"autoriser tous les pays.<br /><b>Montant min: </b>Montant minimum pour proposer le moyen de paiement.<br /><b>Montant max: </b>Montant maximum pour proposer le moyen de "
+"paiement.<br /><b>Mode de validation: </b>En mode manuel, vous devrez confirmer les paiements dans le Back Office %s.<br /><b>Délai de remise: </b>Le nombre de jours "
+"avant la remise en banque. Saisir une valeur seulement si différente de la configuration %s générale.<br /><b>Données panier: </b>Si vous désactivez cette option, le "
+"détail du panier ne sera pas envoyé à la plateforme. A noter que dans certains cas, cette option doit être activée. Reportez-vous à la documentation pour plus "
+"d'informations.<br /><b>N'oubliez pas de cliquer sur le bouton « Enregistrer » afin de sauvegarder vos modifications.</b>"
 
 #: ../includes/Lyranetwork/payzen/Sdk/Refund/Api.php:117
 msgid "Refund of split payment is not supported. Please, consider making necessary changes in %1$s Back Office."

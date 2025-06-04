@@ -44,16 +44,22 @@ var payzenUpdatePaymentBlock = function (useIdentifier, methodId) {
     jQuery("#payzen_use_identifier").val(useIdentifier);
 };
 
-var payzenstd_show_iframe = function() {
-    // Unblock screen.
-    jQuery('form.wc-block-components-form wc-block-checkout__form').unblock();
-    jQuery('.wc-block-components-checkout-place-order-button').prop("disabled", false);
+var payzenWaitForElement = function (selector) {
+    return new Promise(resolve => {
+        if (document.querySelector(selector)) {
+            return resolve(document.querySelector(selector));
+        }
 
-    jQuery('.payment_method_payzenstd p:first-child').hide();
-    jQuery('ul.payzenstd-view-top li.block').hide();
-    jQuery('ul.payzenstd-view-bottom li.block').hide();
-    jQuery('#payzen_iframe').show();
-    jQuery('#payzen_iframe').attr('src', window.IFRAME_LINK);
+        const observer = new MutationObserver(mutations => {
+            if (document.querySelector(selector)) {
+                observer.disconnect();
+                resolve(document.querySelector(selector));
+            }
+        });
 
-    jQuery(window).unbind('beforeunload');
-};
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+}

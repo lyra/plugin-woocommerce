@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.14.4
+ * Version: 1.15.0
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
- * Tested up to: 6.7
+ * Tested up to: 6.8
  * WC requires at least: 2.0
- * WC tested up to: 9.5
+ * WC tested up to: 9.8
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -45,10 +45,8 @@ $payzen_plugin_features = array(
     'prodfaq' => true,
     'restrictmulti' => false,
     'shatwo' => true,
-    'embedded' => true,
-    'smartform' => true,
     'subscr' => true,
-    'support' => true,
+    'support' => false,
 
     'multi' => true,
     'choozeo' => false,
@@ -157,7 +155,7 @@ function woocommerce_payzen_init()
     require_once 'includes/class-wc-payzen-sepa-payment-token.php';
     require_once 'includes/PayzenTools.php';
 
-    // Restore WC notices in case of IFRAME or POST as return mode.
+    // Restore WC notices in case of POST as return mode.
     WC_Gateway_Payzen::restore_wc_notices();
 }
 add_action('woocommerce_init', 'woocommerce_payzen_init');

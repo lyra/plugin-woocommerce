@@ -14,7 +14,6 @@ namespace Lyranetwork\Payzen\Sdk\Form;
  */
 class Request
 {
-
     /**
      * The fields to send to the payment gateway.
      *
@@ -119,9 +118,9 @@ class Request
         $this->addField('signature', 'Signature', '#^[0-9a-f]{40}$#u', true);
 
         $this->addField('vads_acquirer_transient_data', 'Acquirer transient data', $ans255);
-        $this->addField('vads_action_mode', 'Action mode', '#^INTERACTIVE|SILENT$#u', true, 11);
+        $this->addField('vads_action_mode', 'Action mode', '#^INTERACTIVE|SILENT$#u', true);
         $this->addField('vads_amount', 'Amount', '#^' . $supzero . '$#u', true);
-        $this->addField('vads_available_languages', 'Available languages', '#^(|[A-Za-z]{2}(;[A-Za-z]{2})*)$#u', false, 2);
+        $this->addField('vads_available_languages', 'Available languages', '#^(|[A-Za-z]{2}(;[A-Za-z]{2})*)$#u', false);
         $this->addField('vads_capture_delay', 'Capture delay', '#^\d*$#u');
         $this->addField('vads_card_number', 'Card number', '#^\d{13,19}$#u');
         $this->addField('vads_contracts', 'Contracts', $ans255);
@@ -131,7 +130,7 @@ class Request
         $this->addField('vads_cust_address', 'Customer address', $ans255);
         $this->addField('vads_cust_antecedents', 'Customer history', '#^NONE|NO_INCIDENT|INCIDENT$#u');
         $this->addField('vads_cust_cell_phone', 'Customer cell phone', $an63, false, 63);
-        $this->addField('vads_cust_city', 'Customer city', '#^' . $ans . '{0,63}$#u', false, 63);
+        $this->addField('vads_cust_city', 'Customer city', $ans127, false, 127);
         $this->addField('vads_cust_country', 'Customer country', '#^[A-Za-z]{2}$#u', false, 2);
         $this->addField('vads_cust_email', 'Customer email', $regex_mail, false, 127);
         $this->addField('vads_cust_first_name', 'Customer first name', $an63, false, 63);
@@ -139,7 +138,7 @@ class Request
         $this->addField('vads_cust_last_name', 'Customer last name', $an63, false, 63);
         $this->addField('vads_cust_legal_name', 'Customer legal name', '#^' . $ans . '{0,100}$#u', false, 100);
         $this->addField('vads_cust_name', 'Customer name', $ans127, false, 127);
-        $this->addField('vads_cust_phone', 'Customer phone', $an63, false, 63);
+        $this->addField('vads_cust_phone', 'Customer phone', '#^' . $ans . '{0,32}$#u', false, 32);
         $this->addField('vads_cust_state', 'Customer state/region', '#^' . $ans . '{0,63}$#u', false, 63);
         $this->addField('vads_cust_status', 'Customer status (private or company)', '#^PRIVATE|COMPANY$#u', false, 7);
         $this->addField('vads_cust_title', 'Customer title', '#^' . $ans . '{0,63}$#u', false, 63);
@@ -150,16 +149,16 @@ class Request
         $this->addField('vads_cvv', 'Card verification number', '#^\d{3,4}$#u');
         $this->addField('vads_expiry_month', 'Month of card expiration', '#^\d[0-2]{1}$#u');
         $this->addField('vads_expiry_year', 'Year of card expiration', '#^20[0-9]{2}$#u');
-        $this->addField('vads_identifier', 'Identifier', '#^'.$ans.'{0,50}$#u', false, 50);
+        $this->addField('vads_identifier', 'Identifier', '#^' . $ans . '{0,50}$#u', false, 50);
         $this->addField('vads_insurance_amount', 'The amount of insurance', '#^' . $supzero . '$#u', false, 12);
         $this->addField('vads_language', 'Language', '#^[A-Za-z]{2}$#u', false, 2);
         $this->addField('vads_nb_products', 'Number of products', '#^' . $supzero . '$#u', false);
-        $this->addField('vads_order_id', 'Order id', '#^[A-za-z0-9]{0,12}$#u', false, 12);
+        $this->addField('vads_order_id', 'Order id', $an63, false);
         $this->addField('vads_order_info', 'Order info', $ans255);
         $this->addField('vads_order_info2', 'Order info 2', $ans255);
         $this->addField('vads_order_info3', 'Order info 3', $ans255);
-        $this->addField('vads_page_action', 'Page action', '#^PAYMENT$#u', true, 7);
-        $this->addField('vads_payment_cards', 'Payment cards', '#^([A-Za-z0-9\-_]+;)*[A-Za-z0-9\-_]*$#u', false, 127);
+        $this->addField('vads_page_action', 'Page action', '#^PAYMENT$#u', true);
+        $this->addField('vads_payment_cards', 'Payment cards', '#^([A-Za-z0-9\-_]+;)*[A-Za-z0-9\-_]*$#u', false);
         $this->addField('vads_payment_config', 'Payment config', $regex_payment_cfg, true);
         $this->addField('vads_payment_option_code', 'Payment option to use', $regex_payment_option, false);
         $this->addField('vads_payment_src', 'Payment source', '#^$#u', false, 0);
@@ -170,7 +169,7 @@ class Request
         $this->addField('vads_return_get_params', 'GET return parameters', $regex_params, false);
         $this->addField('vads_return_mode', 'Return mode', '#^NONE|GET|POST$#u', false, 4);
         $this->addField('vads_return_post_params', 'POST return parameters', $regex_params, false);
-        $this->addField('vads_ship_to_city', 'Shipping city', '#^' . $ans . '{0,63}$#u', false, 63);
+        $this->addField('vads_ship_to_city', 'Shipping city', $ans127, false, 127);
         $this->addField('vads_ship_to_country', 'Shipping country', '#^[A-Za-z]{2}$#u', false, 2);
         $this->addField('vads_ship_to_delay', 'Delay of shipping', '#^INFERIOR_EQUALS|SUPERIOR|IMMEDIATE|ALWAYS$#u', false, 15);
         $this->addField('vads_ship_to_delivery_company_name', 'Name of the delivery company', $ans127, false, 127);
@@ -178,12 +177,12 @@ class Request
         $this->addField('vads_ship_to_last_name', 'Shipping last name', $an63, false, 63);
         $this->addField('vads_ship_to_legal_name', 'Shipping legal name', '#^' . $ans . '{0,100}$#u', false, 100);
         $this->addField('vads_ship_to_name', 'Shipping name', '#^' . $ans . '{0,127}$#u', false, 127);
-        $this->addField('vads_ship_to_phone_num', 'Shipping phone', $ans255, false, 63);
+        $this->addField('vads_ship_to_phone_num', 'Shipping phone', '#^' . $ans . '{0,32}$#u', false, 32);
         $this->addField('vads_ship_to_speed', 'Speed of the shipping method', '#^STANDARD|EXPRESS|PRIORITY$#u', false, 8);
         $this->addField('vads_ship_to_state', 'Shipping state', $an63, false, 63);
         $this->addField('vads_ship_to_status', 'Shipping status (private or company)', '#^PRIVATE|COMPANY$#u', false, 7);
-        $this->addField('vads_ship_to_street', 'Shipping street', $ans127, false, 127);
-        $this->addField('vads_ship_to_street2', 'Shipping street (2)', $ans127, false, 127);
+        $this->addField('vads_ship_to_street', 'Shipping street', $ans255, false, 255);
+        $this->addField('vads_ship_to_street2', 'Shipping street (2)', $ans255, false, 255);
         $this->addField('vads_ship_to_type', 'Type of the shipping method', $regex_ship_type, false, 24);
         $this->addField('vads_ship_to_zip', 'Shipping zip code', $an63, false, 63);
         $this->addField('vads_shipping_amount', 'The amount of shipping', '#^' . $supzero . '$#u', false, 12);
@@ -195,14 +194,14 @@ class Request
         $this->addField('vads_theme_config', 'Theme configuration', '#^[^;=]+=[^;=]*(;[^;=]+=[^;=]*)*;?$#u');
         $this->addField('vads_totalamount_vat', 'The total amount of VAT', '#^' . $supzero . '$#u', false, 12);
         $this->addField('vads_threeds_mpi', 'Enable / disable 3D Secure', '#^[0-2]$#u', false);
-        $this->addField('vads_trans_date', 'Transaction date', $regex_trans_date, true, 14);
-        $this->addField('vads_trans_id', 'Transaction ID', '#^[0-8]\d{5}$#u', true, 6);
-        $this->addField('vads_url_cancel', 'Cancel URL', $ans127, false, 127);
-        $this->addField('vads_url_error', 'Error URL', $ans127, false, 127);
-        $this->addField('vads_url_referral', 'Referral URL', $ans127, false, 127);
-        $this->addField('vads_url_refused', 'Refused URL', $ans127, false, 127);
-        $this->addField('vads_url_return', 'Return URL', $ans127, false, 127);
-        $this->addField('vads_url_success', 'Success URL', $ans127, false, 127);
+        $this->addField('vads_trans_date', 'Transaction date', $regex_trans_date, true);
+        $this->addField('vads_trans_id', 'Transaction ID', '#^[0-8]\d{5}$#u', true);
+        $this->addField('vads_url_cancel', 'Cancel URL', $ans127, false);
+        $this->addField('vads_url_error', 'Error URL', $ans127, false);
+        $this->addField('vads_url_referral', 'Referral URL', $ans127, false);
+        $this->addField('vads_url_refused', 'Refused URL', $ans127, false);
+        $this->addField('vads_url_return', 'Return URL', $ans127, false);
+        $this->addField('vads_url_success', 'Success URL', $ans127, false);
         $this->addField('vads_user_info', 'User info', $ans255);
         $this->addField('vads_validation_mode', 'Validation mode', '#^[01]?$#u', false, 1);
         $this->addField('vads_version', 'Gatway version', '#^V2$#u', true, 2);

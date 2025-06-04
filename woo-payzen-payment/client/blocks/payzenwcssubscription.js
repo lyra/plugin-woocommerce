@@ -266,7 +266,7 @@ var refreshTempToken = function () {
 };
 
 var initFields = function() {
-    if (jQuery(submitButton).length > 0) {
+    payzenWaitForElement('input[type=radio][name=radio-control-wc-payment-method-options]').then((elm) => {
         displayFields();
         jQuery(submitButton).on('click', onButtonClick);
 
@@ -275,8 +275,7 @@ var initFields = function() {
                 displayFields();
             }
         });
-    }
+    });
 };
 
-jQuery(document).on('ready', initFields);
 jQuery(window).on('load', initFields);

@@ -93,14 +93,14 @@ class Api {
 
         try {
             // Get payment details of all transactions, including ones in unpaid status to manage refund of split payment.
-            $getPaymentDetails = $this->getPaymentDetails($orderInfo, true);
+            $getPaymentDetails = $this->getPaymentDetails($orderInfo);
 
             if (count($getPaymentDetails) > 1) {
                 // Payment in installments, refund the desired amount from last installment to first one.
                 // Check if we can refund amount.
                 $refundableAmount = 0;
                 $transactionRefundedAmount = 0;
-                $split = true;
+                $split = false;
 
                 foreach ($getPaymentDetails as $key => $transaction) {
                     // Get the refundable and the already refunded amount of each transaction.
@@ -109,8 +109,8 @@ class Api {
                     $getPaymentDetails[$key]['transactionRefundableAmount'] = $transactionRefundableAmount;
                     $refundableAmount += $transactionRefundableAmount;
 
-                    if (isset($transaction['metadata']['module_id']) && $transaction['metadata']['module_id'] == "multi") {
-                        $split = false;
+                    if ($transaction['transactionDetails']['cardDetails']['sequenceType'] === 'MULTI_PAYMENT_MEAN') {
+                        $split = true;
                     }
                 }
 
@@ -120,7 +120,7 @@ class Api {
                         throw new \Exception($msg);
                     }
 
-                    $refundTransactions = $this->getRefundDetails($orderInfo, false);
+                    $refundTransactions = $this->getRefundDetails($orderInfo);
                     $response = array(
                         'orderDetails' => array(
                             'orderId' => $orderInfo->getOrderId()
@@ -150,6 +150,16 @@ class Api {
                         }
                     );
 
+                    // Only CANCELLED transactions left, we get one to let the CMS make the actions.
+                    if (count($getPaymentDetailsPaid) == 0) {
+                        $getPaymentDetailsPaid = array_slice(array_filter(
+                            $getPaymentDetails,
+                            function ($trx) {
+                                return $trx["detailedStatus"] === "CANCELLED";
+                            }
+                        ), 0, 1);
+                    }
+
                     $AmountStillToRefund = $amountInCents;
                     $refundedAmount = 0;
                     foreach ($getPaymentDetailsPaid as $transaction) {
@@ -166,6 +176,8 @@ class Api {
                             if ($AmountStillToRefund == 0) {
                                 break;
                             }
+                        } else if ($transaction['transactionRefundableAmount'] == 0){
+                            $this->refundFromOneTransaction($orderInfo, $amountInCents, $transaction, $currency);
                         }
                     }
                 }
@@ -174,7 +186,7 @@ class Api {
                 $getPaymentDetailsPaid = array_filter(
                     $getPaymentDetails,
                     function ($trx) {
-                        return $trx["status"] !== "UNPAID";
+                        return $trx["status"] !== "UNPAID" || $trx["detailedStatus"] === "CANCELLED";
                     }
                 );
 
@@ -224,7 +236,7 @@ class Api {
      * @param boolean $unpaid to include or not unpaid transactions
      * @return array
      */
-    private function getPaymentDetails($orderInfo, $unpaid = false)
+    private function getPaymentDetails($orderInfo)
     {
         /**
          * @var Lyranetwork\Payzen\Sdk\Rest\Api $client
@@ -247,7 +259,7 @@ class Api {
         $transBySequence = array();
         foreach ($getOrderResponse['answer']['transactions'] as $transaction) {
             $sequenceNumber = $transaction['transactionDetails']['sequenceNumber'];
-            if (($transaction['status'] !== 'UNPAID' || $unpaid) && $transaction['detailedStatus'] !== 'REFUSED') {
+            if ($transaction['detailedStatus'] !== 'REFUSED') {
                 $transBySequence[$sequenceNumber] = $transaction;
             }
         }
@@ -263,7 +275,7 @@ class Api {
      * @param boolean $unpaid to include or not unpaid transactions
      * @return array
      */
-    private function getRefundDetails($orderInfo, $unpaid = false)
+    private function getRefundDetails($orderInfo)
     {
         /**
          * @var Lyranetwork\Payzen\Model\Api\Rest\Api $client
@@ -285,7 +297,7 @@ class Api {
         $transactions = array();
         foreach ($getOrderResponse['answer']['transactions'] as $transaction) {
             $uuid = $transaction['uuid'];
-            if (($transaction['status'] !== 'UNPAID' || $unpaid) && $transaction['detailedStatus'] !== 'REFUSED') {
+            if ($transaction['status'] !== 'UNPAID' && $transaction['detailedStatus'] !== 'REFUSED') {
                 $transactions[$uuid] = $transaction;
             }
         }
@@ -391,7 +403,10 @@ class Api {
             $this->privateKey
         );
 
-        if ($transStatus === 'CAPTURED') { // Transaction captured, we can do refund.
+        if ($transStatus === 'CANCELLED') {
+            $this->refundProcessor->log("Transaction already cancelled on Back Office.", 'INFO');
+            $this->refundProcessor->doOnSuccess($transaction, 'already_cancel');
+        } else if ($transStatus === 'CAPTURED') { // Transaction captured, we can do refund.
             $real_refund_amount = $amountInCents;
 
             // Get transaction amount and already transaction refunded amount.
@@ -412,7 +427,15 @@ class Api {
             $remainingAmount = $transAmount - $refundedAmount; // Calculate remaining amount.
             $currency_alpha3 = $currency->getAlpha3();
 
-            if ($remainingAmount < $amountInCents) {
+            // No refund let to do and total refund asked.
+            if ($remainingAmount === 0 && $transAmount === $amountInCents) {
+                $this->refundProcessor->log("Transaction already refunded on Back Office.", 'INFO');
+                $trs = $transaction;
+                $trs["operationType"] = 'CREDIT';
+                $this->refundProcessor->doOnSuccess($trs,'already_refund');
+                return;
+            }
+            else if ($remainingAmount < $amountInCents) {
                 if (! $currency_conversion) {
                     $remainingAmountFloat = $currency->convertAmountToFloat($remainingAmount);
                     $msg = sprintf(

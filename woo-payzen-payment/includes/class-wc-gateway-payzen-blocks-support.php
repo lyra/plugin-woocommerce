@@ -64,6 +64,12 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
         wp_enqueue_script('payzen-utils');
     }
 
+    private function get_card_data_mode()
+    {
+        $option = isset($this->settings['card_data_mode']) ? $this->settings['card_data_mode'] : 'REDIRECT';
+        return ($option === 'REST') ? 'SMARTFORMEXT' : $option;
+    }
+
     public function get_supported_features()
     {
         switch ($this->get_name()) {
@@ -218,20 +224,16 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
                 $data['payment_fields'] = apply_filters('woocommerce_payzen_payment_fields_' . $this->get_name(), null);
 
                 if (($this->get_name() === 'payzenstd') || ($this->get_name() === 'payzenwcssubscription')) {
-                    $data['payment_mode'] = isset($this->settings['card_data_mode']) ? $this->settings['card_data_mode'] : 'REDIRECT';
-                    if ($data['payment_mode'] === 'IFRAME') {
-                        $data['link'] = add_query_arg('wc-api', 'WC_Gateway_payzenstd', home_url('/'));
-                        $data['src'] = add_query_arg('loading', 'true', $data['link']);
-                    } elseif (in_array($data['payment_mode'], ['REST', 'SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS'])) {
-                        if ($vars = get_transient('payzen_js_vars_' . wp_get_session_token())) {
-                            $data['vars'] = $vars;
-                            $data['hide_smartbutton'] = get_transient('payzen_hide_smartbutton_' . wp_get_session_token());
-                            $data['temporary_token_url'] = add_query_arg('wc-api', 'WC_Gateway_' . ucfirst($this->get_name()) . '_Temporary_Form_Token', home_url('/'));
-                            $data['token_url'] = add_query_arg('wc-api', 'WC_Gateway_' . ucfirst($this->get_name()) . '_Form_Token', home_url('/'));
+                    $data['payment_mode'] = $this->get_card_data_mode();
+                    if (in_array($data['payment_mode'], ['SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS'])
+                        && $vars = get_transient('payzen_js_vars_' . wp_get_session_token())) {
+                        $data['vars'] = $vars;
+                        $data['hide_smartbutton'] = get_transient('payzen_hide_smartbutton_' . wp_get_session_token());
+                        $data['temporary_token_url'] = add_query_arg('wc-api', 'WC_Gateway_' . ucfirst($this->get_name()) . '_Temporary_Form_Token', home_url('/'));
+                        $data['token_url'] = add_query_arg('wc-api', 'WC_Gateway_' . ucfirst($this->get_name()) . '_Form_Token', home_url('/'));
 
-                            delete_transient('payzen_js_vars_' . wp_get_session_token());
-                            delete_transient('payzen_hide_smartbutton_' . wp_get_session_token());
-                        }
+                        delete_transient('payzen_js_vars_' . wp_get_session_token());
+                        delete_transient('payzen_hide_smartbutton_' . wp_get_session_token());
                     }
                 }
 

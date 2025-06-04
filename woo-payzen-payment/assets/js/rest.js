@@ -116,13 +116,11 @@ var payzenDrawRestPaymentFields = function(formToken, first) {
         payzenFormConfig['smartForm']['groupingThreshold'] = PAYZEN_GROUPING_THRESHOLD;
     }
 
-    setTimeout(function () {
-        KR.setFormConfig(payzenFormConfig).then(function(v) {
-            if (first) {
-                payzenInitRestEvents(v.KR);
-            }
-        });
-    }, 300);
+    KR.removeForms().then(function() {
+        return KR.setFormConfig(payzenFormConfig)
+    }).then(function(v) {
+        if (first) payzenInitRestEvents(v.KR);
+    });
 };
 
 var payzenUpdateFormToken = function(useIdentifier) {

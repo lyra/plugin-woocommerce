@@ -14,7 +14,6 @@ namespace Lyranetwork\Payzen\Sdk\Form;
  */
 class Field
 {
-
     /**
      * field name.
      * Matches the HTML input attribute.
@@ -105,6 +104,11 @@ class Field
     public function setValue($value)
     {
         $value = ($value === null) ? null : (string) $value;
+
+        if ($value && $this->getLength()) {
+            $value = substr($value, 0, $this->getLength());
+        }
+
         // We save value even if invalid but we return "false" as warning.
         $this->value = $value;
 

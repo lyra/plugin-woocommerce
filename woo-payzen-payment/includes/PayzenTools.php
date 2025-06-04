@@ -35,10 +35,20 @@ class PayzenTools
         $std_method_settings = get_option('woocommerce_payzenstd_settings', null);
         $card_data_mode = is_array($std_method_settings) & isset($std_method_settings['card_data_mode']) ? $std_method_settings['card_data_mode'] : 'DEFAULT';
 
-        return (($card_data_mode === 'DEFAULT') ? 'REDIRECT' : $card_data_mode);
+        switch ($card_data_mode) {
+            case 'DEFAULT':
+            case 'IFRAME':
+                return 'REDIRECT';
+
+            case 'REST':
+                return 'SMARTFORMEXT';
+
+            default:
+                return $card_data_mode;
+        }
     }
 
-    public static function is_embedded_payment($only_smartform = true)
+    public static function is_embedded_payment()
     {
         $std_settings = get_option('woocommerce_payzenstd_settings', null);
         $enabled = is_array($std_settings) && isset($std_settings['enabled']) && ($std_settings['enabled'] == 'yes');
@@ -47,11 +57,8 @@ class PayzenTools
         }
 
         $modes = array('SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS');
-        if (! $only_smartform) {
-            array_push($modes,'REST');
-        }
 
-        return isset($std_settings['card_data_mode']) && in_array($std_settings['card_data_mode'], $modes);
+        return in_array(self::get_integration_mode(), $modes);
     }
 
     public static function get_active_plugins()

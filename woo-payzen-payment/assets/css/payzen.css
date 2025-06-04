@@ -1,13 +1,5 @@
 @CHARSET "UTF-8";
 
-#payzen_iframe {
-    position: relative;
-    width: 100%;
-    min-height: 440px;
-    border: 0 none;
-    margin-bottom: 0 !important;
-}
-
 .kr-form-error span a {
     all: inherit !important;
     text-decoration: underline !important;

@@ -143,17 +143,13 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
     * Init settings for gateways.
     */
     public function init_settings() {
-        global $payzen_plugin_features;
-
         parent::init_settings();
-        if ($payzen_plugin_features['smartform']) {
-            $this->set_smartform_params();
-        }
+        $this->set_smartform_params();
     }
 
     private function set_smartform_params()
     {
-        if (! PayzenTools::is_embedded_payment(true)) {
+        if (! PayzenTools::is_embedded_payment()) {
             $this->settings['card_data_mode'] = 'SMARTFORM';
             $this->settings['rest_popin'] = 'no';
             $this->settings['rest_theme'] = 'neon';
@@ -458,7 +454,7 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
     {
         global $woocommerce;
 
-        if (! $this->is_embedded_payment(false)) {
+        if (! $this->is_embedded_payment()) {
             return false;
         }
 
@@ -469,7 +465,7 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
         return ! is_null($cust_id);
     }
 
-    public function is_embedded_payment($only_smartform = true)
+    public function is_embedded_payment()
     {
         $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
         if (! $key) {

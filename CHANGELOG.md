@@ -1,3 +1,11 @@
+1.15.0, 2025-06-04:
+- Added compatibility with WooCommerce 9.8.x versions and higher.
+- Bug fix: Fix error related to embedded form double initialization in some browsers.
+- Remove the payment by embedded fields legacy mode.
+- Remove the iframe payment mode.
+- Update list of supported payment means.
+- Update list of supported currencies.
+
 = 1.14.4, 2025-02-27:
 - Bug fix: Fix error related to payment options management.
 
