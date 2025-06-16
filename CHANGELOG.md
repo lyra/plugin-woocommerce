@@ -1,3 +1,8 @@
+1.15.1, 2025-06-16:
+- Bug fix: Fix compatibility of newly integrated payment means in the smartform.
+- Bug fix: Fix error related to refund of split payment processing.
+- Bug fix: Fix error related to refund already canceled or refunded transactions.
+
 1.15.0, 2025-06-04:
 - Added compatibility with WooCommerce 9.8.x versions and higher.
 - Bug fix: Fix error related to embedded form double initialization in some browsers.

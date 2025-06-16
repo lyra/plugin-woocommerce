@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 6.8
 WC requires at least: 2.0
 WC tested up to: 9.8
-Stable tag: 1.15.0
+Stable tag: 1.15.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,11 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+1.15.1, 2025-06-16:
+- Bug fix: Fix compatibility of newly integrated payment means in the smartform.
+- Bug fix: Fix error related to refund of split payment processing.
+- Bug fix: Fix error related to refund already canceled or refunded transactions.
 
 1.15.0, 2025-06-04:
 - Added compatibility with WooCommerce 9.8.x versions and higher.
