@@ -1603,7 +1603,11 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $email = method_exists($woocommerce->customer, 'get_billing_email') ? $woocommerce->customer->get_billing_email() : $woocommerce->customer->user_email;
         $amount = $currency->convertAmountToInteger($woocommerce->cart->total);
 
+        // Get order ID for draft orders otherwise generate a temporary order_id.
+        $order_id = $woocommerce->session->get('store_api_draft_order') ? $woocommerce->session->get('store_api_draft_order') : PayzenApi::generateTransId(time());
+
         $params = array(
+            'orderId' => $order_id,
             'amount' => $amount,
             'currency' => $currency->getAlpha3(),
             'customer' => array(
