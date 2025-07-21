@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 6.8
 WC requires at least: 2.0
 WC tested up to: 9.8
-Stable tag: 1.15.1
+Stable tag: 1.15.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,72 +42,76 @@ The payment plugin has the following features:
 
 == Changelog ==
 
-1.15.1, 2025-06-16:
-- Bug fix: Fix compatibility of newly integrated payment means in the smartform.
-- Bug fix: Fix error related to refund of split payment processing.
-- Bug fix: Fix error related to refund already canceled or refunded transactions.
+= 1.15.2, 2025-07-18 =
+* Use order metadata to store payment option selection.
+* Prevent double submission of the payment form in redirection mode.
 
-1.15.0, 2025-06-04:
-- Added compatibility with WooCommerce 9.8.x versions and higher.
-- Bug fix: Fix error related to embedded form double initialization in some browsers.
-- Remove the payment by embedded fields legacy mode.
-- Remove the iframe payment mode.
-- Update list of supported payment means.
-- Update list of supported currencies.
+= 1.15.1, 2025-06-16 =
+* Bug fix: Fix compatibility of newly integrated payment means in the smartform.
+* Bug fix: Fix error related to refund of split payment processing.
+* Bug fix: Fix error related to refund already canceled or refunded transactions.
 
-= 1.14.4, 2025-02-27:
-- Bug fix: Fix error related to payment options management.
+= 1.15.0, 2025-06-04 =
+* Added compatibility with WooCommerce 9.8.x versions and higher.
+* Bug fix: Fix error related to embedded form double initialization in some browsers.
+* Remove the payment by embedded fields legacy mode.
+* Remove the iframe payment mode.
+* Update list of supported payment means.
+* Update list of supported currencies.
 
-= 1.14.3, 2025-01-13:
-- Bug fix: Fix payment method availability for manual payment of failed subscription renewals.
-- Bug fix: Fix errors when jQuery Migrate is disabled.
-- Update all domains payment means.
-- Update all domains supported currencies.
+= 1.14.4, 2025-02-27 =
+* Bug fix: Fix error related to payment options management.
 
-= 1.14.2, 2024-10-16:
-- Bug fix: Fix redirection to payment gateway.
-- [embedded] Bug fix: Fix updating form token on shipping method change.
+= 1.14.3, 2025-01-13 =
+* Bug fix: Fix payment method availability for manual payment of failed subscription renewals.
+* Bug fix: Fix errors when jQuery Migrate is disabled.
+* Update all domains payment means.
+* Update all domains supported currencies.
 
-= 1.14.1, 2024-10-14:
-- [embedded] Bug fix: Fix error related to JS form overload.
-- [embedded] Bug fix: Fix error related to embedded form display.
+= 1.14.2, 2024-10-16 =
+* Bug fix: Fix redirection to payment gateway.
+* [embedded] Bug fix: Fix updating form token on shipping method change.
 
-= 1.14.0, 2024-09-10:
-- [sepa] Adding SEPA submodule.
-- Added compatibility with WooCommerce 9.x versions.
+= 1.14.1, 2024-10-14 =
+* [embedded] Bug fix: Fix error related to JS form overload.
+* [embedded] Bug fix: Fix error related to embedded form display.
 
-= 1.13.3, 2024-07-01:
-- [technical] Enabled some features by plugin variant.
+= 1.14.0, 2024-09-10 =
+* [sepa] Adding SEPA submodule.
+* Added compatibility with WooCommerce 9.x versions.
 
-= 1.13.2, 2024-05-30:
-- Rollback using 500 http code on error for IPN calls.
+= 1.13.3, 2024-07-01 =
+* [technical] Enabled some features by plugin variant.
 
-= 1.13.1, 2024-05-14:
-- Bug fix: Fix error related to product description format.
+= 1.13.2, 2024-05-30 =
+* Rollback using 500 http code on error for IPN calls.
 
-= 1.13.0, 2024-05-02:
-- [embedded] Use customer wallet functionality to manage payment by token.
-- [smartform] Use customer wallet functionality with Smartform to manage subscription payment with WooCommerce Subscriptions.
-- Added support of WooCommerce order cancellation from buyer account.
-- Added support of automatic refund.
-- Added new transaction status REFUND_TO_RETRY.
-- Bug fix: Fix error related to payment by token management.
-- Bug fix: Fix automatic retry on failed payment on subscription renewal.
+= 1.13.1, 2024-05-14 =
+* Bug fix: Fix error related to product description format.
 
-= 1.12.3, 2024-03-26=
-- [embedded] Take into account the notification URL on payment abandoned by buyer.
-- Bug fix: Fix PHP warning related to deprecated method wc_get_log_file_path.
+= 1.13.0, 2024-05-02 =
+* [embedded] Use customer wallet functionality to manage payment by token.
+* [smartform] Use customer wallet functionality with Smartform to manage subscription payment with WooCommerce Subscriptions.
+* Added support of WooCommerce order cancellation from buyer account.
+* Added support of automatic refund.
+* Added new transaction status REFUND_TO_RETRY.
+* Bug fix: Fix error related to payment by token management.
+* Bug fix: Fix automatic retry on failed payment on subscription renewal.
 
-= 1.12.2, 2024-03-12=
-- Bug fix: Fix error related to payment by token statuses management.
-- Bug fix: Fix error related to multi-currency management.
+= 1.12.3, 2024-03-26 =
+* [embedded] Take into account the notification URL on payment abandoned by buyer.
+* Bug fix: Fix PHP warning related to deprecated method wc_get_log_file_path.
 
-= 1.12.1, 2024-02-14=
-- Set return mode to POST by default.
-- Improve IPN errors management.
-- Bug fix: Fix retrieving admin user data for support component.
+= 1.12.2, 2024-03-12 =
+* Bug fix: Fix error related to payment by token statuses management.
+* Bug fix: Fix error related to multi-currency management.
 
-= 1.12.0, 2023-12-26=
+= 1.12.1, 2024-02-14 =
+* Set return mode to POST by default.
+* Improve IPN errors management.
+* Bug fix: Fix retrieving admin user data for support component.
+
+= 1.12.0, 2023-12-26 =
 * New management of WooCommerce subscriptions.
 * Added compatibility with WooCommerce Blocks for all payment modes.
 * Added compatibility with High-Performance Order Storage (HPOS).
@@ -117,13 +121,13 @@ The payment plugin has the following features:
 * Fix redirection page display with some WordPress themes.
 * Bug fix: Fix PHP warnings related to deprecated creation of dynamic properties.
 
-= 1.11.1, 2023-10-26=
+= 1.11.1, 2023-10-26 =
 * Fix compatibility with some WordPress 6.3.x themes.
 * [smartform] Send capture delay parameter in case of Smartform.
 * Update all domains payment means.
 * Update all domains supported currencies.
 
-= 1.11.0, 2023-09-15=
+= 1.11.0, 2023-09-15 =
 * [smartform] Smartform integration.
 * [embedded] Bug fix: Fix error related to validation mode.
 * Added compatibility with "Woocommerce Blocks" for payment in redirection.
@@ -132,20 +136,20 @@ The payment plugin has the following features:
 * Update list of supported payment means.
 * Update list of supported currencies.
 
-1.10.8, 2023-07-10=
+= 1.10.8, 2023-07-10 =
 * [franfinance] Bug fix: Saving min and max amount of the payment options correctly for Franfinance payment method.
 * [subscr] Bug fix: Do not update or cancel subscription processed by another payment method.
 * Some code fixes.
 
-1.10.7, 2023-04-19=
+= 1.10.7, 2023-04-19 =
 * Bug fix: Fix error related to customer form validation in embedded and iframe modes.
 * Bug fix: Fix verification of presence of WC Blocks in checkout page.
 * Bug fix: Fix SDK autoload for compatibility with PHP 8.2.
 
-1.10.6, 2023-04-12=
+= 1.10.6, 2023-04-12 =
 * Bug fix: Fix error related to displaying order details.
 
-1.10.5, 2023-04-11=
+= 1.10.5, 2023-04-11 =
 * Fix compatibility with WooCommerce 7.5.x versions.
 * Fix "WooCommerce Blocks" support in standard redirection payment.
 * [embedded] Bug fix: Fix number of payment attempts in case of rejected payment.

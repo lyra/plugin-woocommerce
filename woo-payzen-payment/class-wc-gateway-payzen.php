@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-9.x';
     const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
-    const PLUGIN_VERSION = '1.15.1';
+    const PLUGIN_VERSION = '1.15.2';
     const GATEWAY_VERSION = 'V2';
 
     const LOG_FOLDER = 'wp-content/uploads/wc-logs/';
@@ -2248,6 +2248,13 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     public static function payzen_update_order_meta($payzen_response, $order)
     {
         if (PayzenTools::is_hpos_enabled()) {
+            // Clear payment options.
+            $order->delete_meta_data('payzenfranfinance_option');
+            $order->delete_meta_data('payzenmulti_option');
+            $order->delete_meta_data('payzenstd_card_type');
+            $order->delete_meta_data('payzenmulti_card_type');
+            $order->delete_meta_data('payzenregroupedother_card_type');
+
             // Delete old saved transaction details.
             $order->delete_meta_data('Transaction ID');
             $order->delete_meta_data('Card number');
@@ -2288,6 +2295,13 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $order->save();
         } else {
             $order_id = (int) $payzen_response->get('order_id');
+
+            // Clear payment options.
+            delete_post_meta($order_id, 'payzenfranfinance_option');
+            delete_post_meta($order_id, 'payzenmulti_option');
+            delete_post_meta($order_id, 'payzenstd_card_type');
+            delete_post_meta($order_id, 'payzenmulti_card_type');
+            delete_post_meta($order_id, 'payzenregroupedother_card_type');
 
             // Delete old saved transaction details.
             delete_post_meta($order_id, 'Transaction ID');
@@ -2940,5 +2954,17 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $this->log("Identifier for customer {$customer->get_billing_email()}, for " . $id . " submodule, couldn't be verified on gateway: {$e->getMessage()}.");
             return true;
         }
+    }
+
+    public function get_option_metadata($option_name, $order, $is_array = true)
+    {
+        $order_id = self::get_order_property($order, 'id');
+        if (PayzenTools::is_hpos_enabled()) {
+            $option= $order->get_meta($option_name, true);
+        } else {
+            $option = get_post_meta($order_id, $option_name, true);
+        }
+
+        return $is_array ? json_decode($option, true) : $option;
     }
 }

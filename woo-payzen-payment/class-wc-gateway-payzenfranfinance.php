@@ -398,9 +398,11 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
         $order = new WC_Order($order_id);
         if (PayzenTools::is_hpos_enabled()) {
             $order->set_payment_method_title($order->get_payment_method_title() . " ({$option['label']})");
+            $order->update_meta_data('payzenfranfinance_option', json_encode($option));
             $order->save();
         } else {
             update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$option['label']})");
+            update_post_meta(self::get_order_property($order, 'id'), 'payzenfranfinance_option', json_encode($option));
         }
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
@@ -429,6 +431,10 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
         $this->payzen_request->set('capture_delay', '0');
 
         $option = get_transient('payzenfranfinance_option_' . self::get_order_property($order, 'id'));
+        if (empty($option) || ! is_array($option)) {
+            $option = $this->get_option_metadata('payzenfranfinance_option', $order);
+        }
+
         $this->payzen_request->set('payment_cards', 'FRANFINANCE_' . $option['count'] . 'X');
 
         if ($option['fees'] !== '-1') {

@@ -389,9 +389,11 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $order = new WC_Order($order_id);
         if (PayzenTools::is_hpos_enabled()) {
             $order->set_payment_method_title($order->get_payment_method_title() . " ({$option['count']} x)");
+            $order->update_meta_data('payzenmulti_option', json_encode($option));
             $order->save();
         } else {
             update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$option['count']} x)");
+            update_post_meta(self::get_order_property($order, 'id'), 'payzenmulti_option', json_encode($option));
         }
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
@@ -414,6 +416,9 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         parent::payzen_fill_request($order);
 
         $option = get_transient('payzenmulti_option_' . self::get_order_property($order, 'id'));
+        if (empty($option) || ! is_array($option)) {
+            $option = $this->get_option_metadata('payzenmulti_option', $order);
+        }
 
         // Multiple payment options.
         $amount = $this->payzen_request->get('amount');
