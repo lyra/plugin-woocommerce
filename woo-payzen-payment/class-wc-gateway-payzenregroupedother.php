@@ -717,7 +717,11 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         parent::payzen_fill_request($order);
 
         $order_id = self::get_order_property($order, 'id');
+
         $selected_card = get_transient($this->id . '_card_type_' . $order_id);
+        if (empty($selected_card)) {
+            $selected_card = $this->get_option_metadata($this->id . '_card_type', $order, false);
+        }
 
         // Set selected card.
         $this->payzen_request->set('payment_cards', $selected_card);

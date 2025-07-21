@@ -1987,6 +1987,14 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         // Save selected card into database as transcient.
         set_transient($this->id . '_card_type_' . $order_id, $selected_card);
+
+        if (PayzenTools::is_hpos_enabled()) {
+            $order = new WC_Order($order_id);
+            $order->update_meta_data($this->id . '_card_type', $selected_card);
+            $order->save();
+        } else {
+            update_post_meta($order_id, $this->id . '_card_type', $selected_card);
+        }
     }
 
     /**
@@ -2020,7 +2028,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $form .= '</form>';
 
         $form .= '<script type="text/javascript">';
-        $form .= "function payzen_submit_form() {document.getElementById('" . $this->id . "_payment_form_submit').click();}";
+        $form .= "function payzen_submit_form() {document.getElementById('" . $this->id . "_payment_form_submit').click();";
+        $form .= "document.getElementById('" . $this->id . "_payment_form_submit').disabled = true;}";
         $form .= "if (window.addEventListener) {window.addEventListener('load', payzen_submit_form, false);} else if (window.attachEvent) { window.attachEvent('onload', payzen_submit_form);}";
         $form .= "</script>";
 
@@ -2122,8 +2131,11 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             // Payment cards.
             if ($this->get_option('card_data_mode') === 'MERCHANT') {
                 $selected_card = get_transient($this->id . '_card_type_' . $order_id);
-                $this->payzen_request->set('payment_cards', $selected_card);
+                if (empty($selected_card)) {
+                    $selected_card = $this->get_option_metadata($this->id . '_card_type', $order, false);
+                }
 
+                $this->payzen_request->set('payment_cards', $selected_card);
                 delete_transient($this->id . '_card_type_' . $order_id);
             } else {
                 $cards = $this->get_option('payment_cards');
