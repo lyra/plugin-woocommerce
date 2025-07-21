@@ -201,5 +201,4 @@ class PayzenTools
 
         return $token->get_token();
     }
-
 }
