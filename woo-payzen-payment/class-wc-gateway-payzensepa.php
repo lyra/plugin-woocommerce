@@ -231,7 +231,7 @@ class WC_Gateway_PayzenSepa extends WC_Gateway_PayzenStd
 
         $cust_id = self::get_order_property($order, 'user_id');
         if ($this->can_use_alias($cust_id)) {
-            $order_id = wcs_get_objects_property($order, 'id');
+            $order_id = self::get_order_property($order, 'id');
 
             $saved_token = get_transient($this->id . '_token_' . $order_id);
             delete_transient($this->id . '_token_' . $order_id);

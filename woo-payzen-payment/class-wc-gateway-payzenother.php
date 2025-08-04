@@ -46,6 +46,8 @@ class WC_Gateway_PayzenOther extends WC_Gateway_PayzenStd
         // Load the module settings.
         $this->init_settings();
 
+        $this->enabled = $this->is_available() ? 'yes' : 'no';
+
         // Define user set variables.
         $this->title = $this->get_title();
         $this->description = $this->get_description();
