@@ -1,3 +1,9 @@
+= 1.15.3, 2025-08-04 =
+* Bug fix: Fix payment method title displayed in order details.
+* Bug fix: Fix JavaScript loading when no default address option enabled.
+* [sepa] Bug fix: Fix use of undefined method on SEPA submodule.
+* Use order in awaiting payment status by default for processing payment.
+
 = 1.15.2, 2025-07-18 =
 * Use order metadata to store payment option selection.
 * Prevent double submission of the payment form in redirection mode.

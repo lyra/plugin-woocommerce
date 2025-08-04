@@ -4,8 +4,8 @@ Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
 Tested up to: 6.8
 WC requires at least: 2.0
-WC tested up to: 9.8
-Stable tag: 1.15.2
+WC tested up to: 10.0
+Stable tag: 1.15.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,12 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.15.3, 2025-08-04 =
+* Bug fix: Fix payment method title displayed in order details.
+* Bug fix: Fix JavaScript loading when no default address option enabled.
+* [sepa] Bug fix: Fix use of undefined method on SEPA submodule.
+* Use order in awaiting payment status by default for processing payment.
 
 = 1.15.2, 2025-07-18 =
 * Use order metadata to store payment option selection.

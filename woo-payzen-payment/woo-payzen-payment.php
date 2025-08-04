@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.15.2
+ * Version: 1.15.3
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
  * Tested up to: 6.8
  * WC requires at least: 2.0
- * WC tested up to: 9.8
+ * WC tested up to: 10.0
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -260,7 +260,7 @@ function woocommerce_payzen_add_method($methods)
 
     $methods[] = 'WC_Gateway_PayzenRegroupedOther';
 
-    if (get_transient('payzen_other_methods') && ! is_admin()) {
+    if (get_transient('payzen_other_methods')) {
         $other_methods = json_decode(get_transient('payzen_other_methods'), true);
 
         foreach ($other_methods as $code => $label) {

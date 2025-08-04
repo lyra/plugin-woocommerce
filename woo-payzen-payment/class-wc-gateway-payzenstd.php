@@ -116,7 +116,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             return;
         }
 
-        if ($this->is_embedded_payment() && $this->is_available()) {
+        if ($this->is_embedded_payment() && parent::is_available()) {
             $payzen_pub_key = $this->testmode ? $this->get_general_option('test_public_key') : $this->get_general_option('prod_public_key');
 
             $locale = get_locale() ? substr(get_locale(), 0, 2) : null;
@@ -1876,8 +1876,15 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         global $woocommerce;
 
         // Get order ID from session.
-        $order_id = $woocommerce->session->get('store_api_draft_order') ? $woocommerce->session->get('store_api_draft_order') : $woocommerce->session->get('order_awaiting_payment');
+        $order_id = $woocommerce->session->get('order_awaiting_payment') ? $woocommerce->session->get('order_awaiting_payment') : $woocommerce->session->get('store_api_draft_order');
         $order = new WC_Order($order_id);
+
+        if (PayzenTools::is_hpos_enabled()) {
+            $order->update_meta_data(self::METHOD_ID, $this->id);
+            $order->save();
+        } else {
+            update_post_meta(self::get_order_property($order, 'id'), self::METHOD_ID, $this->id);
+        }
 
         // Set flag about use of saved identifier.
         if (isset($_POST['use_identifier'])) {
@@ -1936,6 +1943,13 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
 
         $order = new WC_Order($order_id);
+        if (PayzenTools::is_hpos_enabled()) {
+            $order->update_meta_data(self::METHOD_ID, $this->id);
+            $order->save();
+        } else {
+            update_post_meta(self::get_order_property($order, 'id'), self::METHOD_ID, $this->id);
+        }
+
         $force_redir = isset($_POST['payzen_force_redir']) || (isset($_COOKIE[$this->id. '_force_redir']) && ! empty($_COOKIE[$this->id. '_force_redir']));
 
         // If ($_POST || $_COOKIE)['payzen_force_redir'] is set, force payment by redirection.
