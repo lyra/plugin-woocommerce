@@ -35,11 +35,12 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     const SIGN_ALGO = 'SHA-256';
     const LANGUAGE = 'fr';
 
-    const CMS_IDENTIFIER = 'WooCommerce_2.x-9.x';
+    const CMS_IDENTIFIER = 'WooCommerce_2.x-10.x';
     const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
-    const PLUGIN_VERSION = '1.15.2';
+    const PLUGIN_VERSION = '1.15.3';
     const GATEWAY_VERSION = 'V2';
 
+    const METHOD_ID = 'payzen_method_id';
     const LOG_FOLDER = 'wp-content/uploads/wc-logs/';
 
     protected $admin_page;
@@ -1724,17 +1725,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $checkout_url = $cart_url = $order->get_cancel_order_url();
         }
 
-        if (PayzenRestTools::checkResponse($_POST)) {
-            $payzen_method = $payzen_response->getExtInfo('wcs_scheduled') ? new WC_Gateway_PayzenWcsSubscription : new WC_Gateway_PayzenStd();
-            if (method_exists($order, 'set_payment_method')) {
-                $order->set_payment_method($payzen_method);
-            } else {
-                $order->payment_method = $payzen_method->id;
-                $order->payment_method_title = $payzen_method->get_title();
-            }
-
-            $order->save();
-        }
+        $this->set_payment_method($order);
 
         // Use the selected susbscriptions handler.
         $method = self::get_order_property($order, 'payment_method');
@@ -2254,6 +2245,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $order->delete_meta_data('payzenstd_card_type');
             $order->delete_meta_data('payzenmulti_card_type');
             $order->delete_meta_data('payzenregroupedother_card_type');
+            $order->delete_meta_data(self::METHOD_ID);
 
             // Delete old saved transaction details.
             $order->delete_meta_data('Transaction ID');
@@ -2302,6 +2294,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             delete_post_meta($order_id, 'payzenstd_card_type');
             delete_post_meta($order_id, 'payzenmulti_card_type');
             delete_post_meta($order_id, 'payzenregroupedother_card_type');
+            delete_post_meta($order_id, self::METHOD_ID);
 
             // Delete old saved transaction details.
             delete_post_meta($order_id, 'Transaction ID');
@@ -2483,8 +2476,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             return;
         }
 
-        $this->log("Identifier for customer #{$cust_id} successfully created or updated on payment gateway for SEPA Payment submodule. Let's save it and save IBAN / BIC.");
-
         $number = $payzen_response->get('card_number');
         preg_match('#^([A-Z]{2}[0-9]{2}[A-Z0-9]{10,30})(_[A-Z0-9]{8,11})?$#i', $number, $matches);
 
@@ -2492,6 +2483,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $iban = $matches[1];
 
         $customer_id = $payzen_response->get('cust_id');
+        $this->log("Identifier for customer #{$customer_id} successfully created or updated on payment gateway for SEPA Payment submodule. Let's save it and save IBAN / BIC.");
+
         $new_identifier = true;
 
         if ($payzen_response->get('identifier_status') == 'UPDATED') {
@@ -2966,5 +2959,24 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         return $is_array ? json_decode($option, true) : $option;
+    }
+
+    private function set_payment_method($order)
+    {
+        $order_id = self::get_order_property($order, 'id');
+
+        if (PayzenTools::is_hpos_enabled()) {
+            $payzen_method = $order->get_meta(self::METHOD_ID, true);
+            if ($payzen_method) {
+                $order->set_payment_method($payzen_method);
+            }
+        } else {
+            $payzen_method = get_post_meta($order_id, self::METHOD_ID, true);
+            if ($payzen_method) {
+                $order->payment_method = get_post_meta($order_id, self::METHOD_ID, true);
+            }
+        }
+
+        $order->save();
     }
 }

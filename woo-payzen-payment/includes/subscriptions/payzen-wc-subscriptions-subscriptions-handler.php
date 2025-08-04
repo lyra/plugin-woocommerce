@@ -57,7 +57,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
 
         $count = 0;
 
-        if (! empty($cart->cart_contents) && ! wcs_cart_contains_renewal()) {
+        if (! empty($cart->cart_contents) && (function_exists('wcs_cart_contains_renewal') && ! wcs_cart_contains_renewal())) {
             foreach ($cart->cart_contents as $cart_item) {
                 if (WC_Subscriptions_Product::is_subscription($cart_item['data'])) {
                     $count ++;

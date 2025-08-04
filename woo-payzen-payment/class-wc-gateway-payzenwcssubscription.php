@@ -203,7 +203,7 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
             return false;
         }
 
-        if (wcs_cart_contains_renewal()) {
+        if (function_exists('wcs_cart_contains_renewal') && wcs_cart_contains_renewal()) {
             return true;
         }
 

@@ -399,10 +399,13 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
         if (PayzenTools::is_hpos_enabled()) {
             $order->set_payment_method_title($order->get_payment_method_title() . " ({$option['label']})");
             $order->update_meta_data('payzenfranfinance_option', json_encode($option));
+            $order->update_meta_data(self::METHOD_ID, $this->id);
+
             $order->save();
         } else {
             update_post_meta(self::get_order_property($order, 'id'), '_payment_method_title', self::get_order_property($order, 'payment_method_title') . " ({$option['label']})");
             update_post_meta(self::get_order_property($order, 'id'), 'payzenfranfinance_option', json_encode($option));
+            update_post_meta(self::get_order_property($order, 'id'), self::METHOD_ID, $this->id);
         }
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {

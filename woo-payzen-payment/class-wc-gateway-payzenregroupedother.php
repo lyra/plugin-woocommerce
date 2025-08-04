@@ -696,6 +696,12 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
         $this->save_selected_card($order_id);
 
         $order = new WC_Order($order_id);
+        if (PayzenTools::is_hpos_enabled()) {
+            $order->update_meta_data(self::METHOD_ID, $this->id);
+            $order->save();
+        } else {
+            update_post_meta(self::get_order_property($order, 'id'), self::METHOD_ID, $this->id);
+        }
 
         if (version_compare($woocommerce->version, '2.1.0', '<')) {
             $pay_url = add_query_arg('order', self::get_order_property($order, 'id'), add_query_arg('key', self::get_order_property($order, 'order_key'), get_permalink(woocommerce_get_page_id('pay'))));
