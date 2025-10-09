@@ -144,15 +144,11 @@ var onButtonClick = function (e) {
         return true;
     }
 
-    block();
-
     if (! hideButton && ! hideSmart) {
         validateKR(KR);
     } else {
         submitForm(KR);
     }
-
-    e.preventDefault();
 };
 
 var submitForm = function (KR) {
@@ -166,6 +162,10 @@ var submitForm = function (KR) {
         // Data in checkout page has not changed, no need to calculate token again.
         submitKR(KR);
     } else {
+        if (jQuery('div.wc-block-components-validation-error')[0]) {
+            return true;
+        }
+
         savedData = newData;
         jQuery.ajax({
             method: 'POST',
@@ -190,6 +190,10 @@ var submitForm = function (KR) {
 };
 
 var submitKR = function (KR) {
+    if (jQuery('div.wc-block-components-validation-error')[0]) {
+        return true;
+    }
+
     if (hideButton) {
         let element = jQuery('.kr-smart-button');
 
@@ -224,15 +228,11 @@ var submitKR = function (KR) {
     return false;
 };
 
-var block = function() {
-    jQuery('form.wc-block-components-form wc-block-checkout__form').block();
-    jQuery(submitButton).prop("disabled", true);
-};
-
 var unblock = function() {
-    jQuery('form.wc-block-components-form wc-block-checkout__form').unblock();
-    jQuery(submitButton).prop("disabled", false);
-    jQuery('.wc-block-components-button__text').text("").text(window.PAYZEN_BUTTON_TEXT);
+    var button = document.querySelector(submitButton);
+    button.removeAttribute("aria-disabled");
+    button.setAttribute("style", "");
+    button.classList.remove("wc-block-components-checkout-place-order-button--loading");
 
     return false;
 };

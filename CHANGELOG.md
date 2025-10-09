@@ -1,3 +1,6 @@
+= 1.15.4, 2025-10-08 =
+* Bug fix: Do not process payment if mandatory address fields are invalid.
+
 = 1.15.3, 2025-08-04 =
 * Bug fix: Fix payment method title displayed in order details.
 * Bug fix: Fix JavaScript loading when no default address option enabled.
