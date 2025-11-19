@@ -1,3 +1,6 @@
+= 1.15.5, 2025-11-19 =
+* Bug fix: Fix error related to payment by embbeded fields in pop-in mode with WooCommerce legacy checkout.
+
 = 1.15.4, 2025-10-08 =
 * Bug fix: Do not process payment if mandatory address fields are invalid.
 
