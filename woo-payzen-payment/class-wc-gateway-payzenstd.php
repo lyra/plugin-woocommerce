@@ -1013,7 +1013,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                                 }
                             }
                         }
-                        var popin = jQuery('.kr-popin-button').length > 0;
+                        var popin = (jQuery('.kr-smart-form-modal-button').length > 0) || (jQuery('.kr-popin-button').length > 0);
                         if ((! popin) && (!smartbuttonAll) && (typeof smartbuttonMethod === 'undefined')) {
                             if(! " . $hide_single_payment_button . ") {
                                 if(! " . $hide_smart_button_popin . ") {
@@ -1166,7 +1166,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                                         // Unblock screen.
                                         jQuery('form.checkout').unblock();
                                         " . $check_smart_button_js . "
-                                        var popin = jQuery('.kr-popin-button').length > 0;
+                                        var popin = (jQuery('.kr-smart-form-modal-button').length > 0) || (jQuery('.kr-popin-button').length > 0);
                                         if (! popin) {
                                             jQuery('#payzen_rest_processing').css('display', 'block');
                                             jQuery('ul.payzenstd-view-top li.block').hide();
@@ -1518,15 +1518,32 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
                             payzenUpdateFormToken(false);
                         }, 300);
                     }
-                    var popin = (jQuery(".kr-popin-button").length > 0);
+                    var smartbuttonMethod = "";
+                    var smartbuttonAll = false;
+                    if (' . $hide_smart_button_popin . ') {
+                        var element = jQuery(".kr-smart-button");
+                        if (element.length > 0) {
+                            smartbuttonMethod = element.attr("kr-payment-method");
+                        } else {
+                            element = jQuery(".kr-smart-form-modal-button");
+                            if (element.length > 0) {
+                                smartbuttonAll = true;
+                            }
+                        }
+                    }
+                    var popin = (jQuery(".kr-smart-form-modal-button").length > 0) || (jQuery(".kr-popin-button").length > 0);
                     jQuery("#add_payment_method").submit(function(event) {
                         if (! jQuery("#payment_method_' . $this->id . '").is(":checked")) {
                             return true;
                         }
                         event.preventDefault();
                         jQuery("div.blockUI.blockOverlay").hide();
-                        if (PAYZEN_HIDE_SINGLE_BUTTON) {
+                        if (popin || smartbuttonAll) {
+                            KR.openPopin();
+                        } else if (PAYZEN_HIDE_SINGLE_BUTTON) {
                             KR.openSelectedPaymentMethod();
+                        } else if (typeof smartbuttonMethod !== "unefined") {
+                            KR.openPaymentMethod(smartbuttonMethod);
                         } else {
                             KR.submit();
                         }
