@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 6.8
 WC requires at least: 2.0
 WC tested up to: 10.0
-Stable tag: 1.15.4
+Stable tag: 1.15.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.15.5, 2025-11-19 =
+* Bug fix: Fix error related to payment by embbeded fields in pop-in mode with WooCommerce legacy checkout.
 
 = 1.15.4, 2025-10-08 =
 * Bug fix: Do not process payment if mandatory address fields are invalid.
