@@ -64,6 +64,21 @@ var payzenInitRestEvents = function(KR) {
         jQuery('ul.payzenstd-view-bottom').show();
     });
 
+    KR.onOrderUpdate(function(callback) {
+        if (callback._name && callback._name === 'billingPartialPayment') {
+            jQuery('#payzen_rest_processing').css('display', 'none');
+            jQuery('form.checkout').removeClass('processing').unblock();
+            jQuery('#order_review').unblock();
+
+            jQuery('form.wc-block-components-form wc-block-checkout__form').unblock();
+            jQuery('.wc-block-components-checkout-place-order-button').prop("disabled", false);
+
+            if (typeof window.PAYZEN_BUTTON_TEXT != 'undefined') {
+                jQuery('.wc-block-components-button__text').text("").text(window.PAYZEN_BUTTON_TEXT);
+            }
+        }
+    });
+
     KR.onFocus(function(e) {
         jQuery('.kr-form-error').html('');
     });

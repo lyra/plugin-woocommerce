@@ -112,6 +112,12 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
     public function payzen_rest_head_script()
     {
+        // Only load on necessary pages.
+        if (! is_checkout() && ! is_checkout_pay_page() && ! is_add_payment_method_page()) {
+            return;
+        }
+
+        // Avoid multiple loadings.
         if (wp_script_is('payzen-rest-js', 'registered')) {
             return;
         }
