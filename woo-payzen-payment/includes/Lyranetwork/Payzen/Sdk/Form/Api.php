@@ -249,11 +249,11 @@ class Api
             'PASS_BEAU_CDX_SB' => 'Carte Cadeau Passion Beauté (sandbox)', 'PAYBOX' => 'Paybox', 'PAYDIREKT' => 'Paydirekt', 'PAYPAL' => 'PayPal',
             'PAYPAL_BNPL' => 'PayPal Pay Later', 'PAYPAL_BNPL_SB' => 'PayPal Pay Later Sandbox',
             'PAYPAL_SB' => 'PayPal Sandbox', 'PICWIC' => 'Carte Picwic', 'PICWIC_SB' => 'Carte Picwic (sandbox)',
-            'POSTFINANCE' => 'PostFinance Card', 'POSTFINANCE_EFIN' => 'PostFinance E-Finance', 'PRESTO' => 'Presto',
+            'POSTFINANCE' => 'PostFinance Card', 'POSTFINANCE_EFIN' => 'PostFinance E-Finance',
             'PRZELEWY24' => 'Przelewy24', 'S-MONEY' => 'S-money', 'SAMSUNG_PAY' => 'Samsung Pay', 'SCT' => 'Virement SEPA', 'SDD' => 'Prélèvement SEPA',
             'SODEXO' => 'Pass Restaurant', 'SOFICARTE' => 'Soficarte', 'SOFORT_BANKING' => 'Sofort', 'SOROCRED' => 'Sorocred',
             'SYGMA' => 'Sygma', 'TRUFFAUT_CDX' => 'Carte Cadeau Truffaut', 'VILLAVERDE' => 'Carte Cadeau VillaVerde',
-            'VILLAVERDE_SB' => 'Carte Cadeau VillaVerde (sandbox)', 'WECHAT' => 'WeChat Pay'
+            'VILLAVERDE_SB' => 'Carte Cadeau VillaVerde (sandbox)', 'WECHAT' => 'WeChat Pay', 'WERO' => 'Wero'
         );
     }
 

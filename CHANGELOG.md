@@ -1,3 +1,12 @@
+= 1.16.0, 2025-12-15 =
+* Bug fix: Fix error related to email preview in WooCommerce settings.
+* Limit JS scripts loading to necessary website pages.
+* Added partial payment with embedded fields.
+* Update list of supported payment means.
+* Update list of supported currencies.
+* Added compatibility with WooCommerce 10.x versions and higher.
+* Added compatibility with WordPress 6.9 version.
+
 = 1.15.5, 2025-11-19 =
 * Bug fix: Fix error related to payment by embbeded fields in pop-in mode with WooCommerce legacy checkout.
 

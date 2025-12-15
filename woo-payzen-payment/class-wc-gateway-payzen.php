@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-10.x';
     const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
-    const PLUGIN_VERSION = '1.15.5';
+    const PLUGIN_VERSION = '1.16.0';
     const GATEWAY_VERSION = 'V2';
 
     const METHOD_ID = 'payzen_method_id';
@@ -2002,11 +2002,17 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
     }
 
-    public function payzen_complete_order_status($status, $order_id)
+    public function payzen_complete_order_status($status, $order_id = 0, $order = null)
     {
-        $order = new WC_Order((int)$order_id);
+        if ($order_id === 0) {
+            return $status;
+        }
 
-        if ((strpos(self::get_order_property($order, 'payment_method'), 'payzen') === 0)
+        if ($order === null) {
+            $order = wc_get_order($order_id);
+        }
+
+        if ($order && (strpos(self::get_order_property($order, 'payment_method'), 'payzen') === 0)
             && ($this->get_general_option('order_status_on_success') != 'default')) {
             return $this->get_general_option('order_status_on_success');
         }
@@ -2218,22 +2224,40 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         $order->add_order_note($note);
 
-        $note = '';
         if (! $payzen_response->isCancelledPayment()) {
-            $note .= sprintf(__('Transaction ID: %s.', 'woo-payzen-payment'), $payzen_response->get('trans_id'));
+            if ($payzen_response->get('card_brand') == 'MULTI' && $payzen_response->get('payment_seq')) {
+                $payment_seq = json_decode($payzen_response->get('payment_seq'), true);
+                foreach ($payment_seq['transactions'] as $payment) {
+                    $note = sprintf(__('Transaction ID: %s.', 'woo-payzen-payment'), $payment['trans_id'] . '-' . $payment['sequence_number']);
 
-            if ($payzen_response->get('trans_uuid')) {
-                $note .= "\n";
-                $note .= sprintf(__('Transaction UUID: %s.', 'woo-payzen-payment'), $payzen_response->get('trans_uuid'));
+                    if ($payment['trans_uuid']) {
+                        $note .= "\n";
+                        $note .= sprintf(__('Transaction UUID: %s.', 'woo-payzen-payment'), $payment['trans_uuid']);
+                    }
+
+                    if ($payment['trans_status']) {
+                        $note .= "\n";
+                        $note .= sprintf(__('Transaction status: %s.', 'woo-payzen-payment'), $payment['trans_status']);
+                    }
+
+                    $order->add_order_note($note);
+                }
+            } else {
+                $note = sprintf(__('Transaction ID: %s.', 'woo-payzen-payment'), $payzen_response->get('trans_id'));
+
+                if ($payzen_response->get('trans_uuid')) {
+                    $note .= "\n";
+                    $note .= sprintf(__('Transaction UUID: %s.', 'woo-payzen-payment'), $payzen_response->get('trans_uuid'));
+                }
+
+                if ($payzen_response->getTransStatus()) {
+                    $note .= "\n";
+                    $note .= sprintf(__('Transaction status: %s.', 'woo-payzen-payment'), $payzen_response->getTransStatus());
+                }
+
+                $order->add_order_note($note);
             }
         }
-
-        if ($payzen_response->getTransStatus()) {
-            $note .= "\n";
-            $note .= sprintf(__('Transaction status: %s.', 'woo-payzen-payment'), $payzen_response->getTransStatus());
-        }
-
-        $order->add_order_note($note);
     }
 
     public static function payzen_update_order_meta($payzen_response, $order)

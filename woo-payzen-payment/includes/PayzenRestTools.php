@@ -13,32 +13,42 @@ use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
 
 class PayzenRestTools
 {
-    public static function convertRestResult($answer)
+    public static function convertRestResult($answer, $isTransaction = false)
     {
         if (! is_array($answer) || empty($answer)) {
-            return array();
+            return [];
         }
 
         $transactions = self::getProperty($answer, 'transactions');
-        if (! is_array($transactions) || empty($transactions)) {
+        $multiPaymentMean = false;
+
+        if ($isTransaction) {
             $transaction = $answer;
         } else {
-            $transaction = $transactions[0];
+            if (! is_array($transactions) || empty($transactions)) {
+                $transaction = $answer;
+            } else {
+                $transaction = $transactions[0];
+                $transactionsFiltered = array_filter($transactions, function($trs) {
+                    $successStatuses = array_merge(PayzenApi::getSuccessStatuses(), PayzenApi::getPendingStatuses());
+
+                    return $trs['operationType'] === 'DEBIT' && in_array($trs['detailedStatus'], $successStatuses);
+                });
+
+                if (count($transactionsFiltered) > 1) {
+                    $multiPaymentMean = isset($transactionsFiltered[0]['transactionDetails']['cardDetails']['sequenceType'])
+                        && $transactionsFiltered[0]['transactionDetails']['cardDetails']['sequenceType'] == 'MULTI_PAYMENT_MEAN';
+                }
+            }
         }
 
-        $response = array();
+        $response = [];
 
-        $response['vads_result'] = self::getProperty($transaction, 'errorCode') ? self::getProperty($transaction, 'errorCode') : '00';
-        $response['vads_extra_result'] = self::getProperty($transaction, 'detailedErrorCode');
+        $response['vads_url_check_src'] = self::getProperty($answer, 'kr-src');
+        $response['vads_order_cycle'] = self::getProperty($answer, 'orderCycle');
+        $response['vads_order_status'] = self::getProperty($answer, 'orderStatus');
 
-        $response['vads_trans_status'] = self::getProperty($transaction, 'detailedStatus');
-        $response['vads_trans_uuid'] = self::getProperty($transaction, 'uuid');
-        $response['vads_operation_type'] = self::getProperty($transaction, 'operationType');
-        $response['vads_effective_creation_date'] = self::getProperty($transaction, 'creationDate');
-        $response['vads_payment_config'] = 'SINGLE'; // Only single payments are possible via REST API at this time.
-
-        if ($customer = self::getProperty($answer, 'customer')) {
-            $response['vads_cust_id'] = self::getProperty($customer, 'reference');
+        if (($customer = self::getProperty($answer, 'customer'))) {
             $response['vads_cust_email'] = self::getProperty($customer, 'email');
 
             if ($billingDetails = self::getProperty($customer, 'billingDetails')) {
@@ -46,27 +56,57 @@ class PayzenRestTools
             }
         }
 
-        $response['vads_amount'] = self::getProperty($transaction, 'amount');
-        $response['vads_currency'] = PayzenApi::getCurrencyNumCode(self::getProperty($transaction, 'currency'));
-
-        if (self::getProperty($transaction, 'paymentMethodToken')) {
-            $response['vads_identifier'] = self::getProperty($transaction, 'paymentMethodToken');
-            $response['vads_identifier_status'] = 'CREATED';
-        }
-
         if ($orderDetails = self::getProperty($answer, 'orderDetails')) {
             $response['vads_order_id'] = self::getProperty($orderDetails, 'orderId');
         }
 
-        $response['vads_ext_info_is_rest'] = true;
-        if ($metadata = self::getProperty($transaction, 'metadata')) {
+        $response = self::convertRestTransaction($response, $transaction);
+
+        if ($multiPaymentMean) {
+            $payment_seq = array(
+                'trans_id' => $response['vads_trans_id'],
+                'transactions' => array()
+            );
+
+            foreach ($transactions as $trs) {
+                $payment_seq['transactions'][] = self::convertRestTransaction(array(), $trs, '');
+            }
+
+            $response['vads_card_brand'] = 'MULTI';
+            $response['vads_payment_seq'] = json_encode($payment_seq);
+            $response['vads_amount'] = self::getProperty($orderDetails, 'orderTotalAmount');
+            $response['vads_authorized_amount'] = self::getProperty($orderDetails, 'orderTotalAmount');
+        }
+
+        return $response;
+    }
+
+    private static function convertRestTransaction($response, $transaction, $prefix = 'vads_') {
+        $response[$prefix . 'result'] = self::getProperty($transaction, 'errorCode') ? self::getProperty($transaction, 'errorCode') : '00';
+        $response[$prefix . 'extra_result'] = self::getProperty($transaction, 'detailedErrorCode');
+
+        $response[$prefix . 'trans_status'] = self::getProperty($transaction, 'detailedStatus');
+        $response[$prefix . 'trans_uuid'] = self::getProperty($transaction, 'uuid');
+        $response[$prefix . 'operation_type'] = self::getProperty($transaction, 'operationType');
+        $response[$prefix . 'effective_creation_date'] = self::getProperty($transaction, 'creationDate');
+        $response[$prefix . 'payment_config'] = 'SINGLE'; // Only single payments are possible via REST API at this time.
+
+        $response[$prefix . 'amount'] = self::getProperty($transaction, 'amount');
+        $response[$prefix . 'currency'] = PayzenApi::getCurrencyNumCode(self::getProperty($transaction, 'currency'));
+
+        if ($paymentToken = self::getProperty($transaction, 'paymentMethodToken')) {
+            $response[$prefix . 'identifier'] = $paymentToken;
+            $response[$prefix . 'identifier_status'] = 'CREATED';
+        }
+
+        if (($metadata = self::getProperty($transaction, 'metadata')) && is_array($metadata)) {
             foreach ($metadata as $key => $value) {
-                $response['vads_ext_info_' . $key] = $value;
+                $response[$prefix . 'ext_info_' . $key] = $value;
             }
         }
 
         if ($transactionDetails = self::getProperty($transaction, 'transactionDetails')) {
-            $response['vads_sequence_number'] = self::getProperty($transactionDetails, 'sequenceNumber');
+            $response[$prefix . 'sequence_number'] = self::getProperty($transactionDetails, 'sequenceNumber');
 
             // Workarround to adapt to REST API behavior.
             $effectiveAmount = self::getProperty($transactionDetails, 'effectiveAmount');
@@ -74,65 +114,67 @@ class PayzenRestTools
 
             if ($effectiveAmount && $effectiveCurrency) {
                 // Invert only if there is currency conversion.
-                if ($effectiveCurrency !== $response['vads_currency']) {
-                    $response['vads_effective_amount'] = $response['vads_amount'];
-                    $response['vads_effective_currency'] = $response['vads_currency'];
-                    $response['vads_amount'] = $effectiveAmount;
-                    $response['vads_currency'] = $effectiveCurrency;
+                if ($effectiveCurrency !== $response[$prefix . 'currency']) {
+                    $response[$prefix . 'effective_amount'] = $response[$prefix . 'amount'];
+                    $response[$prefix . 'effective_currency'] = $response[$prefix . 'currency'];
+                    $response[$prefix . 'amount'] = $effectiveAmount;
+                    $response[$prefix . 'currency'] = $effectiveCurrency;
                 } else {
-                    $response['vads_effective_amount'] = $effectiveAmount;
-                    $response['vads_effective_currency'] = $effectiveCurrency;
+                    $response[$prefix . 'effective_amount'] = $effectiveAmount;
+                    $response[$prefix . 'effective_currency'] = $effectiveCurrency;
                 }
             }
 
-            $response['vads_warranty_result'] = self::getProperty($transactionDetails, 'liabilityShift');
+            $response[$prefix . 'warranty_result'] = self::getProperty($transactionDetails, 'liabilityShift');
+            $response[$prefix . 'wallet'] = self::getProperty($transactionDetails, 'wallet');
 
             if ($cardDetails = self::getProperty($transactionDetails, 'cardDetails')) {
-                $response['vads_trans_id'] = self::getProperty($cardDetails, 'legacyTransId'); // Deprecated.
-                $response['vads_presentation_date'] = self::getProperty($cardDetails, 'expectedCaptureDate');
+                $response[$prefix . 'trans_id'] = self::getProperty($cardDetails, 'legacyTransId'); // Deprecated.
+                $response[$prefix . 'presentation_date'] = self::getProperty($cardDetails, 'expectedCaptureDate');
 
-                if (self::getProperty($transaction, 'paymentMethodToken')) {
-                    $response['vads_identifier_status'] = self::getProperty($cardDetails, 'paymentMethodSource') === 'TOKEN' ? 'UPDATED' : 'CREATED';
-                }
+                $response[$prefix . 'card_brand'] = self::getProperty($cardDetails, 'effectiveBrand');
+                $response[$prefix . 'card_number'] = self::getProperty($cardDetails, 'pan');
+                $response[$prefix . 'expiry_month'] = self::getProperty($cardDetails, 'expiryMonth');
+                $response[$prefix . 'expiry_year'] = self::getProperty($cardDetails, 'expiryYear');
 
-                $response['vads_card_brand'] = self::getProperty($cardDetails, 'effectiveBrand');
-                $response['vads_card_number'] = self::getProperty($cardDetails, 'pan');
-                $response['vads_expiry_month'] = self::getProperty($cardDetails, 'expiryMonth');
-                $response['vads_expiry_year'] = self::getProperty($cardDetails, 'expiryYear');
+                $response[$prefix . 'payment_option_code'] = self::getProperty($cardDetails, 'installmentNumber');
 
-                $response['vads_payment_option_code'] = self::getProperty($cardDetails, 'installmentNumber');
 
                 if ($authorizationResponse = self::getProperty($cardDetails, 'authorizationResponse')) {
-                    $response['vads_auth_result'] = self::getProperty($authorizationResponse, 'authorizationResult');
-                    $response['vads_authorized_amount'] = self::getProperty($authorizationResponse, 'amount');
+                    $response[$prefix . 'auth_result'] = self::getProperty($authorizationResponse, 'authorizationResult');
+                    $response[$prefix . 'authorized_amount'] = self::getProperty($authorizationResponse, 'amount');
                 }
 
                 if (($authenticationResponse = self::getProperty($cardDetails, 'authenticationResponse'))
                     && ($value = self::getProperty($authenticationResponse, 'value'))) {
-                    $response['vads_threeds_status'] = self::getProperty($value, 'status');
-                    $response['vads_threeds_auth_type'] = self::getProperty($value, 'authenticationType');
+                    $response[$prefix . 'threeds_status'] = self::getProperty($value, 'status');
+                    $response[$prefix . 'threeds_auth_type'] = self::getProperty($value, 'authenticationType');
                     if ($authenticationValue = self::getProperty($value, 'authenticationValue')) {
-                        $response['vads_threeds_cavv'] = self::getProperty($authenticationValue, 'value');
+                        $response[$prefix . 'threeds_cavv'] = self::getProperty($authenticationValue, 'value');
                     }
                 } elseif (($threeDSResponse = self::getProperty($cardDetails, 'threeDSResponse'))
                     && ($authenticationResultData = self::getProperty($threeDSResponse, 'authenticationResultData'))) {
-                    $response['vads_threeds_cavv'] = self::getProperty($authenticationResultData, 'cavv');
-                    $response['vads_threeds_status'] = self::getProperty($authenticationResultData, 'status');
-                    $response['vads_threeds_auth_type'] = self::getProperty($authenticationResultData, 'threeds_auth_type');
+                    $response[$prefix . 'threeds_cavv'] = self::getProperty($authenticationResultData, 'cavv');
+                    $response[$prefix . 'threeds_status'] = self::getProperty($authenticationResultData, 'status');
+                    $response[$prefix . 'threeds_auth_type'] = self::getProperty($authenticationResultData, 'threeds_auth_type');
                 }
             }
 
             if ($fraudManagement = self::getProperty($transactionDetails, 'fraudManagement')) {
                 if ($riskControl = self::getProperty($fraudManagement, 'riskControl')) {
-                    $response['vads_risk_control'] = '';
+                    $response[$prefix . 'risk_control'] = '';
 
                     foreach ($riskControl as $value) {
-                        $response['vads_risk_control'] .= "{$value['name']}={$value['result']};";
+                        if (! isset($value['name']) || ! isset($value['result'])) {
+                            continue;
+                        }
+
+                        $response[$prefix . 'risk_control'] .= "{$value['name']}={$value['result']};";
                     }
                 }
 
                 if ($riskAssessments = self::getProperty($fraudManagement, 'riskAssessments')) {
-                    $response['vads_risk_assessment_result'] = self::getProperty($riskAssessments, 'results');
+                    $response[$prefix . 'risk_assessment_result'] = self::getProperty($riskAssessments, 'results');
                 }
             }
         }

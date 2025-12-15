@@ -166,7 +166,6 @@ var submitForm = function (KR) {
             return true;
         }
 
-        savedData = newData;
         jQuery.ajax({
             method: 'POST',
             url: payzen_data?.token_url,
@@ -181,6 +180,8 @@ var submitForm = function (KR) {
                     if (registerCard) {
                         jQuery('input[name="kr-do-register"]').attr('checked','checked');
                     }
+
+                    savedData = newData;
 
                     submitKR(KR);
                 });

@@ -2,10 +2,10 @@
 Contributors: Lyra Network, Alsacréations
 Tags: payment, PayZen, gateway, checkout, credit card, bank card, e-commerce
 Requires at least: 3.5
-Tested up to: 6.8
+Tested up to: 6.9
 WC requires at least: 2.0
-WC tested up to: 10.0
-Stable tag: 1.15.5
+WC tested up to: 10.4
+Stable tag: 1.16.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,15 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.16.0, 2025-12-15 =
+* Bug fix: Fix error related to email preview in WooCommerce settings.
+* Limit JS scripts loading to necessary website pages.
+* Added partial payment with embedded fields.
+* Update list of supported payment means.
+* Update list of supported currencies.
+* Added compatibility with WooCommerce 10.x versions and higher.
+* Added compatibility with WordPress 6.9 version.
 
 = 1.15.5, 2025-11-19 =
 * Bug fix: Fix error related to payment by embbeded fields in pop-in mode with WooCommerce legacy checkout.
