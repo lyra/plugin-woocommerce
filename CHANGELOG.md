@@ -1,3 +1,6 @@
+= 1.16.1, 2026-01-28 =
+* Remove the possibility to reset plugin configuration data.
+
 = 1.16.0, 2025-12-15 =
 * Bug fix: Fix error related to email preview in WooCommerce settings.
 * Limit JS scripts loading to necessary website pages.

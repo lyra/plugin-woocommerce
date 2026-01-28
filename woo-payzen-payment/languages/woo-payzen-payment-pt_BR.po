@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PayZen para WooCommerce 1.16.0\n"
+"Project-Id-Version: PayZen para WooCommerce 1.16.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-09 14:25+0200\n"
-"PO-Revision-Date: 2025-04-25 11:45+0200\n"
+"PO-Revision-Date: 2026-01-26 14:26+0100\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <https://payzen.io/fr-FR/support/>\n"
 "Language: pt\n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.8\n"
 "X-Poedit-SearchPath-0: ..\n"
 
 #: ../class-wc-gateway-payzen.php:77 ../class-wc-gateway-payzen.php:88 ../woo-payzen-payment.php:300
@@ -29,11 +29,6 @@ msgstr "Gateway desabilitado"
 #, php-format
 msgid "%s does not support your store currency."
 msgstr "%s não suporta a moeda da sua loja."
-
-#: ../class-wc-gateway-payzen.php:268
-#, php-format
-msgid "Your %s module configuration is successfully reset."
-msgstr "A configuração do seu módulo %s foi reinicializada com sucesso."
 
 #: ../class-wc-gateway-payzen.php:282
 #, php-format
@@ -584,8 +579,8 @@ msgid ""
 "For understanding the problem, please read the documentation of the module : <br />&nbsp;&nbsp;&nbsp;- Chapter &laquo; To read carefully before going further &raquo;<br /"
 ">&nbsp;&nbsp;&nbsp;- Chapter &laquo; Notification URL settings &raquo;"
 msgstr ""
-"Para entender o problema, favor ler a documentação do módulo : <br />&nbsp;&nbsp;&nbsp;- Capítulo &laquo; Ler com atenção antes de continuar &raquo;<br />&nbsp;&nbsp;"
-"&nbsp;- Capítulo &laquo; Configurações da URL de notificação &raquo;"
+"Para entender o problema, favor ler a documentação do módulo : <br />&nbsp;&nbsp;&nbsp;- Capítulo &laquo; Ler com atenção antes de continuar &raquo;<br /"
+">&nbsp;&nbsp;&nbsp;- Capítulo &laquo; Configurações da URL de notificação &raquo;"
 
 #: ../class-wc-gateway-payzen.php:1911
 msgid "Payment method updated."
