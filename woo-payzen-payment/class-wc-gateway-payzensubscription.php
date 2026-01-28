@@ -63,9 +63,6 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $this->subscriptions_handler = Payzen_Subscriptions_Loader::getInstance($handler);
 
         if ($this->payzen_is_section_loaded()) {
-            // Reset subscription payment admin form action.
-            add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
-
             // Update subscription payment admin form action.
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 

@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-10.x';
     const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
-    const PLUGIN_VERSION = '1.16.0';
+    const PLUGIN_VERSION = '1.16.1';
     const GATEWAY_VERSION = 'V2';
 
     const METHOD_ID = 'payzen_method_id';
@@ -45,7 +45,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     protected $admin_page;
     protected $admin_link;
-    protected $reset_admin_link;
 
     protected $general_settings = array();
     protected $general_form_fields = array();
@@ -92,9 +91,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
 
         if ($this->payzen_is_section_loaded()) {
-            // Reset common admin form action.
-            add_action('woocommerce_settings_start', array($this, 'payzen_reset_admin_options'));
-
             // Adding style to admin form action.
             add_action('admin_head-woocommerce_page_' . $this->admin_page, array($this, 'payzen_admin_head_style'));
 
@@ -150,9 +146,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $this->admin_page = $_GET['page'];
 
             $this->admin_link = admin_url('admin.php?page=' . $_GET['page'] . '&tab=' . $_GET['tab'] . '&section=' . $_GET['section']);
-
-            $this->reset_admin_link = add_query_arg('noheader', '', add_query_arg('reset', '', $this->admin_link));
-            $this->reset_admin_link = wp_nonce_url($this->reset_admin_link, $_GET['page']);
         }
     }
 
@@ -263,12 +256,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             echo '<div class="inline error"><p><strong>' . __('Gateway disabled', 'woo-payzen-payment') . ': ' . sprintf(__('%s does not support your store currency.', 'woo-payzen-payment'), self::GATEWAY_NAME) . '</strong></p></div>';
         }
 
-        if (get_transient($this->id . '_settings_reset')) {
-            delete_transient($this->id . '_settings_reset');
-
-            echo '<div class="inline updated"><p><strong>' . sprintf(__('Your %s module configuration is successfully reset.', 'woo-payzen-payment'), self::GATEWAY_NAME) . '</strong></p></div>';
-        }
-
         $payzen_email_send_msg = get_transient('payzen_email_send_msg');
         if ($payzen_email_send_msg) {
             echo $payzen_email_send_msg;
@@ -292,30 +279,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             </table>
         </section>
 
-        <a href="<?php echo $this->reset_admin_link; ?>"><?php _e('Reset configuration', 'woo-payzen-payment');?></a>
-
         <?php
-    }
-
-    public function payzen_reset_admin_options()
-    {
-        // If not reset action do nothing.
-        if (! isset($_GET['reset'])) {
-            return;
-        }
-
-        // Check if correct link.
-        if (! $this->payzen_is_section_loaded()) {
-            return;
-        }
-
-        delete_option('woocommerce_' . $this->id . '_settings');
-
-        // Transcient flag to display reset message.
-        set_transient($this->id . '_settings_reset', true);
-
-        wp_redirect($this->admin_link);
-        exit();
     }
 
     protected function get_supported_languages()
