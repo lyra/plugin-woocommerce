@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 6.9
 WC requires at least: 2.0
 WC tested up to: 10.4
-Stable tag: 1.16.0
+Stable tag: 1.16.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.16.1, 2026-01-28 =
+* Remove the possibility to reset plugin configuration data.
 
 = 1.16.0, 2025-12-15 =
 * Bug fix: Fix error related to email preview in WooCommerce settings.

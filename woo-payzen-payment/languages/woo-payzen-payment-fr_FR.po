@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PayZen for WooCommerce 1.16.0\n"
+"Project-Id-Version: PayZen for WooCommerce 1.16.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-04-25 10:58+0200\n"
 "PO-Revision-Date: 2025-04-25 11:45+0200\n"
@@ -29,11 +29,6 @@ msgstr "Plateforme désactivée"
 #, php-format
 msgid "%s does not support your store currency."
 msgstr "%s ne supporte pas la devise de votre boutique."
-
-#: ../class-wc-gateway-payzen.php:268
-#, php-format
-msgid "Your %s module configuration is successfully reset."
-msgstr "La configuration de votre module %s est réinitialisée avec succès."
 
 #: ../class-wc-gateway-payzen.php:282
 #, php-format
