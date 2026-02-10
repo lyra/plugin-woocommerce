@@ -112,8 +112,12 @@ var displayFields = function () {
 
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach((mutation) => {
-                if ((mutation.type == "characterData") && (mutation.target.nodeName == "#text")) {
-                    refreshTempToken();
+                if (mutation.addedNodes.length > 0) {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.className == "wc-block-components-totals-item__value") {
+                            refreshTempToken();
+                        }
+                    })
                 }
             });
         });

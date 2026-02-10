@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-10.x';
     const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
-    const PLUGIN_VERSION = '1.16.1';
+    const PLUGIN_VERSION = '1.17.0';
     const GATEWAY_VERSION = 'V2';
 
     const METHOD_ID = 'payzen_method_id';
@@ -255,16 +255,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         if (! $this->is_supported_currency()) {
             echo '<div class="inline error"><p><strong>' . __('Gateway disabled', 'woo-payzen-payment') . ': ' . sprintf(__('%s does not support your store currency.', 'woo-payzen-payment'), self::GATEWAY_NAME) . '</strong></p></div>';
         }
-
-        $payzen_email_send_msg = get_transient('payzen_email_send_msg');
-        if ($payzen_email_send_msg) {
-            echo $payzen_email_send_msg;
-
-            delete_transient('payzen_email_send_msg');
-        }
         ?>
-
-        <script type="text/javascript" src="<?php echo WC_PAYZEN_PLUGIN_URL . 'assets/js/support.js' ?>"></script>
         <br />
         <h3><?php echo self::GATEWAY_NAME; ?></h3>
         <p><?php echo sprintf(__('The module works by sending users to %s in order to select their payment mean and enter their payment information.', 'woo-payzen-payment'), self::GATEWAY_NAME); ?></p>
@@ -445,9 +436,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 'type' => 'label',
                 'css' => 'font-weight: bold; color: red; cursor: auto !important; text-transform: uppercase;'
             ),
-            'support_component' => array(
-                'type' => 'support_component'
-            ),
 
             'base_settings' => array(
                 'title' => __('BASE SETTINGS', 'woo-payzen-payment'),
@@ -516,13 +504,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     '<img src="' . esc_url(WC_PAYZEN_PLUGIN_URL . 'assets/images/warn.png') . '"><span class="desc">' . sprintf(__('URL to copy into your %s Back Office > Settings > Notification rules.', 'woo-payzen-payment'), self::BACKOFFICE_NAME) . '</span>',
                 'css' => 'display: none;'
             ),
-            'platform_url' => array(
-                'title' => __('Payment page URL', 'woo-payzen-payment'),
-                'type' => 'text',
-                'default' => self::GATEWAY_URL,
-                'description' => __('Link to the payment page.', 'woo-payzen-payment'),
-                'css' => 'width: 350px;'
-            ),
 
             // Add REST API key fields.
             'rest_settings' => array(
@@ -541,12 +522,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                  'type' => 'password',
                  'default' => '',
                  'custom_attributes' => array('autocomplete' => 'off')
-             ),
-             'rest_url' => array(
-                'title' => __('API REST server URL', 'woo-payzen-payment'),
-                'type' => 'text',
-                'default' => self::REST_URL,
-                'css' => 'width: 350px;'
              ),
             'embedded_fields_keys_settings' => array(
                 'title' => '',
@@ -577,12 +552,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                  'default' => '',
                  'custom_attributes' => array('autocomplete' => 'off')
              ),
-            'static_url' => array(
-                'title' => __('JavaScript client URL', 'woo-payzen-payment'),
-                'type' => 'text',
-                'default' => self::STATIC_URL,
-                'css' => 'width: 350px;'
-            ),
             'rest_check_url' => array(
                 'title' => __('API REST Notification URL', 'woo-payzen-payment'),
                 'type' => 'text',
@@ -803,10 +772,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             unset($this->form_fields['doc_link']);
         }
 
-        if (! $payzen_plugin_features['support']) {
-            unset($this->form_fields['support_component']);
-        }
-
         // Save general form fields.
         foreach ($this->form_fields as $k => $v) {
             $this->general_form_fields[$k] = $v;
@@ -843,72 +808,6 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         }
 
         return $this->general_settings[$key];
-    }
-
-    public function generate_support_component_html($key, $data)
-    {
-        $user_info = get_userdata(1);
-        if (! ($user_info instanceof WP_User)) {
-            $user_info = wp_get_current_user();
-        }
-
-        $send_email_url = add_query_arg('wc-api', 'WC_Gateway_Payzen_Send_Email', home_url('/'));
-
-        ob_start();
-        ?>
-        <tr valign="top">
-            <th scope="row" class="titledesc">
-                <contact-support
-                    shop-id="<?php echo $this->get_general_option('site_id'); ?>"
-                    context-mode="<?php echo $this->get_general_option('ctx_mode'); ?>"
-                    sign-algo="<?php echo $this->get_general_option('sign_algo'); ?>"
-                    contrib="<?php echo PayzenTools::get_contrib(); ?>"
-                    integration-mode="<?php echo PayzenTools::get_integration_mode(); ?>"
-                    plugins="<?php echo PayzenTools::get_active_plugins(); ?>"
-                    title=""
-                    first-name="<?php echo $user_info->first_name; ?>"
-                    last-name="<?php echo $user_info->last_name; ?>"
-                    from-email="<?php echo get_option('admin_email'); ?>"
-                    to-email="<?php echo self::SUPPORT_EMAIL; ?>"
-                    cc-emails=""
-                    phone-number=""
-                    language="<?php echo PayzenTools::get_support_component_language(); ?>"></contact-support>
-            </th>
-        </tr>
-
-        <?php
-        // Load css and add spinner.
-        wp_register_style('payzen', WC_PAYZEN_PLUGIN_URL . 'assets/css/payzen.css', array(), self::PLUGIN_VERSION);
-        wp_enqueue_style('payzen');
-        ?>
-
-        <script type="text/javascript">
-            jQuery(document).ready(function() {
-                jQuery('contact-support').on('sendmail', function(e) {
-                    jQuery('body').block({
-                        message: null,
-                        overlayCSS: {
-                            background: '#fff',
-                            opacity: 0.5
-                        }
-                    });
-
-                    jQuery('div.blockUI.blockOverlay').css('cursor', 'default');
-
-                    jQuery.ajax({
-                        method: 'POST',
-                        url: '<?php echo $send_email_url; ?>',
-                        data: e.originalEvent.detail,
-                        success: function(data) {
-                            location.reload();
-                        }
-                    });
-                });
-            });
-        </script>
-        <?php
-
-        return ob_get_clean();
     }
 
     public function generate_label_html($key, $data)
@@ -1658,6 +1557,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 } else {
                     wc_add_notice(__('Unable to add payment method to your account.', 'woocommerce'), 'error');
                 }
+
+                $cust_id = self::get_customer_property($woocommerce->customer, 'id');
+                delete_transient('payzen_account_token_data_' . $cust_id);
+                delete_transient('payzen_account_token_' . $cust_id);
 
                 $this->payzen_redirect(wc_get_account_endpoint_url('payment-methods'));
             }
@@ -2675,6 +2578,9 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $cust_id = self::get_customer_property($woocommerce->customer, 'id');
 
         if (isset($_POST['token']) && $_POST['token']) {
+            delete_transient('payzen_account_token_data_' . $cust_id);
+            delete_transient('payzen_account_token_' . $cust_id);
+
             $sub_modules = array('payzenstd', 'payzensepa', 'payzensubscription', 'payzenwcssubscription');
             foreach ($sub_modules as $id) {
                 if ($_POST['token'] == $this->get_cust_identifier($cust_id, $id)) {
@@ -2709,7 +2615,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 );
 
                 $client = new PayzenRest(
-                    $this->get_general_option('rest_url'),
+                    $this->get_general_option('rest_url', self::REST_URL),
                     $this->get_general_option('site_id'),
                     $key
                 );
@@ -2770,15 +2676,14 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         $sub_modules = array('payzensubscription');
 
-        $payzen_wcssubscription = new WC_Gateway_PayzenWcsSubscription();
-        if ($payzen_wcssubscription->is_available() && $payzen_wcssubscription->use_wallet($cust_id)) {
+        $payzenwcs_settings = get_option('woocommerce_payzenwcssubscription_settings', null);
+        if (($payzenwcs_settings['enabled'] == 'yes') && PayzenTools::use_wallet($cust_id, 'payzenwcssubscription')) {
             return $list;
         } else {
             $sub_modules[] = 'payzenwcssubscription';
         }
 
-        $payzen_std = new WC_Gateway_PayzenStd();
-        if ($payzen_std->use_wallet($cust_id)) {
+        if (PayzenTools::use_wallet($cust_id)) {
             return $list;
         } else {
             $sub_modules[] = 'payzenstd';
@@ -2900,7 +2805,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             // Perform REST request to check identifier.
             $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
             $client = new PayzenRest(
-                $this->get_general_option('rest_url'),
+                $this->get_general_option('rest_url', self::REST_URL),
                 $this->get_general_option('site_id'),
                 $key
             );

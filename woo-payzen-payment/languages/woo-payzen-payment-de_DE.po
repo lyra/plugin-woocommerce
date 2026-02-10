@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PayZen for WooCommerce 1.16.1\n"
+"Project-Id-Version: PayZen for WooCommerce 1.17.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-09 14:29+0200\n"
-"PO-Revision-Date: 2025-04-25 11:49+0200\n"
+"PO-Revision-Date: 2026-02-05 11:30+0100\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <https://payzen.io/fr-FR/support/>\n"
 "Language: de\n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.8\n"
 "X-Poedit-SearchPath-0: ..\n"
 
 #: ../class-wc-gateway-payzen.php:77 ../class-wc-gateway-payzen.php:88
@@ -245,14 +245,6 @@ msgstr "Benachrichtigung-URL"
 msgid "URL to copy into your %s Back Office > Settings > Notification rules."
 msgstr "URL, die Sie in Ihre %s Back Office kopieren sollen > Einstellung > Regeln der Benachrichtigungen."
 
-#: ../class-wc-gateway-payzen.php:555
-msgid "Payment page URL"
-msgstr "Schnittstellen-URL"
-
-#: ../class-wc-gateway-payzen.php:558
-msgid "Link to the payment page."
-msgstr "Link zur Zahlung."
-
 #: ../class-wc-gateway-payzen.php:564
 msgid "REST API keys"
 msgstr "REST-API-Schlüssel"
@@ -269,10 +261,6 @@ msgstr "Testpasswort"
 #: ../class-wc-gateway-payzen.php:575
 msgid "Production password"
 msgstr "Passwort Produktion"
-
-#: ../class-wc-gateway-payzen.php:581
-msgid "API REST server URL"
-msgstr "API REST server URL"
 
 #: ../class-wc-gateway-payzen.php:589
 msgid "Configure this section only if you are using embedded payment fields modes."
@@ -293,10 +281,6 @@ msgstr "Schlüssel HMAC-SHA-256 für Test"
 #: ../class-wc-gateway-payzen.php:610
 msgid "HMAC-SHA-256 production key"
 msgstr "Schlüssel HMAC-SHA-256 für Produktion"
-
-#: ../class-wc-gateway-payzen.php:616
-msgid "JavaScript client URL"
-msgstr "JavaScript client URL"
 
 #: ../class-wc-gateway-payzen.php:622
 msgid "API REST Notification URL"
@@ -634,23 +618,6 @@ msgstr "The stored means of payment could not be deleted."
 msgid "The stored means of payment was successfully deleted."
 msgstr "The stored means of payment was successfully deleted."
 
-#: ../class-wc-gateway-payzenchoozeo.php:26
-msgid "Choozeo payment"
-msgstr "Choozeo Zahlung"
-
-#: ../class-wc-gateway-payzenchoozeo.php:84
-msgid "Enables / disables Choozeo payment."
-msgstr "Aktivieren/Deaktivieren ChoozeoBezahlung."
-
-#: ../class-wc-gateway-payzenchoozeo.php:86
-msgid "Payment with Choozeo without fees"
-msgstr "Zahlung mit Choozeo ohne zusätzliche"
-
-#: ../class-wc-gateway-payzenchoozeo.php:106
-msgid "CHOOZEO PAYMENT OPTIONS"
-msgstr "CHOOZEO ZAHLUNGOPTIONEN"
-
-#: ../class-wc-gateway-payzenchoozeo.php:112
 #: ../class-wc-gateway-payzenfranfinance.php:118
 #: ../class-wc-gateway-payzenmulti.php:129
 #: ../class-wc-gateway-payzenregroupedother.php:143
@@ -658,37 +625,28 @@ msgstr "CHOOZEO ZAHLUNGOPTIONEN"
 msgid "Label"
 msgstr "Kennzeichnung"
 
-#: ../class-wc-gateway-payzenchoozeo.php:117
 #: ../class-wc-gateway-payzenfranfinance.php:134
 #: ../class-wc-gateway-payzenmulti.php:134
 #: ../class-wc-gateway-payzenregroupedother.php:153
 msgid "Min amount"
 msgstr "Mindestbetrag"
 
-#: ../class-wc-gateway-payzenchoozeo.php:122
 #: ../class-wc-gateway-payzenfranfinance.php:139
 #: ../class-wc-gateway-payzenmulti.php:139
 #: ../class-wc-gateway-payzenregroupedother.php:158
 msgid "Max amount"
 msgstr "Höchstbetrag"
 
-#: ../class-wc-gateway-payzenchoozeo.php:127
 #: ../class-wc-gateway-payzenfranfinance.php:144
 #: ../class-wc-gateway-payzenmulti.php:168
 msgid "Payment options"
 msgstr "Zahlungsoptionen"
 
-#: ../class-wc-gateway-payzenchoozeo.php:134
-msgid "Define amount restriction for each card."
-msgstr "Definieren Menge Beschränkung für jede Karte."
-
-#: ../class-wc-gateway-payzenchoozeo.php:328
 #: ../class-wc-gateway-payzenfranfinance.php:347
 #: ../class-wc-gateway-payzenmulti.php:338
 msgid "Your payment option"
 msgstr "Ihre Ratenzahlungsoption"
 
-#: ../class-wc-gateway-payzenchoozeo.php:330
 #: ../class-wc-gateway-payzenfranfinance.php:354
 #: ../class-wc-gateway-payzenmulti.php:345
 msgid "Choose your payment option"
@@ -1340,18 +1298,6 @@ msgstr "Error: Unable to create renewal order with %s plugin."
 #, php-format
 msgid "Sorry ! In order to use WooCommerce %s Payment plugin, you need to install and activate the WooCommerce plugin."
 msgstr "Entschuldigung! Um das WooCommerce %s Payment Plugin zu benutzen, dann sollen Sie WooCommerce Plugin installieren und aktivieren."
-
-#: ../woo-payzen-payment.php:495
-msgid "Thank you for contacting us. Your email has been successfully sent."
-msgstr "Thank you for contacting us. Your email has been successfully sent."
-
-#: ../woo-payzen-payment.php:497
-msgid "An error has occurred. Your email was not sent."
-msgstr "An error has occurred. Your email was not sent."
-
-#: ../woo-payzen-payment.php:500
-msgid "Please make sure to configure all required fields."
-msgstr "Please make sure to configure all required fields."
 
 #, php-format
 msgid "Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of payment: </b>Choose the means of payment you want to propose.<br /><b>Countries: </b>Countries where the means of payment will be available. Leave blank to authorize all countries.<br /><b>Min. amount: </b>Minimum amount to enable the means of payment.<br /><b>Max. amount: </b>Maximum amount to enable the means of payment.<br /><b>Validation mode: </b>If manual is selected, you will have to confirm payments manually in your %s Back Office.<br /><b>Capture delay: </b>The number of days before the bank capture. Enter value only if different from %s general configuration.<br /><b>Embedded mode: </b>If you enable this option, the payment mean will be displayed in the embedded payment fields. Attention, not all available payment means are supported by the embedded payment. For more information, refer to the module documentation.<br /><b>Cart data: </b>If you disable this option, the shopping cart details will not be sent to the gateway. Attention, in some cases, this option has to be enabled. For more information, refer to the module documentation.<br /><b>Do not forget to click on « Save » button to save your modifications.</b>"

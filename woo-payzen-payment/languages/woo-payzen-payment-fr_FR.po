@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PayZen for WooCommerce 1.16.1\n"
+"Project-Id-Version: PayZen for WooCommerce 1.17.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-04-25 10:58+0200\n"
-"PO-Revision-Date: 2025-04-25 11:45+0200\n"
+"PO-Revision-Date: 2026-02-05 11:30+0100\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <https://payzen.io/fr-FR/support/>\n"
 "Language: fr\n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.8\n"
 "X-Poedit-SearchPath-0: ..\n"
 
 #: ../class-wc-gateway-payzen.php:77 ../class-wc-gateway-payzen.php:88 ../woo-payzen-payment.php:300
@@ -244,14 +244,6 @@ msgstr "URL de notification"
 msgid "URL to copy into your %s Back Office > Settings > Notification rules."
 msgstr "URL à copier dans le Back Office %s > Paramétrage > Règles de notifications."
 
-#: ../class-wc-gateway-payzen.php:555
-msgid "Payment page URL"
-msgstr "URL de la page de paiement"
-
-#: ../class-wc-gateway-payzen.php:558
-msgid "Link to the payment page."
-msgstr "URL vers laquelle l'acheteur sera redirigé pour le paiement."
-
 #: ../class-wc-gateway-payzen.php:564
 msgid "REST API keys"
 msgstr "Clés d'API REST"
@@ -274,10 +266,6 @@ msgstr "Mot de passe de test"
 msgid "Production password"
 msgstr "Mot de passe de production"
 
-#: ../class-wc-gateway-payzen.php:581
-msgid "API REST server URL"
-msgstr "URL du serveur de l'API REST"
-
 #: ../class-wc-gateway-payzen.php:589
 msgid "Configure this section only if you are using embedded payment fields modes."
 msgstr "Configurez cette section seulement si vous utilisez les modes champs de paiement embarqués."
@@ -297,10 +285,6 @@ msgstr "Clé HMAC-SHA-256 de test"
 #: ../class-wc-gateway-payzen.php:610
 msgid "HMAC-SHA-256 production key"
 msgstr "Clé HMAC-SHA-256 de production"
-
-#: ../class-wc-gateway-payzen.php:616
-msgid "JavaScript client URL"
-msgstr "URL du client JavaScript"
 
 #: ../class-wc-gateway-payzen.php:622
 msgid "API REST Notification URL"
@@ -654,50 +638,28 @@ msgstr "Le moyen de paiement enregistré n'a pas pu être supprimé."
 msgid "The stored means of payment was successfully deleted."
 msgstr "Le moyen de paiement enregistré a été supprimé avec succès."
 
-#: ../class-wc-gateway-payzenchoozeo.php:26
-msgid "Choozeo payment"
-msgstr "Paiement Choozeo"
-
-#: ../class-wc-gateway-payzenchoozeo.php:84
-msgid "Enables / disables Choozeo payment."
-msgstr "Activer / désactiver le paiement Choozeo."
-
-#: ../class-wc-gateway-payzenchoozeo.php:86
-msgid "Payment with Choozeo without fees"
-msgstr "Paiement avec Choozeo sans frais"
-
-#: ../class-wc-gateway-payzenchoozeo.php:106
-msgid "CHOOZEO PAYMENT OPTIONS"
-msgstr "OPTIONS DE PAIEMENT CHOOZEO"
-
-#: ../class-wc-gateway-payzenchoozeo.php:112 ../class-wc-gateway-payzenfranfinance.php:118 ../class-wc-gateway-payzenmulti.php:129
-#: ../class-wc-gateway-payzenregroupedother.php:143 ../class-wc-gateway-payzenregroupedother.php:206
+#: ../class-wc-gateway-payzenfranfinance.php:118 ../class-wc-gateway-payzenmulti.php:129 ../class-wc-gateway-payzenregroupedother.php:143
+#: ../class-wc-gateway-payzenregroupedother.php:206
 msgid "Label"
 msgstr "Libellé"
 
-#: ../class-wc-gateway-payzenchoozeo.php:117 ../class-wc-gateway-payzenfranfinance.php:134 ../class-wc-gateway-payzenmulti.php:134
-#: ../class-wc-gateway-payzenregroupedother.php:153
+#: ../class-wc-gateway-payzenfranfinance.php:134 ../class-wc-gateway-payzenmulti.php:134 ../class-wc-gateway-payzenregroupedother.php:153
 msgid "Min amount"
 msgstr "Montant min"
 
-#: ../class-wc-gateway-payzenchoozeo.php:122 ../class-wc-gateway-payzenfranfinance.php:139 ../class-wc-gateway-payzenmulti.php:139
-#: ../class-wc-gateway-payzenregroupedother.php:158
+#: ../class-wc-gateway-payzenfranfinance.php:139 ../class-wc-gateway-payzenmulti.php:139 ../class-wc-gateway-payzenregroupedother.php:158
 msgid "Max amount"
 msgstr "Montant max"
 
-#: ../class-wc-gateway-payzenchoozeo.php:127 ../class-wc-gateway-payzenfranfinance.php:144 ../class-wc-gateway-payzenmulti.php:168
+#: ../class-wc-gateway-payzenfranfinance.php:144 ../class-wc-gateway-payzenmulti.php:168
 msgid "Payment options"
 msgstr "Options de paiement"
 
-#: ../class-wc-gateway-payzenchoozeo.php:134
-msgid "Define amount restriction for each card."
-msgstr "Définir la restriction sur le montant pour chaque carte."
-
-#: ../class-wc-gateway-payzenchoozeo.php:328 ../class-wc-gateway-payzenfranfinance.php:347 ../class-wc-gateway-payzenmulti.php:338
+#: ../class-wc-gateway-payzenfranfinance.php:347 ../class-wc-gateway-payzenmulti.php:338
 msgid "Your payment option"
 msgstr "Votre option de paiement"
 
-#: ../class-wc-gateway-payzenchoozeo.php:330 ../class-wc-gateway-payzenfranfinance.php:354 ../class-wc-gateway-payzenmulti.php:345
+#: ../class-wc-gateway-payzenfranfinance.php:354 ../class-wc-gateway-payzenmulti.php:345
 msgid "Choose your payment option"
 msgstr "Choisissez une option de paiement"
 
@@ -1372,18 +1334,6 @@ msgstr "Erreur: Impossible de créer une commande renouvellement avec le plugin 
 #, php-format
 msgid "Sorry ! In order to use WooCommerce %s Payment plugin, you need to install and activate the WooCommerce plugin."
 msgstr "Désolé ! Pour utiliser le plugin WooCommerce %s Payment, vous devez installer et activer le plugin WooCommerce."
-
-#: ../woo-payzen-payment.php:504
-msgid "Thank you for contacting us. Your email has been successfully sent."
-msgstr "Merci de nous contacter. Votre e-mail a été envoyé avec succès."
-
-#: ../woo-payzen-payment.php:506
-msgid "An error has occurred. Your email was not sent."
-msgstr "Une erreur est survenue. Votre e-mail n'a pas été envoyé."
-
-#: ../woo-payzen-payment.php:509
-msgid "Please make sure to configure all required fields."
-msgstr "Veuillez configurer les champs obligatoires."
 
 msgid ""
 "Click on « Add » button to configure one or more payment means.<br /><b>Label: </b>The label of the means of payment to display on your site.<br /><b>Means of payment: </"
