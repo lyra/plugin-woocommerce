@@ -5,7 +5,7 @@ Requires at least: 3.5
 Tested up to: 6.9
 WC requires at least: 2.0
 WC tested up to: 10.4
-Stable tag: 1.16.1
+Stable tag: 1.17.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,13 @@ The payment plugin has the following features:
 5. PayZen payment page.
 
 == Changelog ==
+
+= 1.17.0, 2026-02-10 =
+* Improve form token management with embedded fields to only refresh on cart change.
+* Improve form token management for customer wallet to only refresh on client data change.
+* Remove contact support component.
+* Remove the possibility to configure URLs for payment page, REST API server and JS client server.
+* [technical] Clean Choozeo payment submodule code.
 
 = 1.16.1, 2026-01-28 =
 * Remove the possibility to reset plugin configuration data.

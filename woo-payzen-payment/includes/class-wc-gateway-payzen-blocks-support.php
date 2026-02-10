@@ -178,12 +178,11 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
      */
     public function get_payment_method_data()
     {
-        if (! is_admin() && ($this->get_name() !== 'payzenother_lyranetwork') && ! apply_filters('woocommerce_available_' . $this->get_name(), null)) {
+        if ((! is_admin() && ($this->get_name() !== 'payzenother_lyranetwork') && ! apply_filters('woocommerce_available_' . $this->get_name(), null))
+            || is_account_page())
+        {
             return;
         }
-
-        delete_transient('payzen_token_' . wp_get_session_token());
-        delete_transient('payzen_id_token_' . wp_get_session_token());
 
         $img_url = WC_PAYZEN_PLUGIN_URL . 'assets/images/payzen.png';
 

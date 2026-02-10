@@ -322,7 +322,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         try {
             $client = new PayzenRest(
-                $this->get_general_option('rest_url'),
+                $this->get_general_option('rest_url', self::REST_URL),
                 $this->get_general_option('site_id'),
                 $key
             );
@@ -369,7 +369,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             );
 
             $client = new PayzenRest(
-                $this->get_general_option('rest_url'),
+                $this->get_general_option('rest_url', self::REST_URL),
                 $this->get_general_option('site_id'),
                 $key
             );
@@ -440,7 +440,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         try {
             $client = new PayzenRest(
-                $this->get_general_option('rest_url'),
+                $this->get_general_option('rest_url', self::REST_URL),
                 $this->get_general_option('site_id'),
                 $key
             );
@@ -460,7 +460,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
     {
         $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
         $client = new PayzenRest(
-            $this->get_general_option('rest_url'),
+            $this->get_general_option('rest_url', self::REST_URL),
             $this->get_general_option('site_id'),
             $key
         );

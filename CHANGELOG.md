@@ -1,3 +1,10 @@
+= 1.17.0, 2026-02-10 =
+* Improve form token management with embedded fields to only refresh on cart change.
+* Improve form token management for customer wallet to only refresh on client data change.
+* Remove contact support component.
+* Remove the possibility to configure URLs for payment page, REST API server and JS client server.
+* [technical] Clean Choozeo payment submodule code.
+
 = 1.16.1, 2026-01-28 =
 * Remove the possibility to reset plugin configuration data.
 
