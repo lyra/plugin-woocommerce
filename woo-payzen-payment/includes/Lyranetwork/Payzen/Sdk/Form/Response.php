@@ -131,7 +131,7 @@ class Response
      */
     public function isAcceptedPayment()
     {
-        return in_array($this->transStatus, Api::getSuccessStatuses(), true) || $this->isPendingPayment();
+        return Api::isAcceptedPayment($this->transStatus);
     }
 
     /**
@@ -141,7 +141,7 @@ class Response
      */
     public function isPendingPayment()
     {
-        return in_array($this->transStatus, Api::getPendingStatuses(), true);
+        return Api::isPendingPayment($this->transStatus);
     }
 
     /**
@@ -150,7 +150,7 @@ class Response
      */
     public function isCancelledPayment()
     {
-        return in_array($this->transStatus, Api::getCancelledStatuses(), true);
+        return Api::isCancelledPayment($this->transStatus);
     }
 
     /**
@@ -159,7 +159,7 @@ class Response
      */
     public function isToValidatePayment()
     {
-        return in_array($this->transStatus, Api::getToValidateStatuses(), true);
+        return Api::isToValidatePayment($this->transStatus);
     }
 
     /**
@@ -382,46 +382,7 @@ class Response
      */
     public function getOutputForGateway($case = '', $extra_message = '', $original_encoding = 'UTF-8')
     {
-        // Predefined response messages according to case.
-        $cases = array(
-            'payment_ok' => array(true, 'Accepted payment, order has been updated.'),
-            'payment_ko' => array(true, 'Payment failure, order has been cancelled.'),
-            'payment_ko_bis' => array(true, 'Payment failure.'),
-            'payment_ok_already_done' => array(true, 'Accepted payment, already registered.'),
-            'payment_ko_already_done' => array(true, 'Payment failure, already registered.'),
-            'order_not_found' => array(false, 'Order not found.'),
-            'payment_ko_on_order_ok' => array(false, 'Order status does not match the payment result.'),
-            'auth_fail' => array(false, 'An error occurred while computing the signature.'),
-            'empty_cart' => array(false, 'Empty cart detected before order processing.'),
-            'unknown_status' => array(false, 'Unknown order status.'),
-            'amount_error' => array(false, 'Total paid is different from order amount.'),
-            'ok' => array(true, ''),
-            'ko' => array(false, '')
-        );
-
-        $success = array_key_exists($case, $cases) ? $cases[$case][0] : false;
-        $message = array_key_exists($case, $cases) ? $cases[$case][1] : '';
-
-        if (! empty($extra_message)) {
-            $message .= ' ' . $extra_message;
-        }
-
-        $message = str_replace("\n", ' ', $message);
-
-        // Set original CMS encoding to convert if necessary response to send to gateway.
-        $encoding = in_array(strtoupper($original_encoding), Api::$SUPPORTED_ENCODINGS, true) ?
-            strtoupper($original_encoding) : 'UTF-8';
-        if ($encoding !== 'UTF-8') {
-            $message = iconv($encoding, 'UTF-8', $message);
-        }
-
-        $content = $success ? 'OK-' : 'KO-';
-        $content .= "$message\n";
-
-        $response = '<span style="display:none">';
-        $response .= htmlspecialchars($content, ENT_COMPAT, 'UTF-8');
-        $response .= '</span>';
-        return $response;
+        return Api::getOutputForGateway($case, $extra_message, $original_encoding);
     }
 
     /**

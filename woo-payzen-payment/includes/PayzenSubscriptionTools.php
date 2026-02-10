@@ -308,14 +308,13 @@ class PayzenSubscriptionTools
         return $saved_identifier;
     }
 
-
     private function get_rest_client() {
         $general_settings = get_option('woocommerce_payzen_settings', null);
-        $rest_url = is_array($general_settings) && isset($general_settings['rest_url'])  ? $general_settings['rest_url'] : null;
+        $rest_url = is_array($general_settings) && isset($general_settings['rest_url'])  ? $general_settings['rest_url'] : WC_Gateway_Payzen::REST_URL;
         $site_id = is_array($general_settings) && isset($general_settings['site_id'])  ? $general_settings['site_id'] : null;
 
         return new PayzenRest($rest_url, $site_id, $this->get_key());
-     }
+    }
 
     protected function check_identifier($cust_id, $identifier = null)
     {

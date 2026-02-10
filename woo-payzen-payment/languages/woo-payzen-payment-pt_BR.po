@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PayZen para WooCommerce 1.16.1\n"
+"Project-Id-Version: PayZen para WooCommerce 1.17.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-09 14:25+0200\n"
-"PO-Revision-Date: 2026-01-26 14:26+0100\n"
+"PO-Revision-Date: 2026-02-05 11:31+0100\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <https://payzen.io/fr-FR/support/>\n"
 "Language: pt\n"
@@ -244,14 +244,6 @@ msgstr "URL de notificação de pagamento instantâneo"
 msgid "URL to copy into your %s Back Office > Settings > Notification rules."
 msgstr "URL para copiar no seu Back Office %s > Configurações > Regras de notificação."
 
-#: ../class-wc-gateway-payzen.php:555
-msgid "Payment page URL"
-msgstr "URL Página de pagamento"
-
-#: ../class-wc-gateway-payzen.php:558
-msgid "Link to the payment page."
-msgstr "Link para a página de pagamento."
-
 #: ../class-wc-gateway-payzen.php:564
 msgid "REST API keys"
 msgstr "Chaves de API REST"
@@ -274,10 +266,6 @@ msgstr "Senha de teste"
 msgid "Production password"
 msgstr "Senha de produção"
 
-#: ../class-wc-gateway-payzen.php:581
-msgid "API REST server URL"
-msgstr "URL do servidor API REST"
-
 #: ../class-wc-gateway-payzen.php:589
 msgid "Configure this section only if you are using embedded payment fields modes."
 msgstr "Configure esta secção apenas se estiver usando campos de compra incorporados."
@@ -297,10 +285,6 @@ msgstr "Chave HMAC-SHA-256 de teste"
 #: ../class-wc-gateway-payzen.php:610
 msgid "HMAC-SHA-256 production key"
 msgstr "Chave HMAC-SHA-256 de produção"
-
-#: ../class-wc-gateway-payzen.php:616
-msgid "JavaScript client URL"
-msgstr "URL Cliente JavaScript"
 
 #: ../class-wc-gateway-payzen.php:622
 msgid "API REST Notification URL"
@@ -653,50 +637,28 @@ msgstr "O meio de pagamento armazenado não pôde ser apagado."
 msgid "The stored means of payment was successfully deleted."
 msgstr "O meio de pagamento armazenado foi apagado com sucesso."
 
-#: ../class-wc-gateway-payzenchoozeo.php:26
-msgid "Choozeo payment"
-msgstr "Pagamento Choozeo"
-
-#: ../class-wc-gateway-payzenchoozeo.php:84
-msgid "Enables / disables Choozeo payment."
-msgstr "Ativa / desativa o pagamento com Choozeo."
-
-#: ../class-wc-gateway-payzenchoozeo.php:86
-msgid "Payment with Choozeo without fees"
-msgstr "Pagamento com Choozeo sem custo"
-
-#: ../class-wc-gateway-payzenchoozeo.php:106
-msgid "CHOOZEO PAYMENT OPTIONS"
-msgstr "OPÇÕES DE PAGAMENTO CHOOZEO"
-
-#: ../class-wc-gateway-payzenchoozeo.php:112 ../class-wc-gateway-payzenfranfinance.php:118 ../class-wc-gateway-payzenmulti.php:129
-#: ../class-wc-gateway-payzenregroupedother.php:143 ../class-wc-gateway-payzenregroupedother.php:206
+#: ../class-wc-gateway-payzenfranfinance.php:118 ../class-wc-gateway-payzenmulti.php:129 ../class-wc-gateway-payzenregroupedother.php:143
+#: ../class-wc-gateway-payzenregroupedother.php:206
 msgid "Label"
 msgstr "Rótulo"
 
-#: ../class-wc-gateway-payzenchoozeo.php:117 ../class-wc-gateway-payzenfranfinance.php:134 ../class-wc-gateway-payzenmulti.php:134
-#: ../class-wc-gateway-payzenregroupedother.php:153
+#: ../class-wc-gateway-payzenfranfinance.php:134 ../class-wc-gateway-payzenmulti.php:134 ../class-wc-gateway-payzenregroupedother.php:153
 msgid "Min amount"
 msgstr "Valor min"
 
-#: ../class-wc-gateway-payzenchoozeo.php:122 ../class-wc-gateway-payzenfranfinance.php:139 ../class-wc-gateway-payzenmulti.php:139
-#: ../class-wc-gateway-payzenregroupedother.php:158
+#: ../class-wc-gateway-payzenfranfinance.php:139 ../class-wc-gateway-payzenmulti.php:139 ../class-wc-gateway-payzenregroupedother.php:158
 msgid "Max amount"
 msgstr "Valor max"
 
-#: ../class-wc-gateway-payzenchoozeo.php:127 ../class-wc-gateway-payzenfranfinance.php:144 ../class-wc-gateway-payzenmulti.php:168
+#: ../class-wc-gateway-payzenfranfinance.php:144 ../class-wc-gateway-payzenmulti.php:168
 msgid "Payment options"
 msgstr "Opções de pagamento"
 
-#: ../class-wc-gateway-payzenchoozeo.php:134
-msgid "Define amount restriction for each card."
-msgstr "Defina um limite de valor para cada cartão."
-
-#: ../class-wc-gateway-payzenchoozeo.php:328 ../class-wc-gateway-payzenfranfinance.php:347 ../class-wc-gateway-payzenmulti.php:338
+#: ../class-wc-gateway-payzenfranfinance.php:347 ../class-wc-gateway-payzenmulti.php:338
 msgid "Your payment option"
 msgstr "Sua opção de pagamento"
 
-#: ../class-wc-gateway-payzenchoozeo.php:330 ../class-wc-gateway-payzenfranfinance.php:354 ../class-wc-gateway-payzenmulti.php:345
+#: ../class-wc-gateway-payzenfranfinance.php:354 ../class-wc-gateway-payzenmulti.php:345
 msgid "Choose your payment option"
 msgstr "Escolha sua opção de pagamento"
 
@@ -1364,18 +1326,6 @@ msgstr "Erro: Não foi possível criar uma ordem de renovação com o plugin de 
 #, php-format
 msgid "Sorry ! In order to use WooCommerce %s Payment plugin, you need to install and activate the WooCommerce plugin."
 msgstr "Para usar o plugin de pagamento %s WooCommerce, deve instalar e ativar o plugin WooCommerce."
-
-#: ../woo-payzen-payment.php:495
-msgid "Thank you for contacting us. Your email has been successfully sent."
-msgstr "Obrigado por entrar em contato conosco. Seu email foi enviado com sucesso."
-
-#: ../woo-payzen-payment.php:497
-msgid "An error has occurred. Your email was not sent."
-msgstr "Ocorreu um erro. Seu email não foi enviado."
-
-#: ../woo-payzen-payment.php:500
-msgid "Please make sure to configure all required fields."
-msgstr "Tenha certeza de ter configurado todos os campos requeridos."
 
 #, php-format
 msgid ""

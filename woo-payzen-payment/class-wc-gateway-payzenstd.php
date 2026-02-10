@@ -917,7 +917,11 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
     {
         global $woocommerce;
 
-        if (is_account_page() && ! is_add_payment_method_page()) {
+        if (is_account_page()) {
+            if (! is_add_payment_method_page()) {
+                return '';
+            }
+        } elseif (! is_checkout() && ! is_checkout_pay_page()) {
             return '';
         }
 
@@ -1238,8 +1242,20 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
     public function payment_fields()
     {
+        global $woocommerce, $wp_current_filter;
+
         if (! $this->is_available()) {
             return;
+        }
+
+        if (($this->id == 'payzenstd') &&
+            ($wp_current_filter == 'woocommerce_after_account_payment_methods' || in_array('woocommerce_after_account_payment_methods', $wp_current_filter))) {
+            $cust_id = self::get_customer_property($woocommerce->customer, 'id');
+            $payzenwcs_settings = get_option('woocommerce_payzenwcssubscription_settings', null);
+
+            if (($payzenwcs_settings['enabled'] == 'yes') && PayzenTools::use_wallet($cust_id, 'payzenwcssubscription')) {
+                return;
+            }
         }
 
         echo $this->get_payment_fields();
@@ -1623,11 +1639,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $email = method_exists($woocommerce->customer, 'get_billing_email') ? $woocommerce->customer->get_billing_email() : $woocommerce->customer->user_email;
         $amount = $currency->convertAmountToInteger($woocommerce->cart->total);
 
-        // Get order ID for draft orders otherwise generate a temporary order_id.
-        $order_id = $woocommerce->session->get('store_api_draft_order') ? $woocommerce->session->get('store_api_draft_order') : PayzenApi::generateTransId(time());
-
         $params = array(
-            'orderId' => $order_id,
             'amount' => $amount,
             'currency' => $currency->getAlpha3(),
             'customer' => array(
@@ -1666,20 +1678,26 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
 
         // Do not refresh token if data didn't change.
-        $last_token_data = get_transient('payzen_token_data_' . ($use_identifier ? 'identifier_' : '') . wp_get_session_token());
-        $last_token = get_transient('payzen_token_' . ($use_identifier ? 'identifier_' : '') . wp_get_session_token());
+        $transientSuffix = ($use_identifier ? 'identifier_' : '') . wp_get_session_token();
+        $last_token_data = get_transient('payzen_token_data_' . $transientSuffix);
+        $last_token = get_transient('payzen_token_' . $transientSuffix);
 
         $token_data = base64_encode(serialize($params));
         if ($last_token && $last_token_data && ($last_token_data === $token_data)) {
-            // Cart data does not change from last payment attempt, do not re-create payment token.
+            // Cart data did not change from last payment attempt, do not re-create payment token.
             $this->log("Cart data did not change since last token creation, use last created token for current cart for user: {$email}.");
+
             return $last_token;
         }
 
+        // Get order ID for draft orders otherwise generate a temporary order_id.
+        $order_id = $woocommerce->session->get('store_api_draft_order') ? $woocommerce->session->get('store_api_draft_order') : PayzenApi::generateTransId(time());
+        $params['orderId'] = $order_id;
+
         $token = $this->create_form_token($params, "user {$email}");
         if ($token) {
-            set_transient('payzen_token_data_' . ($use_identifier ? 'identifier_' : '') . wp_get_session_token(), $token_data);
-            set_transient('payzen_token_' . ($use_identifier ? 'identifier_' : '') . wp_get_session_token(), $token);
+            set_transient('payzen_token_data_' . $transientSuffix, $token_data, 900);
+            set_transient('payzen_token_' . $transientSuffix, $token, 900);
         }
 
         return $token;
@@ -1689,6 +1707,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         global $woocommerce, $wp, $wpdb;
 
         $customer = $woocommerce->customer;
+        $reference = self::get_customer_property($customer, 'id');
         $email = method_exists($customer, 'get_billing_email') ? $customer->get_billing_email() : $customer->user_email;
         $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
 
@@ -1696,7 +1715,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             'formAction' => ($force_register || isset($wp->query_vars['add-payment-method'])) ? 'REGISTER' : 'CUSTOMER_WALLET',
             'customer' => array(
                 'email' => $email,
-                'reference' => self::get_customer_property($customer, 'id'),
+                'reference' => $reference,
                 'billingDetails' => array(
                     'firstName' => self::get_customer_property($customer, 'first_name'),
                     'lastName' => self::get_customer_property($customer, 'last_name'),
@@ -1715,7 +1734,25 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             )
         );
 
-        return $this->create_form_token($params, "user {$email}", 'CreateToken');
+        // Do not refresh token if data didn't change.
+        $last_token_data = get_transient('payzen_account_token_data_' . $reference);
+        $last_token = get_transient('payzen_account_token_' . $reference);
+
+        $token_data = base64_encode(serialize($params));
+        if ($last_token && $last_token_data && ($last_token_data === $token_data)) {
+            // User data did not change from last token creation, do not re-create account token.
+            $this->log("User data did not change since last token creation, use last created account token for user: {$email}.");
+
+            return $last_token;
+        }
+
+        $token = $this->create_form_token($params, "user {$email}", 'CreateToken');
+        if ($token) {
+            set_transient('payzen_account_token_data_' . $reference, $token_data, 900);
+            set_transient('payzen_account_token_' . $reference, $token, 900);
+        }
+
+        return $token;
     }
 
     protected function get_form_token($order, $use_identifier = false)
@@ -1857,7 +1894,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
 
         try {
-            $client = new PayzenRest($this->get_general_option('rest_url'), $this->get_general_option('site_id'), $key);
+            $client = new PayzenRest($this->get_general_option('rest_url', self::REST_URL), $this->get_general_option('site_id'), $key);
             $result = $client->post('V4/Charge/' . $webservice, json_encode($params));
 
             if ($result['status'] != 'SUCCESS') {
@@ -1932,9 +1969,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         $this->log("Updating form token for user #{$email}.");
 
-        if ($token = $this->get_temporary_form_token($_POST['use_identifier'] === 'true')) {
-            $this->log("Form token updated for user #{$email}.");
-
+        $use_identifier = isset($_POST['use_identifier']) ? $_POST['use_identifier'] === 'true' : false;
+        if ($token = $this->get_temporary_form_token($use_identifier)) {
             $result = array('result' => 'success', 'formToken' => $token);
         } else {
             $result = array('result' => 'error');
@@ -2195,13 +2231,15 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         // Other configuration params.
         $config_keys = array(
-            'site_id', 'key_test', 'key_prod', 'ctx_mode', 'platform_url', 'capture_delay', 'validation_mode',
+            'site_id', 'key_test', 'key_prod', 'ctx_mode', 'capture_delay', 'validation_mode',
             'redirect_success_timeout', 'redirect_error_timeout', 'return_mode', 'sign_algo'
         );
 
         foreach ($config_keys as $key) {
             $this->payzen_request->set($key, $this->get_general_option($key));
         }
+
+        $this->payzen_request->set('platform_url', $this->get_general_option('platform_url', parent::GATEWAY_URL));
 
         // Check if capture_delay and validation_mode are overriden in submodules.
         if (is_numeric($this->get_option('capture_delay'))) {

@@ -24,12 +24,6 @@ class PayzenTools
             . '/' . PayzenApi::shortPhpVersion();
     }
 
-    public static function get_support_component_language()
-    {
-        $parts = explode('_', get_locale());
-        return $parts[0];
-    }
-
     public static function get_integration_mode()
     {
         $std_method_settings = get_option('woocommerce_payzenstd_settings', null);
@@ -61,72 +55,29 @@ class PayzenTools
         return in_array(self::get_integration_mode(), $modes);
     }
 
-    public static function get_active_plugins()
+    public static function use_wallet($cust_id = null, $method = 'payzenstd')
     {
-        $all_active_plugins = get_option('active_plugins');
+        global $woocommerce;
 
-        $active_plugins = array();
-        foreach ($all_active_plugins as $plugin) {
-            $parts = explode('/', $plugin);
-            $active_plugins[] = $parts[0];
+        $std_settings = get_option('woocommerce_payzenstd_settings', null);
+        if (($method == 'payzenstd') && ($std_settings['use_customer_wallet'] !== '1')) {
+            return false;
         }
 
-        return implode(' / ', $active_plugins);
+        if (! self::is_embedded_payment()) {
+            return false;
+        }
+
+        if (! $cust_id) {
+            $cust_id = WC_Gateway_Payzen::get_customer_property($woocommerce->customer, 'id');
+        }
+
+        return ! is_null($cust_id);
     }
 
     public static function is_plugin_not_active($plugin)
     {
         return is_plugin_active($plugin) ? 'false' : 'true';
-    }
-
-    public static function get_used_discounts($order)
-    {
-        $coupons = array();
-        $used_coupons = self::get_coupon_codes($order);
-        foreach ($used_coupons as $coupon_code) {
-            $coupon = new WC_Coupon($coupon_code);
-
-            $discount_type = $coupon->get_discount_type(); // Get coupon discount type.
-            $coupon_amount = $coupon->get_amount(); // Get coupon amount.
-            $currency = ($discount_type !== 'percent') ? ' ' . $order->get_currency() : '%'; // Get coupon currency.
-
-            $coupons[] = $discount_type . ' -' . $coupon_amount . $currency;
-        }
-
-        return $coupons ? implode(' / ', $coupons) : '';
-    }
-
-    private static function get_coupon_codes($order)
-    {
-        if (method_exists($order, 'get_coupon_codes')) {
-            return $order->get_coupon_codes();
-        }
-
-        if (method_exists($order, 'get_used_coupons')) {
-            return $order->get_used_coupons();
-        }
-
-        return array();
-    }
-
-    public static function get_transaction_uuid($order)
-    {
-        $trans_uuid = '';
-        $trans_id = (self::is_hpos_enabled()) ? $order->get_meta('Transaction ID') : get_post_meta((int) $order->get_id(), 'Transaction ID', true);
-
-        if ($trans_id) {
-            $notes = WC_Gateway_Payzen::get_order_notes($order->get_id());
-            foreach ($notes as $note) {
-                if (strpos($note, $trans_id) !== false) {
-                    $parts = explode('.', $note);
-                    $trans_uuid = $parts ? $parts[1] : '';
-                    break;
-                }
-            }
-        }
-
-        $parts = $trans_uuid ? explode(':', $trans_uuid) : '';
-        return $parts ? $parts[1] : '';
     }
 
     public static function is_hpos_enabled()
