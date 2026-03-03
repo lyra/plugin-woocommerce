@@ -1,3 +1,6 @@
+= 1.17.1, 2026-03-03 =
+* Bug fix: Fix error related to order status management for payment by token.
+
 = 1.17.0, 2026-02-10 =
 * Improve form token management with embedded fields to only refresh on cart change.
 * Improve form token management for customer wallet to only refresh on client data change.
