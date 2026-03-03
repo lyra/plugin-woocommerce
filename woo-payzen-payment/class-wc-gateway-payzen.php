@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-10.x';
     const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
-    const PLUGIN_VERSION = '1.17.0';
+    const PLUGIN_VERSION = '1.17.1';
     const GATEWAY_VERSION = 'V2';
 
     const METHOD_ID = 'payzen_method_id';
@@ -1510,7 +1510,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         if ($server_rest_abandoned_payment && PayzenTools::is_embedded_payment() && empty($payzen_response->getTransStatus())) {
             if (! $order && ($this->get_option('rest_popin') !== 'yes')) {
                 $this->log("Payment abandoned, do nothing.");
-                $this->log('IPN URL PROCESS END');
+                $this->log("IPN URL process end for order #$order_id");
 
                 die('<span style="display:none">KO-Payment abandoned, no order to update. IPN ignored.' . "\n" . '</span>');
             }
@@ -1524,7 +1524,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     $this->log("Order #$order_id cancelled successfully.");
                 }
 
-                $this->log('IPN URL PROCESS END');
+                $this->log("IPN URL process end for order #$order_id");
 
                 die('<span style="display:none">KO-Payment abandoned, order cancelled.' . "\n" . '</span>');
             }
@@ -1535,10 +1535,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $this->log("Order #$order_id was deleted on payment failure. Please, try to re-order.");
 
             if ($from_server) {
-                $this->log('IPN URL PROCESS END');
+                $this->log("IPN URL process end for order #$order_id");
                 die($payzen_response->getOutputForGateway('payment_ko'));
             } else {
-                $this->log('RETURN URL PROCESS END');
+                $this->log("Return URL process end for order #$order_id");
 
                 if (! $payzen_response->isCancelledPayment()) {
                     $this->add_notice(__('Your payment was not accepted. Please, try to re-order.', 'woo-payzen-payment'), 'error');
@@ -1568,7 +1568,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             $this->log("Error: order #$order_id not found or key does not match received invoice ID.");
 
             if ($from_server) {
-                $this->log('IPN URL PROCESS END');
+                $this->log("IPN URL process end for order #$order_id");
 
                 die($payzen_response->getOutputForGateway('order_not_found'));
             } else {
@@ -1576,7 +1576,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 $woocommerce->cart->empty_cart();
                 $this->add_notice(__('An error has occurred in the payment process.', 'woo-payzen-payment'), 'error');
 
-                $this->log('RETURN URL PROCESS END');
+                $this->log("Return URL process end for order #$order_id");
                 $this->payzen_redirect($cart_url);
             }
         }
@@ -1620,7 +1620,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     $this->log("Payment is pending, make order #$order_id in on-hold status.");
 
                     $order->update_status('on-hold');
-                } else {
+                } elseif ($payzen_response->isAcceptedPayment()) {
                     // Payment completed.
                     $this->log("Payment successfull, let's complete order #$order_id.");
 
@@ -1639,7 +1639,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 if ($from_server) {
                     $this->log("Payment processed successfully by IPN URL call for order #$order_id.");
-                    $this->log('IPN URL PROCESS END');
+                    $this->log("IPN URL process end for order #$order_id");
 
                     die($payzen_response->getOutputForGateway('payment_ok'));
                 } else {
@@ -1653,7 +1653,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                         $this->add_notice($ipn_url_warn, 'error');
                     }
 
-                    $this->log('RETURN URL PROCESS END');
+                    $this->log("Return URL process end for order #$order_id");
                     $this->payzen_redirect($this->get_return_url($order));
                 }
             } else {
@@ -1678,10 +1678,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 }
 
                 if ($from_server) {
-                    $this->log('IPN URL PROCESS END');
+                    $this->log("IPN URL process end for order #$order_id");
                     die($payzen_response->getOutputForGateway($msg));
                 } else {
-                    $this->log('RETURN URL PROCESS END');
+                    $this->log("Return URL process end for order #$order_id");
 
                     if (! $payzen_response->isCancelledPayment()) {
                         $this->add_notice(__('Your payment was not accepted. Please, try to re-order.', 'woo-payzen-payment'), 'error');
@@ -1711,7 +1711,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     echo($payzen_response->getOutputForGateway('payment_ko'));
                 }
 
-                $this->log('IPN URL PROCESS END');
+                $this->log("IPN URL process end for order #$order_id");
                 die();
             } elseif (($payzen_response->get('identifier_status') === 'UPDATED')
                 || (($payzen_response->get('identifier_status') === 'CREATED') && $wcs_scheduled)
@@ -1764,20 +1764,20 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     }
 
                     if ($from_server) {
-                        $this->log('IPN URL PROCESS END');
+                        $this->log("IPN URL process end for order #$order_id");
                         die($payzen_response->getOutputForGateway('payment_ok_already_done'));
                     } else {
                         $this->add_notice(__('Payment method updated.', 'woo-payzen-payment'));
 
-                        $this->log('RETURN URL PROCESS END');
+                        $this->log("Return URL process end for order #$order_id");
                         $this->payzen_redirect($subsc_redirect_url ? $subsc_redirect_url : $this->get_return_url($order));
                     }
                 } else {
                     if ($from_server) {
-                        $this->log('IPN URL PROCESS END');
+                        $this->log("IPN URL process end for order #$order_id");
                         die($payzen_response->getOutputForGateway('payment_ok_already_done'));
                     } else {
-                        $this->log('RETURN URL PROCESS END');
+                        $this->log("Return URL process end for order #$order_id");
 
                         if (! $payzen_response->isCancelledPayment()) {
                             $this->add_notice(__('The payment method can not be changed for that subscription.', 'woo-payzen-payment'), 'error');
@@ -1803,9 +1803,13 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                         break;
                     case self::is_successful_action($payzen_response):
                         $this->log("Order #$order_id is in a pending status and payment is accepted. Complete order payment.");
-                        $order->payment_complete();
+                        if ($payzen_response->isAcceptedPayment()) {
+                            $this->log("Payment accepted, complete payment for order #$order_id.");
+                            $order->payment_complete();
 
-                        echo($payzen_response->getOutputForGateway('payment_ok'));
+                            echo($payzen_response->getOutputForGateway('payment_ok'));
+                        }
+
                         break;
                     default:
                         $this->log("Order #$order_id is in a pending status and payment failed. Cancel order.");
@@ -1818,7 +1822,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                         break;
                 }
 
-                $this->log('IPN URL PROCESS END');
+                $this->log("IPN URL process end for order #$order_id");
+
                 die();
             } elseif (self::is_successful_action($payzen_response) && key_exists($order_status, self::get_success_order_statuses(false, $subscriptions_handler))) {
                 $status = $payzen_response->isPendingPayment() ? 'pending' : 'successful';
@@ -1826,10 +1831,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 // Order success registered and payment success received.
                 if ($from_server) {
-                    $this->log('IPN URL PROCESS END');
+                    $this->log("IPN URL process end for order #$order_id");
                     die($payzen_response->getOutputForGateway('payment_ok_already_done'));
                 } else {
-                    $this->log('RETURN URL PROCESS END');
+                    $this->log("Return URL process end for order #$order_id");
                     $this->payzen_redirect($this->get_return_url($order));
                 }
             } elseif (! self::is_successful_action($payzen_response) && ($order_status === 'failed' || $order_status === 'cancelled')) {
@@ -1837,10 +1842,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 // Order failure registered and payment error received.
                 if ($from_server) {
-                    $this->log('IPN URL PROCESS END');
+                    $this->log("IPN URL process end for order #$order_id");
                     die($payzen_response->getOutputForGateway('payment_ko_already_done'));
                 } else {
-                    $this->log('RETURN URL PROCESS END');
+                    $this->log("Return URL process end for order #$order_id");
 
                     if (! $payzen_response->isCancelledPayment()) {
                         $this->add_notice(__('Your payment was not accepted. Please, try to re-order.', 'woo-payzen-payment'), 'error');
@@ -1854,7 +1859,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
                 // Registered order status not match payment result.
                 if ($from_server) {
-                    $this->log('IPN URL PROCESS END');
+                    $this->log("IPN URL process end for order #$order_id");
 
                     die($payzen_response->getOutputForGateway('payment_ko_on_order_ok'));
                 } else {
@@ -1862,7 +1867,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                     $woocommerce->cart->empty_cart();
                     $this->add_notice(__('An error has occurred in the payment process.', 'woo-payzen-payment'), 'error');
 
-                    $this->log('RETURN URL PROCESS END');
+                    $this->log("Return URL process end for order #$order_id");
+
                     $this->payzen_redirect($cart_url);
                 }
             }

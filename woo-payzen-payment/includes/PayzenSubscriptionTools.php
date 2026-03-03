@@ -119,8 +119,12 @@ class PayzenSubscriptionTools
 
             if (WC_Gateway_Payzen::is_successful_action($response)) {
                 // Payment completed.
-                $renewal_order->payment_complete();
-                $this->log("Payment successful, renewal order #$renewal_order_id completed.");
+                if ($response->isAcceptedPayment()) {
+                    $this->log("Payment accepted, complete payment for renewal order #$renewal_order_id.");
+
+                    $renewal_order->payment_complete();
+                    $this->log("Payment successful, renewal order #$renewal_order_id completed.");
+                }
             } else {
                 // Payment failed or pending.
                 $renewal_order->update_status('failed');

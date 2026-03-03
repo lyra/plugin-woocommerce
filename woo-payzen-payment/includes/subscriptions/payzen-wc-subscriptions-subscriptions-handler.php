@@ -243,7 +243,9 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
         }
 
         if (WC_Gateway_Payzen::is_successful_action($response)) {
-            $subscription->payment_complete();
+            if ($response->isAcceptedPayment()) {
+                $subscription->payment_complete();
+            }
         } else {
             $subscription->payment_failed();
         }
@@ -321,7 +323,9 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
 
                 if (WC_Gateway_Payzen::is_successful_action($response)) {
                     // Payment completed.
-                    $subscription->payment_complete();
+                    if ($response->isAcceptedPayment()) {
+                        $subscription->payment_complete();
+                    }
                 } else {
                     // Payment failed or pending.
                     $subscription->payment_failed();
