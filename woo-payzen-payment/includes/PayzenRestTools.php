@@ -99,6 +99,7 @@ class PayzenRestTools
             $response[$prefix . 'identifier_status'] = 'CREATED';
         }
 
+        $response[$prefix . 'ext_info_' . 'is_rest'] = true;
         if (($metadata = self::getProperty($transaction, 'metadata')) && is_array($metadata)) {
             foreach ($metadata as $key => $value) {
                 $response[$prefix . 'ext_info_' . $key] = $value;
