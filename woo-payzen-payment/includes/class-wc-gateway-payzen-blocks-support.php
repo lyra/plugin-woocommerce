@@ -66,7 +66,7 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
 
     private function get_card_data_mode()
     {
-        $option = isset($this->settings['card_data_mode']) ? $this->settings['card_data_mode'] : 'REDIRECT';
+        $option = $this->settings['card_data_mode'] ?? 'REDIRECT';
         return ($option === 'REST') ? 'SMARTFORMEXT' : $option;
     }
 

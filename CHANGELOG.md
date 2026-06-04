@@ -1,3 +1,8 @@
+= 1.17.2, 2026-06-03 =
+* Bug fix: Fix PHP error related to displaying notices on order confirmation page.
+* Update list of supported payment means.
+* Update list of supported currencies.
+
 = 1.17.1, 2026-03-03 =
 * Bug fix: Fix error related to order status management for payment by token.
 

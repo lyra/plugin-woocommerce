@@ -385,7 +385,7 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
         global $woocommerce;
 
         $options = $this->get_available_options();
-        $option_id = isset($_POST['payzenfranfinance_option']) ? $_POST['payzenfranfinance_option'] : $_COOKIE['payzenfranfinance_option'];
+        $option_id = $_POST['payzenfranfinance_option'] ?? $_COOKIE['payzenfranfinance_option'];
         $option = $options[$option_id];
 
         // Save selected payment option into session...

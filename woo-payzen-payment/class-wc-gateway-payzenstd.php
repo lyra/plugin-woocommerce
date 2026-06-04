@@ -1253,7 +1253,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             $cust_id = self::get_customer_property($woocommerce->customer, 'id');
             $payzenwcs_settings = get_option('woocommerce_payzenwcssubscription_settings', null);
 
-            if (($payzenwcs_settings['enabled'] == 'yes') && PayzenTools::use_wallet($cust_id, 'payzenwcssubscription')) {
+            $isWcsActive = $payzenwcs_settings && isset($payzenwcs_settings['enabled']) && $payzenwcs_settings['enabled'] == 'yes';
+            if ($isWcsActive && PayzenTools::use_wallet($cust_id, 'payzenwcssubscription')) {
                 return;
             }
         }
@@ -2354,7 +2355,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $not_allowed_chars_regex = '#[^A-Z0-9ÁÀÂÄÉÈÊËÍÌÎÏÓÒÔÖÚÙÛÜÇ -]#ui';
 
         $chosen_shipping_methods = WC()->session->get('chosen_shipping_methods');
-        $selected_shipping = $chosen_shipping_methods ? substr($chosen_shipping_methods[0], 0, strpos($chosen_shipping_methods[0], ':')) : '';
+        $shipping_method = $chosen_shipping_methods[0] ?? null;
+        $selected_shipping = $shipping_method ? substr($shipping_method, 0, strpos($shipping_method, ':')) : '';
 
         if (! $selected_shipping) { // There is no shipping method.
             $this->payzen_request->set('ship_to_type', 'ETICKET');

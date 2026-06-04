@@ -139,7 +139,8 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
     /**
     * Init settings for gateways.
     */
-    public function init_settings() {
+    public function init_settings()
+    {
         parent::init_settings();
         $this->set_smartform_params();
     }
