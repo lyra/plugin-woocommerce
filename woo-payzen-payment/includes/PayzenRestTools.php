@@ -22,23 +22,17 @@ class PayzenRestTools
         $transactions = self::getProperty($answer, 'transactions');
         $multiPaymentMean = false;
 
-        if ($isTransaction) {
+        if ($isTransaction || ! is_array($transactions) || empty($transactions)) {
             $transaction = $answer;
         } else {
-            if (! is_array($transactions) || empty($transactions)) {
-                $transaction = $answer;
-            } else {
-                $transaction = $transactions[0];
-                $transactionsFiltered = array_filter($transactions, function($trs) {
-                    $successStatuses = array_merge(PayzenApi::getSuccessStatuses(), PayzenApi::getPendingStatuses());
+            $transaction = $transactions[0];
+            $transactionsFiltered = array_filter($transactions, function($trs) {
+                return $trs['operationType'] === 'DEBIT' && PayzenApi::isAcceptedPayment($trs['detailedStatus']);
+            });
 
-                    return $trs['operationType'] === 'DEBIT' && in_array($trs['detailedStatus'], $successStatuses);
-                });
-
-                if (count($transactionsFiltered) > 1) {
-                    $multiPaymentMean = isset($transactionsFiltered[0]['transactionDetails']['cardDetails']['sequenceType'])
-                        && $transactionsFiltered[0]['transactionDetails']['cardDetails']['sequenceType'] == 'MULTI_PAYMENT_MEAN';
-                }
+            if (count($transactionsFiltered) > 1) {
+                $multiPaymentMean = isset($transactionsFiltered[0]['transactionDetails']['cardDetails']['sequenceType'])
+                    && $transactionsFiltered[0]['transactionDetails']['cardDetails']['sequenceType'] == 'MULTI_PAYMENT_MEAN';
             }
         }
 
@@ -65,11 +59,11 @@ class PayzenRestTools
         if ($multiPaymentMean) {
             $payment_seq = array(
                 'trans_id' => $response['vads_trans_id'],
-                'transactions' => array()
+                'transactions' => []
             );
 
             foreach ($transactions as $trs) {
-                $payment_seq['transactions'][] = self::convertRestTransaction(array(), $trs, '');
+                $payment_seq['transactions'][] = self::convertRestTransaction([], $trs, '');
             }
 
             $response['vads_card_brand'] = 'MULTI';
@@ -81,8 +75,9 @@ class PayzenRestTools
         return $response;
     }
 
-    private static function convertRestTransaction($response, $transaction, $prefix = 'vads_') {
-        $response[$prefix . 'result'] = self::getProperty($transaction, 'errorCode') ? self::getProperty($transaction, 'errorCode') : '00';
+    private static function convertRestTransaction($response, $transaction, $prefix = 'vads_')
+    {
+        $response[$prefix . 'result'] = self::getProperty($transaction, 'errorCode') ?? '00';
         $response[$prefix . 'extra_result'] = self::getProperty($transaction, 'detailedErrorCode');
 
         $response[$prefix . 'trans_status'] = self::getProperty($transaction, 'detailedStatus');
@@ -185,11 +180,7 @@ class PayzenRestTools
 
     public static function getProperty($array, $key)
     {
-        if (isset($array[$key])) {
-            return $array[$key];
-        }
-
-        return null;
+        return $array[$key] ?? null;
     }
 
     public static function checkHash($data, $key)
@@ -216,7 +207,7 @@ class PayzenRestTools
     }
 
     // Check REST WS response.
-    public static function checkResult($response, $expectedStatuses = array())
+    public static function checkResult($response, $expectedStatuses = [])
     {
         $answer = $response['answer'];
 

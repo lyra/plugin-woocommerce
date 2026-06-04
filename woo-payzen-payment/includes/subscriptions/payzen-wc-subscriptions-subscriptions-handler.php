@@ -55,24 +55,29 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
             return false;
         }
 
+        if (function_exists('wcs_cart_contains_renewal') && wcs_cart_contains_renewal()) {
+            return false;
+        }
+
         $count = 0;
 
-        if (! empty($cart->cart_contents) && (function_exists('wcs_cart_contains_renewal') && ! wcs_cart_contains_renewal())) {
-            foreach ($cart->cart_contents as $cart_item) {
-                if (WC_Subscriptions_Product::is_subscription($cart_item['data'])) {
-                    $count ++;
-                }
+        $cart_contents = $cart->cart_contents ?? [];
+        foreach ($cart_contents as $cart_item) {
+            $data = $cart_item['data'] ?? null;
+            if ($data && WC_Subscriptions_Product::is_subscription($data) && ++$count > 1) {
+                return true;
             }
         }
 
-        return $count > 1;
+        return false;
     }
 
     /**
      * {@inheritDoc}
      * @see Payzen_Subscriptions_Handler_Interface::is_subscription_update()
      */
-    public function is_subscription_update() {
+    public function is_subscription_update()
+    {
         if (! class_exists('WC_Subscriptions_Product')) {
             return false;
         }
@@ -84,7 +89,8 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
      * {@inheritDoc}
      * @see Payzen_Subscriptions_Handler_Interface::get_parent_order()
      */
-    public function get_parent_order($id) {
+    public function get_parent_order($id)
+    {
         $subscription = wcs_get_subscription($id);
 
         if ($subscription) {
@@ -208,7 +214,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
             'day' => 'DAILY'
         );
 
-        return $mapping[$subscription_period];
+        return $mapping[$subscription_period] ?? null;
     }
 
     /**
@@ -419,7 +425,7 @@ class Payzen_WC_Subscriptions_Subscriptions_Handler implements Payzen_Subscripti
     {
         foreach ($subscription->get_related_orders('ids', 'renewal') as $renewal_order_id) {
             $order = wc_get_order($renewal_order_id);
-            $recurrenceNum = (PayzenTools::is_hpos_enabled()) ? $order->get_meta('Recurrence number', true) : get_post_meta($renewal_order_id, 'Recurrence number', true);
+            $recurrenceNum = PayzenTools::is_hpos_enabled() ? $order->get_meta('Recurrence number', true) : get_post_meta($renewal_order_id, 'Recurrence number', true);
             if ($recurrence == $recurrenceNum) {
                 return $renewal_order_id;
             }

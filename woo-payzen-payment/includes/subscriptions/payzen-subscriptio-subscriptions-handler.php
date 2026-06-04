@@ -48,16 +48,15 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
 
         $count = 0;
 
-        if (! empty($cart->cart_contents)) {
-            foreach ($cart->cart_contents as $item) {
-                $itemId = isset($item['variation_id']) && $item['variation_id'] ? $item['variation_id'] : $item['product_id'];
-                if (Subscriptio_Subscription_Product::is_subscription($itemId)) {
-                    $count++;
-                }
+        $cart_contents = $cart->cart_contents ?? [];
+        foreach ($cart_contents as $item) {
+            $item_id = $item['variation_id'] ?? $item['product_id'] ?? null;
+            if ($item_id && Subscriptio_Subscription_Product::is_subscription($item_id) && ++$count > 1) {
+                return true;
             }
         }
 
-        return $count > 1;
+        return false;
     }
 
     /**
@@ -86,6 +85,9 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
 
         $subscriptions = Subscriptio_Order_Handler::get_subscriptions_from_order_id($order_id);
         $subscription = reset($subscriptions); // Get first subscription.
+        if (! $subscription) {
+            return false;
+        }
 
         // Check if need to charge shipping.
         $charge_shipping = (Subscriptio::option('shipping_renewal_charge') == 1) ? true : false;
@@ -117,7 +119,7 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
 
         $time = strtotime("+{$time_value}{$time_unit}");
 
-        return date('Ymd', $time);
+        return date('Ymd', $time !== false ? $time : time());
     }
 
     private static function get_frequency($subscription)
@@ -129,7 +131,7 @@ class Payzen_Subscriptio_Subscriptions_Handler implements Payzen_Subscriptions_H
             'day' => 'DAILY'
         );
 
-        return $mapping[$subscription->price_time_unit];
+        return $mapping[$subscription->price_time_unit] ?? null;
     }
 
     private static function get_end_date($subscription)

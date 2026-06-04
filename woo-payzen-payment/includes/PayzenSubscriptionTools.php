@@ -28,6 +28,7 @@ class PayzenSubscriptionTools
     {
         if (! $renewal_order) {
             $this->log('Could not load renewal order or process renewal payment.');
+
             return;
         }
 
@@ -291,12 +292,16 @@ class PayzenSubscriptionTools
         return null;
     }
 
-    private function get_key() {
+    private function get_key()
+    {
         $general_settings = get_option('woocommerce_payzen_settings', null);
+        if (! is_array($general_settings)) {
+            return null;
+        }
 
-        $testmode = is_array($general_settings) && isset($general_settings['ctx_mode']) && ($general_settings['ctx_mode'] == 'TEST');
-        $test_private_key = is_array($general_settings) && isset($general_settings['test_private_key'])  ? $general_settings['test_private_key'] : null;
-        $prod_private_key = is_array($general_settings) && isset($general_settings['prod_private_key']) ? $general_settings['prod_private_key'] : null;
+        $testmode = isset($general_settings['ctx_mode']) && ($general_settings['ctx_mode'] == 'TEST');
+        $test_private_key = $general_settings['test_private_key'] ?? null;
+        $prod_private_key = $general_settings['prod_private_key'] ?? null;
 
         return ($testmode) ? $test_private_key : $prod_private_key;
     }
@@ -312,7 +317,8 @@ class PayzenSubscriptionTools
         return $saved_identifier;
     }
 
-    private function get_rest_client() {
+    private function get_rest_client()
+    {
         $general_settings = get_option('woocommerce_payzen_settings', null);
         $rest_url = is_array($general_settings) && isset($general_settings['rest_url'])  ? $general_settings['rest_url'] : WC_Gateway_Payzen::REST_URL;
         $site_id = is_array($general_settings) && isset($general_settings['site_id'])  ? $general_settings['site_id'] : null;
