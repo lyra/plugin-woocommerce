@@ -27,7 +27,11 @@ class PayzenTools
     public static function get_integration_mode()
     {
         $std_method_settings = get_option('woocommerce_payzenstd_settings', null);
-        $card_data_mode = is_array($std_method_settings) & isset($std_method_settings['card_data_mode']) ? $std_method_settings['card_data_mode'] : 'DEFAULT';
+        if (! is_array($std_method_settings)) {
+            return 'REDIRECT';
+        }
+
+        $card_data_mode = $std_method_settings['card_data_mode'] ?? 'DEFAULT';
 
         switch ($card_data_mode) {
             case 'DEFAULT':
@@ -50,7 +54,7 @@ class PayzenTools
             return false;
         }
 
-        $modes = array('SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS');
+        $modes = ['SMARTFORM', 'SMARTFORMEXT', 'SMARTFORMEXTNOLOGOS'];
 
         return in_array(self::get_integration_mode(), $modes);
     }
@@ -60,7 +64,7 @@ class PayzenTools
         global $woocommerce;
 
         $std_settings = get_option('woocommerce_payzenstd_settings', null);
-        if (($method == 'payzenstd') && ($std_settings['use_customer_wallet'] !== '1')) {
+        if (($method == 'payzenstd') && (! is_array($std_settings) || $std_settings['use_customer_wallet'] !== '1')) {
             return false;
         }
 
@@ -100,7 +104,10 @@ class PayzenTools
         } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             // Proxy servers can send through this header like this: X-Forwarded-For: client1, proxy1, proxy2.
             // Make sure we always only send through the first IP in the list which should always be the client IP.
-            return (string) rest_is_ip_address(trim(current(preg_split('/,/', sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_FOR']))))));
+            $parts = preg_split('/,/', sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_FOR'])));
+            if (is_array($parts) && ! empty($parts)) {
+                return (string) rest_is_ip_address(trim($parts[0]));
+            }
         } elseif (isset($_SERVER['REMOTE_ADDR'])) {
             return sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']));
         }
@@ -129,7 +136,7 @@ class PayzenTools
         if (function_exists('wcs_get_subscription')) {
             $subscription = wcs_get_subscription($subsc_id);
 
-            return $subscription->get_view_order_url();
+            return $subscription ? $subscription->get_view_order_url() : null;
         }
 
         return null;
@@ -137,9 +144,9 @@ class PayzenTools
 
     public static function get_token_from_request(array $request)
     {
-        $payment_method = isset($request['payment_method']) ? $request['payment_method'] : null;
+        $payment_method = $request['payment_method'] ?? null;
         $token_request_key = 'wc-' . $payment_method . '-payment-token';
-        if (! isset($request[ $token_request_key]) || 'new' === $request[ $token_request_key]) {
+        if (! isset($request[$token_request_key]) || $request[$token_request_key] === 'new') {
             return null;
         }
 

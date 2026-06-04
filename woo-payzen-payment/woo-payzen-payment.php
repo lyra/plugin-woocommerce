@@ -14,7 +14,7 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.17.1
+ * Version: 1.17.2
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
@@ -252,7 +252,7 @@ function woocommerce_payzen_add_method($methods)
     if (get_transient('payzen_other_methods')) {
         $other_methods = json_decode(get_transient('payzen_other_methods'), true);
 
-        foreach ($other_methods as $code => $label) {
+        foreach ($other_methods ?? [] as $code => $label) {
             $methods[] = new WC_Gateway_PayzenOther($code, $label);
         }
     }
@@ -451,6 +451,10 @@ if (is_multisite() && $is_valid_ipn) {
 
 function payzen_launch_online_refund($order, $refund_amount, $refund_currency)
 {
+    if (! $order || ! $order->get_id()) {
+        return;
+    }
+
     // Prepare order information for refund.
     require_once 'includes/sdk-autoload.php';
     require_once 'includes/PayzenRefundProcessor.php';
@@ -510,11 +514,14 @@ function payzen_online_refund($order_id, $refund_id)
 {
     // Check if order was passed with other payment means submodule.
     $order = new WC_Order((int) $order_id);
-    if (substr($order->get_payment_method(), 0, strlen('payzenother_')) !== 'payzenother_') {
+    if (! $order || substr($order->get_payment_method(), 0, strlen('payzenother_')) !== 'payzenother_') {
         return;
     }
 
     $refund = new WC_Order_Refund((int) $refund_id);
+    if (! $refund) {
+        return;
+    }
 
     // Do online refund.
     payzen_launch_online_refund($order, $refund->get_amount(), $refund->get_currency());
@@ -526,7 +533,7 @@ add_action('woocommerce_order_refunded', 'payzen_online_refund', 10 , 2);
 function payzen_online_cancel($order_id)
 {
     $order = new WC_Order((int) $order_id);
-    if (substr($order->get_payment_method(), 0, strlen('payzen')) !== 'payzen') {
+    if (! $order || substr($order->get_payment_method(), 0, strlen('payzen')) !== 'payzen') {
         return;
     }
 
@@ -536,7 +543,8 @@ function payzen_online_cancel($order_id)
 // Do online cancel after local cancellation.
 add_action('woocommerce_cancelled_order', 'payzen_online_cancel');
 
-function payzen_payment_token_deleted($token_id, $token) {
+function payzen_payment_token_deleted($token_id, $token)
+{
     if (strpos($token->get_gateway_id(), 'payzen') !== 0) {
         return;
     }

@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-10.x';
     const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
-    const PLUGIN_VERSION = '1.17.1';
+    const PLUGIN_VERSION = '1.17.2';
     const GATEWAY_VERSION = 'V2';
 
     const METHOD_ID = 'payzen_method_id';
@@ -2020,6 +2020,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     public static function get_order_property($order, $property_name)
     {
+        if (! $order || is_bool($order)) {
+            return '';
+        }
+
         $method = 'get_' . $property_name;
 
         if (method_exists($order, $method)) {
@@ -2278,6 +2282,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     public function payzen_thankyou($order_id)
     {
         $order = wc_get_order($order_id);
+ 
         $this->display_notices($order);
     }
 
@@ -2286,7 +2291,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         global $woocommerce;
 
         // Display notices in case of successful payment.
-        if (strpos(self::get_order_property($order, 'payment_method'), 'payzen') === 0) {
+        $payment_method = self::get_order_property($order, 'payment_method');
+        if ($payment_method && strpos($payment_method, 'payzen') === 0) {
             if (PayzenTools::has_checkout_block()) {
                 self::restore_wc_notices();
             }
@@ -2563,7 +2569,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     private static function subscriptions_handler($method)
     {
-        if ($method !== 'payzensubscription') {
+        if (! $method || $method !== 'payzensubscription') {
             return null;
         }
 
@@ -2610,7 +2616,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         exit();
     }
 
-    public function delete_identifier_online($identifier, $cust_id, $id, $delete_attributes = true) {
+    public function delete_identifier_online($identifier, $cust_id, $id, $delete_attributes = true)
+    {
         global $woocommerce;
 
         try {
@@ -2683,7 +2690,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $sub_modules = array('payzensubscription');
 
         $payzenwcs_settings = get_option('woocommerce_payzenwcssubscription_settings', null);
-        if (($payzenwcs_settings['enabled'] == 'yes') && PayzenTools::use_wallet($cust_id, 'payzenwcssubscription')) {
+        $isWcsActive = $payzenwcs_settings && isset($payzenwcs_settings['enabled']) && $payzenwcs_settings['enabled'] == 'yes';
+        if ($isWcsActive && PayzenTools::use_wallet($cust_id, 'payzenwcssubscription')) {
             return $list;
         } else {
             $sub_modules[] = 'payzenwcssubscription';
