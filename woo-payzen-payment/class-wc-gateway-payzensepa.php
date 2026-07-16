@@ -33,7 +33,7 @@ class WC_Gateway_PayzenSepa extends WC_Gateway_PayzenStd
     public function __construct()
     {
         $this->id = 'payzensepa';
-        $this->icon = apply_filters('woocommerce_payzensepa_icon', self::LOGO_URL . 'sepa.png');
+        $this->icon = apply_filters('woocommerce_payzensepa_icon', PayzenTools::get_white_label_url(self::LOGO_URL) . 'sepa.png');
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME . ' - ' . __('SEPA payment', 'woo-payzen-payment');
         $this->method_description = __('Accept payments via SEPA Direct Debit. This method can be used to pay for subscriptions managed by WooCommerce Subscriptions.', 'woo-payzen-payment');

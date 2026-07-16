@@ -159,4 +159,71 @@ class PayzenTools
 
         return $token->get_token();
     }
+
+    public static function get_white_label_url($urlName)
+    {
+        return PayzenApi::getWhiteLabelUrl(self::get_white_label(), $urlName);
+    }
+
+    public static function get_white_label()
+    {
+        global $payzen_plugin_features;
+
+        if (! ($payzen_plugin_features['whitelabelall'] ?? false)) {
+            return '';
+        }
+
+        $general_settings = get_option('woocommerce_payzen_settings', null);
+        $whiteLabel = is_array($general_settings) ? ($general_settings['white_label'] ?? '') : '';
+
+        if ($whiteLabel !== '' && $whiteLabel !== 'EU') {
+            return $whiteLabel;
+        }
+
+        $default = self::get_default_white_label();
+
+        return $default !== 'EU' ? $default : '';
+    }
+
+    public static function get_default_white_label()
+    {
+        global $payzen_plugin_features;
+
+        if (! ($payzen_plugin_features['whitelabelall'] ?? false)) {
+            return 'EU';
+        }
+
+        $general_settings = get_option('woocommerce_payzen_settings', null);
+        if (! is_array($general_settings)) {
+            return 'EU';
+        }
+
+        foreach (['LAT', 'BR'] as $label) {
+            if (isset($general_settings['platform_url']) && $general_settings['platform_url'] === PayzenApi::getWhiteLabelUrl($label, 'gatewayUrl')) {
+                return $label;
+            }
+
+            if (isset($general_settings['rest_url']) && $general_settings['rest_url'] === PayzenApi::getWhiteLabelUrl($label, 'restUrl')) {
+                return $label;
+            }
+        }
+
+        return 'EU';
+    }
+
+    public static function get_white_label_feature($feature)
+    {
+        global $payzen_plugin_features;
+
+        $features = $payzen_plugin_features;
+
+        if ($payzen_plugin_features['whitelabelall'] ?? false) {
+            $whiteLabel = self::get_white_label();
+            if ($whiteLabel !== '') {
+                $features = PayzenApi::getWhiteLabelFeatures($whiteLabel);
+            }
+        }
+
+        return $features[$feature] ?? false;
+    }
 }

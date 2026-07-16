@@ -20,7 +20,7 @@ class WC_Gateway_PayzenKlarna extends WC_Gateway_PayzenStd
     public function __construct()
     {
         $this->id = 'payzenklarna';
-        $this->icon = apply_filters('woocommerce_payzenklarna_icon', self::LOGO_URL . 'klarna.png');
+        $this->icon = apply_filters('woocommerce_payzenklarna_icon', PayzenTools::get_white_label_url(self::LOGO_URL) . 'klarna.png');
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME . ' - ' . __('Klarna payment', 'woo-payzen-payment');
 

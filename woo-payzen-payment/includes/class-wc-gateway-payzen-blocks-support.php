@@ -14,6 +14,8 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
 use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
 
+require_once 'PayzenTools.php';
+
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
@@ -190,7 +192,7 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
             case 'payzenklarna':
             case 'payzenfranfinance':
             case 'payzensepa':
-                $img_url = WC_Gateway_Payzen::LOGO_URL . substr($this->get_name(), strlen('payzen')) . '.png';
+                $img_url = PayzenTools::get_white_label_url(WC_Gateway_Payzen::LOGO_URL) . substr($this->get_name(), strlen('payzen')) . '.png';
                 break;
 
             case 'payzenregroupedother':
@@ -200,7 +202,7 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
 
             default:
                 if (strpos($this->get_name(), 'payzenother_') === 0) {
-                    $img_url = WC_Gateway_Payzen::LOGO_URL . substr($this->get_name(), strlen('payzenother_')) . '.png';
+                    $img_url = PayzenTools::get_white_label_url(WC_Gateway_Payzen::LOGO_URL) . substr($this->get_name(), strlen('payzenother_')) . '.png';
                 }
 
                 break;

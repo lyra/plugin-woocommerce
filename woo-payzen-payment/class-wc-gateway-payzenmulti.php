@@ -17,8 +17,6 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
 {
     public function __construct()
     {
-        global $payzen_plugin_features;
-
         $this->id = 'payzenmulti';
         $this->icon = apply_filters('woocommerce_payzenmulti_icon', WC_PAYZEN_PLUGIN_URL . 'assets/images/payzenmulti.png');
         $this->has_fields = true;
@@ -39,7 +37,7 @@ class WC_Gateway_PayzenMulti extends WC_Gateway_PayzenStd
         $this->testmode = ($this->get_general_option('ctx_mode') == 'TEST');
         $this->debug = ($this->get_general_option('debug') == 'yes') ? true : false;
 
-        if ($payzen_plugin_features['restrictmulti']) {
+        if (PayzenTools::get_white_label_feature('restrictmulti')) {
             $this->notices[] = __('ATTENTION: The payment in installments feature activation is subject to the prior agreement of Société Générale.<br />If you enable this feature while you have not the associated option, an error 10000 – INSTALLMENTS_NOT_ALLOWED or 07 - PAYMENT_CONFIG will occur and the buyer will not be able to pay.', 'woo-payzen-payment');
         }
 

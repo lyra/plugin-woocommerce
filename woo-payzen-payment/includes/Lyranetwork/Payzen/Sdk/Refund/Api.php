@@ -17,7 +17,7 @@ use Lyranetwork\Payzen\Sdk\Rest\Api as PayzenRest;
  */
 class Api {
     /**
-     * refundProcessor Object
+     * refundProcessor Object.
      *
      * @var refundProcessor
      */
@@ -45,11 +45,18 @@ class Api {
     private $siteId;
 
     /**
-     * CMS name
+     * CMS name.
      *
      * @var string
      */
     private $cmsName;
+
+    /**
+     * Merchant Back Office name.
+     *
+     * @var string
+     */
+    private $backOfficeName;
 
     /**
      * Constructor for refund API class.
@@ -59,14 +66,16 @@ class Api {
      * @param string $restServerUrl
      * @param string $siteId
      * @param string $cmsName
+     * @param string $backOfficeName
      */
-    public function __construct($refundProcessor, $privateKey, $restServerUrl, $siteId, $cmsName)
+    public function __construct($refundProcessor, $privateKey, $restServerUrl, $siteId, $cmsName, $backOfficeName = 'PayZen')
     {
         $this->refundProcessor = $refundProcessor;
         $this->privateKey = $privateKey;
         $this->restServerUrl = $restServerUrl;
         $this->siteId = $siteId;
         $this->cmsName = $cmsName;
+        $this->backOfficeName = $backOfficeName;
     }
 
     /**
@@ -75,7 +84,7 @@ class Api {
      * @param \Lyranetwork\Payzen\Sdk\Refund\OrderInfo $orderInfo
      * @param float $amount
      */
-    public function refund($orderInfo, $amount)
+    public function refund($orderInfo, $amount, $whiteLabel = '')
     {
         // Client has not configured private key in module backend, let CMS do offline refund.
         if (! $this->privateKey) {
@@ -85,7 +94,7 @@ class Api {
         }
 
         // Get currency.
-        $currency = PayzenApi::findCurrencyByAlphaCode($orderInfo->getOrderCurrencyIsoCode());
+        $currency = PayzenApi::findCurrencyByAlphaCode($orderInfo->getOrderCurrencyIsoCode(), $whiteLabel);
         $amount = round($amount, $currency->getDecimals());
         $amountInCents = $currency->convertAmountToInteger($amount);
 
@@ -116,7 +125,7 @@ class Api {
 
                 if ($split) {
                     if (! $transactionRefundedAmount || $transactionRefundedAmount == 0) {
-                        $msg = sprintf($this->refundProcessor->translate('Refund of split payment is not supported. Please, consider making necessary changes in %1$s Back Office.'), 'PayZen');
+                        $msg = sprintf($this->refundProcessor->translate('Refund of split payment is not supported. Please, consider making necessary changes in %1$s Back Office.'), $this->backOfficeName);
                         throw new \Exception($msg);
                     }
 
@@ -203,7 +212,7 @@ class Api {
                 case 'PSP_100':
                     // Merchant don't have offer allowing REST WS.
                     // Allow offline refund and display warning message.
-                    $this->refundProcessor->doOnError($errorCode, sprintf($this->refundProcessor->translate('Payment is refunded/canceled only in %1$s. Please, consider making necessary changes in %2$s Back Office.'), $this->cmsName, 'PayZen'));
+                    $this->refundProcessor->doOnError($errorCode, sprintf($this->refundProcessor->translate('Payment is refunded/canceled only in %1$s. Please, consider making necessary changes in %2$s Back Office.'), $this->cmsName, $this->backOfficeName));
                     return true;
 
                 case 'PSP_083':

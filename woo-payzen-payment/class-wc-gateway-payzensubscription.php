@@ -194,7 +194,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $card_brand_logo = '';
         if (strpos($saved_subsc_masked_pan, '|')) {
             $card_brand = substr($saved_subsc_masked_pan, 0, strpos($saved_subsc_masked_pan, '|'));
-            $remote_logo = self::LOGO_URL . strtolower($card_brand) . '.png';
+            $remote_logo = PayzenTools::get_white_label_url(self::LOGO_URL) . strtolower($card_brand) . '.png';
             if ($card_brand) {
                 $card_brand_logo = '<img src="' . $remote_logo . '"
                        alt="' . $card_brand . '"
@@ -249,7 +249,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $info = $this->subscriptions_handler ? $this->subscriptions_handler->subscription_info($order) : null;
 
         if (is_array($info) && ! empty($info)) {
-            $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
+            $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency(), PayzenTools::get_white_label());
 
             $this->payzen_request->set('sub_amount', $currency->convertAmountToInteger($info['amount']));
             $this->payzen_request->set('sub_currency', $currency->getNum()); // Same as general order currency.
@@ -322,7 +322,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         try {
             $client = new PayzenRest(
-                $this->get_general_option('rest_url', self::REST_URL),
+                PayzenTools::get_white_label_url(self::REST_URL),
                 $this->get_general_option('site_id'),
                 $key
             );
@@ -369,7 +369,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             );
 
             $client = new PayzenRest(
-                $this->get_general_option('rest_url', self::REST_URL),
+                PayzenTools::get_white_label_url(self::REST_URL),
                 $this->get_general_option('site_id'),
                 $key
             );
@@ -419,7 +419,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             return;
         }
 
-        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
+        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency(), PayzenTools::get_white_label());
 
         $subscriptionId = (PayzenTools::is_hpos_enabled()) ? $order->get_meta('Subscription ID', true) : get_post_meta($order_id, 'Subscription ID', true);
 
@@ -440,7 +440,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
 
         try {
             $client = new PayzenRest(
-                $this->get_general_option('rest_url', self::REST_URL),
+                PayzenTools::get_white_label_url(self::REST_URL),
                 $this->get_general_option('site_id'),
                 $key
             );
@@ -460,7 +460,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
     {
         $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
         $client = new PayzenRest(
-            $this->get_general_option('rest_url', self::REST_URL),
+            PayzenTools::get_white_label_url(self::REST_URL),
             $this->get_general_option('site_id'),
             $key
         );

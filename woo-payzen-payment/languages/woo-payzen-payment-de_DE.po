@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PayZen for WooCommerce 1.17.2\n"
+"Project-Id-Version: PayZen for WooCommerce 1.18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-09 14:29+0200\n"
-"PO-Revision-Date: 2026-02-05 11:30+0100\n"
+"PO-Revision-Date: 2026-05-05 10:56+0200\n"
 "Last-Translator: \n"
 "Language-Team: Lyra Network <https://payzen.io/fr-FR/support/>\n"
 "Language: de\n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 "X-Poedit-SearchPath-0: ..\n"
 
 #: ../class-wc-gateway-payzen.php:77 ../class-wc-gateway-payzen.php:88
@@ -158,6 +158,10 @@ msgstr "Modulversion"
 #: ../class-wc-gateway-payzen.php:473
 msgid "Gateway version"
 msgstr "Kompatibel mit Zahlungsschnittstelle"
+
+#: ../class-wc-gateway-payzen.php:434
+msgid "Domain"
+msgstr "Domain"
 
 #: ../class-wc-gateway-payzen.php:488
 msgid "BASE SETTINGS"
