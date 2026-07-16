@@ -1,3 +1,8 @@
+= 1.18.0, 2026-07-16 =
+* Add possibility to configure specific PayZen white label.
+* Update list of supported payment means.
+* Update list of supported currencies.
+
 = 1.17.2, 2026-06-03 =
 * Bug fix: Fix PHP error related to displaying notices on order confirmation page.
 * Update list of supported payment means.

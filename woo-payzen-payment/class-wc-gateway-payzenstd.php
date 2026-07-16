@@ -156,7 +156,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             // Custom theme.
             $payzen_std_rest_theme = $this->settings['rest_theme'];
-            $payzen_static_url = $this->get_general_option('static_url', self::STATIC_URL);
+            $payzen_static_url = PayzenTools::get_white_label_url(self::STATIC_URL);
 
             $payzen_display = 'flex';
             if ($this->is_embedded_payment() && ($this->get_option('rest_popin') == 'yes')) {
@@ -694,7 +694,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
     protected function get_supported_card_types($codeInLabel = true)
     {
-        $cards = PayzenApi::getSupportedCardTypes();
+        $cards = PayzenApi::getSupportedCardTypes(PayzenTools::get_white_label());
         foreach ($cards as $code => $label) {
             $cards[$code] = ($codeInLabel ? $code . ' - ' : '') . $label;
         }
@@ -968,7 +968,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
                     $html .= '<label for="' . $this->id . '_' . $lower_key . '" style="display: inline;">';
 
-                    $remote_logo = self::LOGO_URL . $lower_key . '.png';
+                    $remote_logo = PayzenTools::get_white_label_url(self::LOGO_URL) . $lower_key . '.png';
                     $html .= '<img src="' . $remote_logo . '"
                                alt="' . $key . '"
                                title="' . $value . '"
@@ -1319,7 +1319,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             $card_brand_logo = '';
             if (strpos($saved_masked_pan, '|')) {
                 $card_brand = substr($saved_masked_pan, 0, strpos($saved_masked_pan, '|'));
-                $remote_logo = self::LOGO_URL . strtolower($card_brand) . '.png';
+                $remote_logo = PayzenTools::get_white_label_url(self::LOGO_URL) . strtolower($card_brand) . '.png';
                 if ($card_brand) {
                     $card_brand_logo = '<img src="' . $remote_logo . '"
                            alt="' . $card_brand . '"
@@ -1636,7 +1636,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             return $cust_id ? $this->get_account_token(true) : false;
         }
 
-        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
+        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency(), PayzenTools::get_white_label());
         $email = method_exists($woocommerce->customer, 'get_billing_email') ? $woocommerce->customer->get_billing_email() : $woocommerce->customer->user_email;
         $amount = $currency->convertAmountToInteger($woocommerce->cart->total);
 
@@ -1710,7 +1710,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $customer = $woocommerce->customer;
         $reference = self::get_customer_property($customer, 'id');
         $email = method_exists($customer, 'get_billing_email') ? $customer->get_billing_email() : $customer->user_email;
-        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
+        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency(), PayzenTools::get_white_label());
 
         $params = array(
             'formAction' => ($force_register || isset($wp->query_vars['add-payment-method'])) ? 'REGISTER' : 'CUSTOMER_WALLET',
@@ -1761,7 +1761,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         global $woocommerce, $wpdb;
 
         $order_id = $this->get_escaped_var($this->payzen_request, 'order_id');
-        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
+        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency(), PayzenTools::get_white_label());
         $amount = $this->get_escaped_var($this->payzen_request, 'amount');
 
         $threeds_mpi = null;
@@ -1895,7 +1895,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
 
         try {
-            $client = new PayzenRest($this->get_general_option('rest_url', self::REST_URL), $this->get_general_option('site_id'), $key);
+            $client = new PayzenRest(PayzenTools::get_white_label_url(self::REST_URL), $this->get_general_option('site_id'), $key);
             $result = $client->post('V4/Charge/' . $webservice, json_encode($params));
 
             if ($result['status'] != 'SUCCESS') {
@@ -2121,7 +2121,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         // Get currency.
         $order_currency = $order->get_currency() ? $order->get_currency() : get_woocommerce_currency();
-        $currency = PayzenApi::findCurrencyByAlphaCode($order_currency);
+        $currency = PayzenApi::findCurrencyByAlphaCode($order_currency, PayzenTools::get_white_label());
         if ($currency == null) {
             $this->log('The store currency (' . get_woocommerce_currency() . ') is not supported by payment gateway.');
 
@@ -2240,7 +2240,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             $this->payzen_request->set($key, $this->get_general_option($key));
         }
 
-        $this->payzen_request->set('platform_url', $this->get_general_option('platform_url', parent::GATEWAY_URL));
+        $this->payzen_request->set('platform_url', PayzenTools::get_white_label_url(self::GATEWAY_URL));
 
         // Check if capture_delay and validation_mode are overriden in submodules.
         if (is_numeric($this->get_option('capture_delay'))) {
@@ -2273,7 +2273,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
     {
         $notAllowed = '#[^A-Z0-9ÁÀÂÄÉÈÊËÍÌÎÏÓÒÔÖÚÙÛÜÇ ]#ui';
 
-        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
+        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency(), PayzenTools::get_white_label());
 
         // Add cart products info.
         foreach ($order->get_items() as $line_item) {

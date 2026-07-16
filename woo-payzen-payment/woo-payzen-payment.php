@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.17.2
+ * Version: 1.18.0
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
  * Tested up to: 6.9
  * WC requires at least: 2.0
- * WC tested up to: 10.4
+ * WC tested up to: 10.7
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -50,7 +50,9 @@ $payzen_plugin_features = array(
     'multi' => true,
     'klarna' => true,
     'franfinance' => true,
-    'sepa' => true
+    'sepa' => true,
+
+    'whitelabelall' => true
 );
 
 /* Check requirements. */
@@ -93,8 +95,6 @@ register_uninstall_hook(__FILE__, 'woocommerce_payzen_uninstallation');
 /* Include gateway classes. */
 function woocommerce_payzen_init()
 {
-    global $payzen_plugin_features;
-
     // Load translation files.
     load_plugin_textdomain('woo-payzen-payment', false, plugin_basename(dirname(__FILE__)) . '/languages');
 
@@ -110,19 +110,19 @@ function woocommerce_payzen_init()
         require_once 'class-wc-gateway-payzenstd.php';
     }
 
-    if ($payzen_plugin_features['multi'] && ! class_exists('WC_Gateway_PayzenMulti')) {
+    if (PayzenTools::get_white_label_feature('multi') && ! class_exists('WC_Gateway_PayzenMulti')) {
         require_once 'class-wc-gateway-payzenmulti.php';
     }
 
-    if ($payzen_plugin_features['klarna'] && ! class_exists('WC_Gateway_PayzenKlarna')) {
+    if (PayzenTools::get_white_label_feature('klarna') && ! class_exists('WC_Gateway_PayzenKlarna')) {
         require_once 'class-wc-gateway-payzenklarna.php';
     }
 
-    if ($payzen_plugin_features['franfinance'] && ! class_exists('WC_Gateway_PayzenFranfinance')) {
+    if (PayzenTools::get_white_label_feature('franfinance') && ! class_exists('WC_Gateway_PayzenFranfinance')) {
         require_once 'class-wc-gateway-payzenfranfinance.php';
     }
 
-    if ($payzen_plugin_features['sepa'] && ! class_exists('WC_Gateway_PayzenSepa')) {
+    if (PayzenTools::get_white_label_feature('sepa') && ! class_exists('WC_Gateway_PayzenSepa')) {
         require_once 'class-wc-gateway-payzensepa.php';
     }
 
@@ -134,7 +134,7 @@ function woocommerce_payzen_init()
         require_once 'class-wc-gateway-payzenother.php';
     }
 
-    if ($payzen_plugin_features['subscr'] && ! class_exists('WC_Gateway_PayzenSubscription')) {
+    if (PayzenTools::get_white_label_feature('subscr') && ! class_exists('WC_Gateway_PayzenSubscription')) {
         require_once 'class-wc-gateway-payzensubscription.php';
     }
 
@@ -168,27 +168,25 @@ function woocommerce_payzen_woocommerce_block_support()
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
             function(PaymentMethodRegistry $payment_method_registry) {
-                global $payzen_plugin_features;
-
                 $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenstd'));
 
-                if ($payzen_plugin_features['multi']) {
+                if (PayzenTools::get_white_label_feature('multi')) {
                     $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenmulti'));
                 }
 
-                if ($payzen_plugin_features['franfinance']) {
+                if (PayzenTools::get_white_label_feature('franfinance')) {
                     $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenfranfinance'));
                 }
 
-                if ($payzen_plugin_features['klarna']) {
+                if (PayzenTools::get_white_label_feature('klarna')) {
                     $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzenklarna'));
                 }
 
-                if ($payzen_plugin_features['sepa']) {
+                if (PayzenTools::get_white_label_feature('sepa')) {
                     $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzensepa'));
                 }
 
-                if ($payzen_plugin_features['subscr']) {
+                if (PayzenTools::get_white_label_feature('subscr')) {
                     $payment_method_registry->register(new WC_Gateway_Payzen_Blocks_Support('payzensubscription'));
                 }
 
@@ -220,30 +218,30 @@ add_action('woocommerce_blocks_loaded', 'woocommerce_payzen_woocommerce_block_su
 /* Add our payment methods to WooCommerce methods. */
 function woocommerce_payzen_add_method($methods)
 {
-    global $payzen_plugin_features, $woocommerce;
+    global $woocommerce;
 
     $methods[] = 'WC_Gateway_Payzen';
     $methods[] = 'WC_Gateway_PayzenStd';
 
-    if ($payzen_plugin_features['multi']) {
+    if (PayzenTools::get_white_label_feature('multi')) {
         $methods[] = 'WC_Gateway_PayzenMulti';
     }
 
-    if ($payzen_plugin_features['klarna']) {
+    if (PayzenTools::get_white_label_feature('klarna')) {
         $methods[] = 'WC_Gateway_PayzenKlarna';
     }
 
-    if ($payzen_plugin_features['franfinance']) {
+    if (PayzenTools::get_white_label_feature('franfinance')) {
         $methods[] = 'WC_Gateway_PayzenFranfinance';
     }
 
-    if ($payzen_plugin_features['sepa']) {
+    if (PayzenTools::get_white_label_feature('sepa')) {
         $methods[] = 'WC_Gateway_PayzenSepa';
     }
 
     $methods[] = 'WC_Gateway_PayzenWcsSubscription';
 
-    if ($payzen_plugin_features['subscr']) {
+    if (PayzenTools::get_white_label_feature('subscr')) {
         $methods[] = 'WC_Gateway_PayzenSubscription';
     }
 
@@ -284,12 +282,10 @@ add_filter('woocommerce_payment_gateways', 'woocommerce_payzen_add_method');
 /* Add a link to plugin settings page from plugins list. */
 function woocommerce_payzen_add_link($links, $file)
 {
-    global $payzen_plugin_features;
-
     $links[] = '<a href="' . payzen_admin_url('Payzen') . '">' . __('General configuration', 'woo-payzen-payment') . '</a>';
     $links[] = '<a href="' . payzen_admin_url('PayzenStd') . '">' . __('Standard payment', 'woo-payzen-payment') . '</a>';
 
-    if ($payzen_plugin_features['multi']) {
+    if (PayzenTools::get_white_label_feature('multi')) {
         $links[] = '<a href="' . payzen_admin_url('PayzenMulti') . '">' . __('Payment in installments', 'woo-payzen-payment')
             . '</a>';
     }
@@ -476,13 +472,13 @@ function payzen_launch_online_refund($order, $refund_amount, $refund_currency)
     $refund_api = new PayzenRefundApi(
         $refund_processor,
         $key,
-        $std_payment_method->get_general_option('rest_url', WC_Gateway_Payzen::REST_URL),
+        PayzenTools::get_white_label_url(WC_Gateway_Payzen::REST_URL),
         $std_payment_method->get_general_option('site_id'),
         'WooCommerce'
     );
 
     // Do online refund.
-    $refund_api->refund($order_info, $refund_amount);
+    $refund_api->refund($order_info, $refund_amount, PayzenTools::get_white_label());
 }
 
 function payzen_display_refund_result_message($order_id)

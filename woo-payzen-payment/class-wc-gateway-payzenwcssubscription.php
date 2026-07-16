@@ -244,7 +244,7 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
         $card_brand_logo = '';
         if (strpos($saved_subsc_masked_pan, '|')) {
             $card_brand = substr($saved_subsc_masked_pan, 0, strpos($saved_subsc_masked_pan, '|'));
-            $remote_logo = self::LOGO_URL . strtolower($card_brand) . '.png';
+            $remote_logo = PayzenTools::get_white_label_url(self::LOGO_URL) . strtolower($card_brand) . '.png';
             if ($card_brand) {
                 $card_brand_logo = '<img src="' . $remote_logo . '"
                        alt="' . $card_brand . '"

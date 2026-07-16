@@ -13,6 +13,8 @@ use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
 use Lyranetwork\Payzen\Sdk\Form\Response as PayzenResponse;
 use Lyranetwork\Payzen\Sdk\Rest\Api as PayzenRest;
 
+require_once 'PayzenTools.php';
+
 class PayzenSubscriptionTools
 {
     protected $logger;
@@ -146,7 +148,7 @@ class PayzenSubscriptionTools
         global $wpdb;
 
         $order_id = $renewal_order->get_id();
-        $currency = PayzenApi::findCurrencyByAlphaCode($renewal_order->get_currency());
+        $currency = PayzenApi::findCurrencyByAlphaCode($renewal_order->get_currency(), PayzenTools::get_white_label());
 
         $subscriptions = wcs_get_subscriptions_for_order($renewal_order, array('order_type' => array('renewal')));
         $subscription = reset($subscriptions); // Get first subscription.
@@ -320,8 +322,8 @@ class PayzenSubscriptionTools
     private function get_rest_client()
     {
         $general_settings = get_option('woocommerce_payzen_settings', null);
-        $rest_url = is_array($general_settings) && isset($general_settings['rest_url'])  ? $general_settings['rest_url'] : WC_Gateway_Payzen::REST_URL;
-        $site_id = is_array($general_settings) && isset($general_settings['site_id'])  ? $general_settings['site_id'] : null;
+        $rest_url = PayzenTools::get_white_label_url(WC_Gateway_Payzen::REST_URL);
+        $site_id = is_array($general_settings) ? ($general_settings['site_id'] ?? null) : null;
 
         return new PayzenRest($rest_url, $site_id, $this->get_key());
     }

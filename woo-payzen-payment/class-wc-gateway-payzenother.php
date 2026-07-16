@@ -31,7 +31,7 @@ class WC_Gateway_PayzenOther extends WC_Gateway_PayzenStd
 
         $code = strtolower($this->payment_code);
         $this->id = 'payzenother_' . $code;
-        $this->icon = apply_filters('woocommerce_' . $this->id . '_icon', self::LOGO_URL . $code . '.png');
+        $this->icon = apply_filters('woocommerce_' . $this->id . '_icon', PayzenTools::get_white_label_url(self::LOGO_URL) . $code . '.png');
 
         $this->has_fields = true;
         $this->method_title = self::GATEWAY_NAME . ' - ' . $this->payment_title;
@@ -94,7 +94,7 @@ class WC_Gateway_PayzenOther extends WC_Gateway_PayzenStd
         $title = $this->payment_title;
 
         if (! $title) {
-            $cards = PayzenApi::getSupportedCardTypes();
+            $cards = PayzenApi::getSupportedCardTypes(PayzenTools::get_white_label());
             $title = sprintf(__('Payment with %s', 'woo-payzen-payment'), $cards[$this->payment_code]);
         }
 

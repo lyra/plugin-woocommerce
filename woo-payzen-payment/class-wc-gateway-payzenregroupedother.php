@@ -458,7 +458,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
                 } else {
                     $used_cards[] = $option['payment_mean'];
                     if (! $option['label']) {
-                        $cards = PayzenApi::getSupportedCardTypes();
+                        $cards = PayzenApi::getSupportedCardTypes(PayzenTools::get_white_label());
                         // Add extra means of payment to supported payment means.
                         $extra_cards = $this->get_option('extra_payment_means');
                         if (! empty($extra_cards)){
@@ -497,7 +497,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
     {
         $name = $this->plugin_id . $this->id . '_' . $key;
         $value = $value ? $value : (key_exists($name, $_POST) ? $_POST[$name] : array());
-        $used_cards = array_keys(PayzenApi::getSupportedCardTypes());
+        $used_cards = array_keys(PayzenApi::getSupportedCardTypes(PayzenTools::get_white_label()));
 
         foreach ($value as $id => $option) {
             $code = trim($option['code']);
@@ -654,7 +654,7 @@ class WC_Gateway_PayzenRegroupedOther extends WC_Gateway_PayzenStd
 
             $html .= '<label for="' . $this->id . '_' . $lower_payment_code . '" style="display: inline;">';
 
-            $remote_logo = self::LOGO_URL . $lower_payment_code . '.png';
+            $remote_logo = PayzenTools::get_white_label_url(self::LOGO_URL) . $lower_payment_code . '.png';
             $html .= '<img src="' . $remote_logo . '"
                        alt="' . $option['payment_mean'] . '"
                        title="' . $option['label'] . '"

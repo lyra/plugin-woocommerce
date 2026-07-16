@@ -24,10 +24,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     const GATEWAY_CODE = 'PayZen';
     const GATEWAY_NAME = 'PayZen';
     const BACKOFFICE_NAME = 'PayZen';
-    const GATEWAY_URL = 'https://secure.payzen.eu/vads-payment/';
-    const REST_URL = 'https://api.payzen.eu/api-payment/';
-    const STATIC_URL = 'https://static.payzen.eu/static/';
-    const LOGO_URL = 'https://secure.payzen.eu/static/latest/images/type-carte/';
+    const GATEWAY_URL = 'gatewayUrl';
+    const REST_URL = 'restUrl';
+    const STATIC_URL = 'staticUrl';
+    const LOGO_URL = 'logoUrl';
     const SITE_ID = '12345678';
     const KEY_TEST = '1111111111111111';
     const KEY_PROD = '2222222222222222';
@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-10.x';
     const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
-    const PLUGIN_VERSION = '1.17.2';
+    const PLUGIN_VERSION = '1.18.0';
     const GATEWAY_VERSION = 'V2';
 
     const METHOD_ID = 'payzen_method_id';
@@ -397,11 +397,11 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         $docs = __('Click to view the module configuration documentation: ', 'woo-payzen-payment');
 
-        foreach (PayzenApi::getOnlineDocUri() as $lang => $docUri) {
+        foreach (PayzenApi::getOnlineDocUri(PayzenTools::get_white_label()) as $lang => $docUri) {
             $docs .= '<a style="margin-left: 10px; text-decoration: none; text-transform: uppercase;" href="' . $docUri . 'woocommerce/sitemap.html" target="_blank">' . $languages[$lang] . '</a>';
         }
 
-        $this->form_fields = array(
+        $module_info_fields = array(
             // Module information.
             'module_details' => array(
                 'title' => __('MODULE DETAILS', 'woo-payzen-payment'),
@@ -453,7 +453,20 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'payment_gateway_access' => array(
                 'title' => __('PAYMENT GATEWAY ACCESS', 'woo-payzen-payment'),
                 'type' => 'title'
-            ),
+            )
+        );
+
+        if (($payzen_plugin_features['whitelabelall'] ?? false)) {
+            $module_info_fields['white_label'] = array(
+                'title' => __('Domain', 'woo-payzen-payment'),
+                'type' => 'select',
+                'default' => PayzenTools::get_default_white_label(),
+                'options' => Lyranetwork\Payzen\Sdk\Form\WhiteLabel::getWhiteLabels(),
+                'class' => 'wc-enhanced-select'
+            );
+        }
+
+        $gateway_config_fields = array(
             'site_id' => array(
                 'title' => __('Shop ID', 'woo-payzen-payment'),
                 'type' => 'text',
@@ -707,6 +720,8 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             ),
         );
 
+        $this->form_fields = array_merge($module_info_fields, $gateway_config_fields);
+
         $columns['label'] = array(
             'title' => __('Product category', 'woo-payzen-payment'),
             'width' => '154px'
@@ -755,14 +770,14 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             'description' => $descr
         );
 
-        if (isset($payzen_plugin_features['qualif']) && $payzen_plugin_features['qualif']) {
+        if (PayzenTools::get_white_label_feature('qualif')) {
             // Tests will be made on qualif, no test mode available.
             unset($this->form_fields['key_test']);
 
             $this->form_fields['ctx_mode']['disabled'] = true;
         }
 
-        if (isset($payzen_plugin_features['shatwo']) && $payzen_plugin_features['shatwo']) {
+        if (PayzenTools::get_white_label_feature('shatwo')) {
             // HMAC-SHA-256 already available, update field description.
             $desc = preg_replace('#<br /><b>[^<>]+</b>#', '', $this->form_fields['sign_algo']['description']);
             $this->form_fields['sign_algo']['description'] = $desc;
@@ -977,7 +992,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $options = $this->get_option($key);
         if ($key === 'extra_payment_means' && ! empty($options)) {
             foreach ($options as $key_card => $option_card) {
-                $cards = PayzenApi::getSupportedCardTypes();
+                $cards = PayzenApi::getSupportedCardTypes(PayzenTools::get_white_label());
                 if (isset($cards[$option_card['code']])) {
                     unset($options[$key_card]);
                 }
@@ -1255,12 +1270,10 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     public function validate_ctx_mode_field($key, $value = null)
     {
-        global $payzen_plugin_features;
-
         $name = $this->plugin_id . $this->id . '_' . $key;
         $new_value = ! is_null($value) ? $value : (key_exists($name, $_POST) ? $_POST[$name] : null);
 
-        if (! $new_value && $payzen_plugin_features['qualif']) {
+        if (! $new_value && PayzenTools::get_white_label_feature('qualif'))  {
             // When using qualif for testing, mode is always PRODUCTION.
             return 'PRODUCTION';
         }
@@ -1419,7 +1432,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
      */
     protected function is_supported_currency()
     {
-        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency());
+        $currency = PayzenApi::findCurrencyByAlphaCode(get_woocommerce_currency(), PayzenTools::get_white_label());
         if ($currency == null) {
             return false;
         }
@@ -1483,7 +1496,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
      **/
     public function payzen_manage_notify_response($payzen_response, $from_server_rest = false, $update_on_failure = true, $server_rest_abandoned_payment = false)
     {
-        global $woocommerce, $payzen_plugin_features;
+        global $woocommerce;
 
         // Clear all response messages.
         $this->clear_notices();
@@ -1581,7 +1594,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             }
         }
 
-        if (! $from_server && $this->testmode && $payzen_plugin_features['prodfaq']) {
+        if (! $from_server && $this->testmode && PayzenTools::get_white_label_feature('prodfaq')) {
             $msg = __('<p><u>GOING INTO PRODUCTION</u></p>You want to know how to put your shop into production mode, please read chapters « Proceeding to test phase » and « Shifting the shop to production mode » in the documentation of the module.', 'woo-payzen-payment');
 
             $this->add_notice($msg);
@@ -2282,7 +2295,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
     public function payzen_thankyou($order_id)
     {
         $order = wc_get_order($order_id);
- 
+
         $this->display_notices($order);
     }
 
@@ -2563,7 +2576,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             return '';
         }
 
-        $currency = PayzenApi::findCurrencyByNumCode($currency_code);
+        $currency = PayzenApi::findCurrencyByNumCode($currency_code, PayzenTools::get_white_label());
         return $currency->convertAmountToFloat($amount_in_cents) . ' ' . $currency->getAlpha3();
     }
 
@@ -2628,7 +2641,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
                 );
 
                 $client = new PayzenRest(
-                    $this->get_general_option('rest_url', self::REST_URL),
+                    PayzenTools::get_white_label_url(self::REST_URL),
                     $this->get_general_option('site_id'),
                     $key
                 );
@@ -2819,7 +2832,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
             // Perform REST request to check identifier.
             $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
             $client = new PayzenRest(
-                $this->get_general_option('rest_url', self::REST_URL),
+                PayzenTools::get_white_label_url(self::REST_URL),
                 $this->get_general_option('site_id'),
                 $key
             );

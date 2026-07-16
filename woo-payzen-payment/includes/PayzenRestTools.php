@@ -11,6 +11,8 @@
 
 use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
 
+require_once 'PayzenTools.php';
+
 class PayzenRestTools
 {
     public static function convertRestResult($answer, $isTransaction = false)
@@ -87,7 +89,7 @@ class PayzenRestTools
         $response[$prefix . 'payment_config'] = 'SINGLE'; // Only single payments are possible via REST API at this time.
 
         $response[$prefix . 'amount'] = self::getProperty($transaction, 'amount');
-        $response[$prefix . 'currency'] = PayzenApi::getCurrencyNumCode(self::getProperty($transaction, 'currency'));
+        $response[$prefix . 'currency'] = PayzenApi::getCurrencyNumCode(self::getProperty($transaction, 'currency'), PayzenTools::get_white_label());
 
         if ($paymentToken = self::getProperty($transaction, 'paymentMethodToken')) {
             $response[$prefix . 'identifier'] = $paymentToken;
@@ -106,7 +108,7 @@ class PayzenRestTools
 
             // Workarround to adapt to REST API behavior.
             $effectiveAmount = self::getProperty($transactionDetails, 'effectiveAmount');
-            $effectiveCurrency = PayzenApi::getCurrencyNumCode(self::getProperty($transactionDetails, 'effectiveCurrency'));
+            $effectiveCurrency = PayzenApi::getCurrencyNumCode(self::getProperty($transactionDetails, 'effectiveCurrency'), PayzenTools::get_white_label());
 
             if ($effectiveAmount && $effectiveCurrency) {
                 // Invert only if there is currency conversion.
