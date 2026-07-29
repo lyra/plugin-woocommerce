@@ -44,22 +44,28 @@ var payzenUpdatePaymentBlock = function (useIdentifier, methodId) {
     jQuery("#payzen_use_identifier").val(useIdentifier);
 };
 
-var payzenWaitForElement = function (selector) {
-    return new Promise(resolve => {
-        if (document.querySelector(selector)) {
-            return resolve(document.querySelector(selector));
+/**
+ * Reset WooCommerce Blocks checkout state to IDLE so the "Place Order" button
+ * becomes clickable again after KR takes over the payment flow.
+ */
+var payzenResetWCBlocksCheckout = function() {
+    if (typeof wp === 'undefined' || typeof wp.data === 'undefined') {
+        return;
+    }
+
+    try {
+        var checkoutStore = wp.data.dispatch('wc/store/checkout');
+        if (!checkoutStore) {
+            return;
         }
 
-        const observer = new MutationObserver(mutations => {
-            if (document.querySelector(selector)) {
-                observer.disconnect();
-                resolve(document.querySelector(selector));
-            }
-        });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-    });
-}
+        // WC Blocks >= 9.6 exposes setIdle(); older versions expose __internalSetIdle().
+        if (typeof checkoutStore.__internalSetIdle === 'function') {
+            checkoutStore.__internalSetIdle();
+        } else if (typeof checkoutStore.setIdle === 'function') {
+            checkoutStore.setIdle();
+        }
+    } catch (e) {
+        console.warn('[Payzen] Could not reset WooCommerce checkout state:', e);
+    }
+};

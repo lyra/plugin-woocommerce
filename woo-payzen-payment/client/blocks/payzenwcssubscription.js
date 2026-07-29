@@ -13,6 +13,7 @@
  */
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { decodeEntities } from '@wordpress/html-entities';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies.
@@ -22,7 +23,6 @@ import { getPayzenServerData } from './payzen-utils';
 const PAYMENT_METHOD_NAME = 'payzenwcssubscription';
 var payzen_data = getPayzenServerData(PAYMENT_METHOD_NAME);
 
-var submitButton = '.wc-block-components-checkout-place-order-button';
 var smartbuttonMethod = '';
 var smartbuttonAll = false;
 var hideSmart = payzen_data?.hide_smartbutton && (payzen_data?.hide_smartbutton === 'true');
@@ -31,7 +31,37 @@ var hideButton = false;
 var savedData = false;
 var newData = null;
 
-const Content = () => {
+const Content = (props) => {
+    const { eventRegistration } = props || {};
+    const { onCheckoutValidation, onCheckoutSuccess } = eventRegistration || {};
+
+    useEffect(() => {
+        const unsubscribes = [];
+
+        if (typeof onCheckoutValidation === 'function') {
+            let unsubscribe = onCheckoutValidation(displayFields());
+
+            if (typeof unsubscribe === 'function') {
+                unsubscribes.push(unsubscribe);
+            }
+        }
+
+        if (typeof onCheckoutSuccess === 'function') {
+            // Fallback for older checkout blocks integrations.
+            let unsubscribe = onCheckoutSuccess((payload) => {
+                processPayment(payload);
+            });
+
+            if (typeof unsubscribe === 'function') {
+                unsubscribes.push(unsubscribe);
+            }
+        }
+
+        return () => {
+            unsubscribes.forEach((unsubscribe) => unsubscribe());
+        };
+    }, [onCheckoutValidation, onCheckoutSuccess]);
+
     if (payzen_data?.payment_fields) {
         var fields = <div dangerouslySetInnerHTML={{ __html: payzen_data?.payment_fields }} />;
 
@@ -89,7 +119,6 @@ var displayFields = function () {
         delete(window.FORM_TOKEN);
         delete(window.PAYZEN_HIDE_SINGLE_BUTTON);
 
-        window.PAYZEN_BUTTON_TEXT = jQuery(submitButton).text();
         eval(payzen_data?.vars);
 
         hideButton = (window.PAYZEN_HIDE_SINGLE_BUTTON == true);
@@ -123,13 +152,15 @@ var displayFields = function () {
         });
 
         var target = document.querySelector('.wc-block-components-totals-footer-item');
-        observer.observe(target, {characterData: true, childList: true, subtree: true});
+        if (target) {
+            observer.observe(target, {characterData: true, childList: true, subtree: true});
+        }
     }
 
     payzenUpdatePaymentBlock(true, PAYMENT_METHOD_NAME);
 };
 
-var onButtonClick = function (e) {
+var processPayment = function (payload) {
     if (! jQuery("#radio-control-wc-payment-method-options-" + PAYMENT_METHOD_NAME).is(":checked")) {
         return true;
     }
@@ -140,7 +171,6 @@ var onButtonClick = function (e) {
     }
 
     jQuery('.kr-form-error').html('');
-    window.PAYZEN_BUTTON_TEXT = jQuery(submitButton).text();
 
     document.cookie = PAYMENT_METHOD_NAME + '_force_redir=; Max-Age=0; path=/; domain=' + location.host;
     if (typeof window.FORM_TOKEN == 'undefined') {
@@ -217,27 +247,18 @@ var submitKR = function (KR) {
 
     if (popin || smartbuttonAll) {
         KR.openPopin();
-        unblock();
+        payzenResetWCBlocksCheckout(); // Reset WC Blocks state so a second click is possible.
     } else if (hideButton) {
         KR.openSelectedPaymentMethod();
-        unblock();
+        payzenResetWCBlocksCheckout(); // Reset WC Blocks state so a second click is possible.
     } else if (smartbuttonMethod.length > 0) {
         KR.openPaymentMethod(smartbuttonMethod);
-        unblock();
+       payzenResetWCBlocksCheckout(); // Reset WC Blocks state so a second click is possible.
     } else {
         jQuery('#payzen_rest_processing').css('display', 'block');
 
         KR.submit();
     }
-
-    return false;
-};
-
-var unblock = function() {
-    var button = document.querySelector(submitButton);
-    button.removeAttribute("aria-disabled");
-    button.setAttribute("style", "");
-    button.classList.remove("wc-block-components-checkout-place-order-button--loading");
 
     return false;
 };
@@ -269,18 +290,3 @@ var refreshTempToken = function () {
         });
     }
 };
-
-var initFields = function() {
-    payzenWaitForElement('input[type=radio][name=radio-control-wc-payment-method-options]').then((elm) => {
-        displayFields();
-        jQuery(submitButton).on('click', onButtonClick);
-
-        jQuery('input[type=radio][name=radio-control-wc-payment-method-options]').change(function(e) {
-            if (this.value === PAYMENT_METHOD_NAME) {
-                displayFields();
-            }
-        });
-    });
-};
-
-jQuery(window).on('load', initFields);

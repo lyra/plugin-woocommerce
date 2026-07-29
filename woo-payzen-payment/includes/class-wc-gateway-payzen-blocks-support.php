@@ -130,6 +130,10 @@ final class WC_Gateway_Payzen_Blocks_Support extends AbstractPaymentMethodType
                 : $dependencies;
         }
 
+        if (! in_array('wc-blocks-registry', $dependencies, true)) {
+            $dependencies[] = 'wc-blocks-registry';
+        }
+
         $build_name = (strpos($this->get_name(), 'payzenother_') === 0) ? 'payzenother' : $this->get_name();
         if (! wp_script_is('wc-' . $this->get_name() . '-blocks-integration', 'registered')) {
             wp_register_script(
