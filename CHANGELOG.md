@@ -1,3 +1,6 @@
+= 1.18.1, 2026-07-29 =
+* Added compatibility with WordPress 7.0 version and latest versions of WooCommerce 10.
+
 = 1.18.0, 2026-07-16 =
 * Add possibility to configure specific PayZen white label.
 * Update list of supported payment means.

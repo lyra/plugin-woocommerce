@@ -1935,26 +1935,32 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         // Get order ID from session.
         $order_id = $woocommerce->session->get('order_awaiting_payment') ? $woocommerce->session->get('order_awaiting_payment') : $woocommerce->session->get('store_api_draft_order');
-        $order = new WC_Order($order_id);
 
-        if (PayzenTools::is_hpos_enabled()) {
-            $order->update_meta_data(self::METHOD_ID, $this->id);
-            $order->save();
-        } else {
-            update_post_meta(self::get_order_property($order, 'id'), self::METHOD_ID, $this->id);
-        }
-
-        // Set flag about use of saved identifier.
-        if (isset($_POST['use_identifier'])) {
-            set_transient($this->id . '_use_identifier_' . $order_id, $_POST['use_identifier'] === 'true');
-        }
-
-        $this->payzen_fill_request($order);
-
-        if ($token = $this->get_form_token($order, $_POST['use_identifier'] === 'true')) {
-            $result = array('result' => 'success', 'formToken' => $token);
-        } else {
+        if (empty($order_id)) {
+            $this->log("No order to pay.");
             $result = array('result' => 'error');
+        } else {
+            $order = wc_get_order($order_id);
+
+            if (PayzenTools::is_hpos_enabled()) {
+                $order->update_meta_data(self::METHOD_ID, $this->id);
+                $order->save();
+            } else {
+                update_post_meta(self::get_order_property($order, 'id'), self::METHOD_ID, $this->id);
+            }
+
+            // Set flag about use of saved identifier.
+            if (isset($_POST['use_identifier'])) {
+                set_transient($this->id . '_use_identifier_' . $order_id, $_POST['use_identifier'] === 'true');
+            }
+
+            $this->payzen_fill_request($order);
+
+            if ($token = $this->get_form_token($order, $_POST['use_identifier'] === 'true')) {
+                $result = array('result' => 'success', 'formToken' => $token);
+            } else {
+                $result = array('result' => 'error');
+            }
         }
 
         @ob_clean();

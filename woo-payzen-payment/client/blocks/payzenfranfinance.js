@@ -12,6 +12,7 @@
  * External dependencies.
  */
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies.
@@ -21,9 +22,30 @@ import { getPayzenServerData } from './payzen-utils';
 const PAYMENT_METHOD_NAME = 'payzenfranfinance';
 var payzen_data = getPayzenServerData(PAYMENT_METHOD_NAME);
 
-const Content = () => {
+const Content = (props) => {
+    const { eventRegistration } = props || {};
+    const { onPaymentSetup } = eventRegistration || {};
+
+    useEffect(() => {
+        let unsubscribe;
+
+        const processSelection = () => {
+            payzen_get_selected_option(['payzenfranfinance_option']);
+        };
+
+        if (typeof onPaymentSetup === 'function') {
+            // Fallback for older checkout blocks integrations.
+            unsubscribe = onPaymentSetup(processSelection);
+        }
+
+        return () => {
+            if (typeof unsubscribe === 'function') {
+                return unsubscribe();
+            }
+        };
+    }, [onPaymentSetup]);
+
     var fields = <ul dangerouslySetInnerHTML={{__html: payzen_data?.payment_fields}} />;
-    jQuery('.wc-block-components-checkout-place-order-button').on('click', payzen_get_selected_option(['payzenfranfinance_option']));
 
     return (
         <div>
