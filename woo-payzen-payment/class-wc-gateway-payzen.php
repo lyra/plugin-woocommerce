@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-10.x';
     const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
-    const PLUGIN_VERSION = '1.18.1';
+    const PLUGIN_VERSION = '1.18.2';
     const GATEWAY_VERSION = 'V2';
 
     const METHOD_ID = 'payzen_method_id';
@@ -1519,6 +1519,13 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         $key = $payzen_response->getExtInfo('order_key');
 
         $order = wc_get_order($order_id);
+
+        // Clear cached embedded form config, whether triggered by IPN or by the customer returning to the shop.
+        if ($update_on_failure && $order && $order->get_meta('_payzen_form_token', true)) {
+            $order->delete_meta_data('_payzen_form_token');
+            $order->delete_meta_data('_payzen_form_token_created_at');
+            $order->save();
+        }
 
         if ($server_rest_abandoned_payment && PayzenTools::is_embedded_payment() && empty($payzen_response->getTransStatus())) {
             if (! $order && ($this->get_option('rest_popin') !== 'yes')) {

@@ -1995,6 +1995,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
     {
         global $woocommerce;
 
+        $this->log("Received payment request for order #{$order_id} during checkout processing.");
+
         if ($this->get_option('card_data_mode') === 'MERCHANT') {
             $this->save_selected_card($order_id);
         }
@@ -2017,6 +2019,22 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         // If ($_POST || $_COOKIE)['payzen_force_redir'] is set, force payment by redirection.
         if ($this->is_embedded_payment() && ! $force_redir) {
+            $order = wc_get_order($order_id);
+            if ($order) {
+                $cached_form_token = $order->get_meta('_payzen_form_token', true);
+                $cached_form_token_created_at = (int) $order->get_meta('_payzen_form_token_created_at', true);
+
+                if ($cached_form_token && $cached_form_token_created_at && (time() - $cached_form_token_created_at) < 900) {
+                    $this->log("Reusing cached form token for repeated checkout processing on order #{$order_id}.");
+
+                    return ['result' => 'success', 'formToken' => $cached_form_token];
+                }
+            } else {
+                return array(
+                    'result' => 'error'
+                );
+            }
+
             $return = array(
                 'result' => 'success',
                 'messages' => '<div></div>'
@@ -2025,6 +2043,15 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             // To avoid "undefined key" notice.
             if (PayzenTools::has_checkout_block()) {
                 $return['redirect'] = null;
+
+                $this->payzen_fill_request($order);
+                $return['formToken'] = $this->get_form_token($order, get_transient($this->id . '_use_identifier_' . $order_id) === true);
+
+                if ($return['formToken']) {
+                    $order->update_meta_data('_payzen_form_token', $return['formToken']);
+                    $order->update_meta_data('_payzen_form_token_created_at', time());
+                    $order->save();
+                }
             }
 
             return $return;

@@ -1,3 +1,7 @@
+= 1.18.2, 2026-09-30 =
+* Bug fix: Fix payment by embbeded fields when buyer creates an account on checkout.
+* Bug fix: Fix error related to retry on failed or partial payments by embedded fields.
+
 = 1.18.1, 2026-07-29 =
 * Added compatibility with WordPress 7.0 version and latest versions of WooCommerce 10.
 

@@ -48,8 +48,8 @@ const Content = (props) => {
 
         if (typeof onCheckoutSuccess === 'function') {
             // Fallback for older checkout blocks integrations.
-            let unsubscribe = onCheckoutSuccess((payload) => {
-                processPayment(payload);
+            let unsubscribe = onCheckoutSuccess(async (payload) => {
+                await processPayment(payload);
             });
 
             if (typeof unsubscribe === 'function') {
@@ -160,7 +160,7 @@ var displayFields = function () {
     payzenUpdatePaymentBlock(true, PAYMENT_METHOD_NAME);
 };
 
-var processPayment = function (payload) {
+var processPayment = async function (payload) {
     if (! jQuery("#radio-control-wc-payment-method-options-" + PAYMENT_METHOD_NAME).is(":checked")) {
         return true;
     }
@@ -171,6 +171,20 @@ var processPayment = function (payload) {
     }
 
     jQuery('.kr-form-error').html('');
+
+    var formToken = getFormToken(payload);
+    if (! formToken) {
+        return {
+            type: 'error',
+            message: __('Unable to initialise the payment form.', 'woo-payzen-payment')
+        };
+    }
+
+    var v = await KR.setFormConfig({
+        formToken: formToken
+    })
+
+    KR = v.KR;
 
     document.cookie = PAYMENT_METHOD_NAME + '_force_redir=; Max-Age=0; path=/; domain=' + location.host;
     if (typeof window.FORM_TOKEN == 'undefined') {
@@ -200,27 +214,7 @@ var submitForm = function (KR) {
             return true;
         }
 
-        jQuery.ajax({
-            method: 'POST',
-            url: payzen_data?.token_url,
-            data: { 'use_identifier': 0 },
-            success: function(data) {
-                var parsed = JSON.parse(data);
-                KR.setFormConfig({
-                    language: window.PAYZEN_LANGUAGE,
-                    formToken: parsed.formToken
-                }).then(function(v) {
-                    KR = v.KR;
-                    if (registerCard) {
-                        jQuery('input[name="kr-do-register"]').attr('checked','checked');
-                    }
-
-                    savedData = newData;
-
-                    submitKR(KR);
-                });
-            }
-        });
+        submitKR(KR);
     }
 };
 
@@ -289,4 +283,13 @@ var refreshTempToken = function () {
             }
         });
     }
+};
+
+var getFormToken = function (payload) {
+    var formToken = payload?.processingResponse?.paymentDetails?.formToken ?? payload?.paymentDetails?.formToken ?? null;
+    if (! formToken) {
+        return null;
+    }
+
+    return formToken;
 };
