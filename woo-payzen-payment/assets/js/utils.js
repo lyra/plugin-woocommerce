@@ -65,6 +65,13 @@ var payzenResetWCBlocksCheckout = function() {
         } else if (typeof checkoutStore.setIdle === 'function') {
             checkoutStore.setIdle();
         }
+
+        // Also reset payment status: WC Blocks keeps it READY when checkout is set back to IDLE,
+        // which triggers an extra POST /checkout on the next "Place Order" click.
+        var paymentStore = wp.data.dispatch('wc/store/payment');
+        if (paymentStore && typeof paymentStore.__internalSetPaymentIdle === 'function') {
+            paymentStore.__internalSetPaymentIdle();
+        }
     } catch (e) {
         console.warn('[Payzen] Could not reset WooCommerce checkout state:', e);
     }

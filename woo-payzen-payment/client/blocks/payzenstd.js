@@ -48,8 +48,8 @@ const Content = (props) => {
 
         if (typeof onCheckoutSuccess === 'function') {
             // Fallback for older checkout blocks integrations.
-            let unsubscribe = onCheckoutSuccess((payload) => {
-                processPayment(payload);
+            let unsubscribe = onCheckoutSuccess(async (payload) => {
+                await processPayment(payload);
             });
 
             if (typeof unsubscribe === 'function') {
@@ -171,7 +171,7 @@ var displayFields = function () {
     payzenUpdatePaymentBlock(true, PAYMENT_METHOD_NAME);
 };
 
-var processPayment = function (payload) {
+var processPayment = async function (payload) {
     if (! jQuery("#radio-control-wc-payment-method-options-" + PAYMENT_METHOD_NAME).is(":checked")) {
         return true;
     }
@@ -207,6 +207,20 @@ var processPayment = function (payload) {
             var useIdentifier = jQuery("#payzen_use_identifier").length && jQuery("#payzen_use_identifier").val() === "true";
             var popin = (jQuery(".kr-smart-form-modal-button").length > 0) || (jQuery(".kr-popin-button").length > 0);
 
+            var formToken = getFormToken(payload);
+            if (! formToken) {
+                return {
+                    type: 'error',
+                    message: __('Unable to initialise the payment form.', 'woo-payzen-payment')
+                };
+            }
+
+            var v = await KR.setFormConfig({
+                formToken: formToken
+            })
+
+            KR = v.KR;
+
             if (! useIdentifier && ! popin && ! hideButton && ! hideSmart) {
                 return validateKR(KR);
             } else {
@@ -214,9 +228,18 @@ var processPayment = function (payload) {
                 break;
             }
 
-         default:
+        default:
             break;
     }
+};
+
+var getFormToken = function (payload) {
+    var formToken = payload?.processingResponse?.paymentDetails?.formToken ?? payload?.paymentDetails?.formToken ?? null;
+    if (! formToken) {
+        return null;
+    }
+
+    return formToken;
 };
 
 var submitForm = function (KR, popin = false, useIdentifier = false) {
@@ -234,29 +257,7 @@ var submitForm = function (KR, popin = false, useIdentifier = false) {
             return true;
         }
 
-        jQuery.ajax({
-            method: 'POST',
-            url: payzen_data?.token_url,
-            data: { 'use_identifier': useIdentifier },
-            success: function(data) {
-                var parsed = JSON.parse(data);
-                KR.setFormConfig({
-                    language: window.PAYZEN_LANGUAGE,
-                    formToken: parsed.formToken
-                }).then(function(v) {
-                    KR = v.KR;
-                    if (registerCard) {
-                        jQuery('input[name="kr-do-register"]').attr('checked','checked');
-                    }
-
-                    savedData = newData;
-
-                    return submitKR(KR, popin);
-                });
-            }
-        });
-
-        return false;
+        return submitKR(KR, popin);
     }
 };
 
@@ -281,13 +282,10 @@ var submitKR = function (KR, popin) {
 
     if (popin || smartbuttonAll) {
         KR.openPopin();
-        payzenResetWCBlocksCheckout(); // Reset WC Blocks state so a second click is possible.
     } else if (hideButton) {
         KR.openSelectedPaymentMethod();
-        payzenResetWCBlocksCheckout();
     } else if (smartbuttonMethod.length > 0) {
         KR.openPaymentMethod(smartbuttonMethod);
-        payzenResetWCBlocksCheckout();
     } else {
         jQuery('#payzen_rest_processing').css('display', 'block');
         jQuery('ul.' + PAYMENT_METHOD_NAME + '-view-top li.block').hide();
