@@ -298,7 +298,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
         if (! $key) {
             if (is_admin()) { // Show error message only if it's made on backend.
-                set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('Subscription is cancelled only in WooCommerce. Please, consider cancelling the subscription in %s Back Office.', 'woo-payzen-payment'), 'PayZen'));
+                PayzenTools::set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('Subscription is cancelled only in WooCommerce. Please, consider cancelling the subscription in %s Back Office.', 'woo-payzen-payment'), 'PayZen'));
             } else {
                 wc_add_notice(__('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice');
             }
@@ -341,7 +341,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             }
         } catch (Exception $e) {
             if (is_admin()) { // Show error message only if it's made on backend.
-                set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
+                PayzenTools::set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
             } else {
                 wc_add_notice(__('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice');
             }
@@ -378,7 +378,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             PayzenRestTools::checkResult($result, 'CANCELLED');
         } catch (Exception $e) {
             if (is_admin()) { // Show error message only if it's made on backend.
-                set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
+                PayzenTools::set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
             }  else {
                 wc_add_notice(__('An error occurred during the cancellation of the subscription. Please contact customer support.', 'woo-payzen-payment'), 'notice');
             }
@@ -391,7 +391,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
     {
         $key = $this->testmode ? $this->get_general_option('test_private_key') : $this->get_general_option('prod_private_key');
         if (! $key) {
-            set_transient('payzen_update_subscription_error_msg', sprintf(__('Subscription is updated only in WooCommerce. Please, consider making necessary changes in %s Back Office.', 'woo-payzen-payment'), 'PayZen'));
+            PayzenTools::set_transient('payzen_update_subscription_error_msg', sprintf(__('Subscription is updated only in WooCommerce. Please, consider making necessary changes in %s Back Office.', 'woo-payzen-payment'), 'PayZen'));
             $this->log("Subscription #{$subscription_id} for order #$order_id cannot be updated on gateway: private key is not configured.");
             return;
         }
@@ -406,7 +406,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         // Re-generate subscriptions data from updated order.
         $info = $this->subscriptions_handler ? $this->subscriptions_handler->subscription_info($order) : null;
         if (! is_array($info) || empty($info)) {
-            set_transient('payzen_update_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
+            PayzenTools::set_transient('payzen_update_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
             $this->log("Empty subscription info returned for order #$order_id. Cannot update subscription #{$subscription_id}.");
             return;
         }
@@ -414,7 +414,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         // Get subscription effect date in ISO8601 format.
         $date_time = strtotime($info['effect_date']);
         if ($date_time < time()) {
-            set_transient('payzen_update_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
+            PayzenTools::set_transient('payzen_update_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
             $this->log("Cannot update subscription #{$subscription_id} for order #$order_id. Effect date has passed.");
             return;
         }
@@ -451,7 +451,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             //Subscription cancelled successfully.
             $this->log("Subscription #{$subscription_id} updated successfully for order #$order_id.");
         } catch (Exception $e) {
-            set_transient('payzen_update_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
+            PayzenTools::set_transient('payzen_update_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
             $this->log("Subscription update exception for order #$order_id with code {$e->getCode()}: {$e->getMessage()}");
         }
     }
@@ -487,7 +487,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
             ksort($trans_by_sequence);
             return array_reverse($trans_by_sequence);
         } catch (Exception $e) {
-            set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
+            PayzenTools::set_transient('payzen_cancelled_subscription_error_msg', sprintf(__('An error has occurred during the cancellation or update of the subscription. Please consult the %s logs for more details.', 'woo-payzen-payment'), 'PayZen'));
             $this->log("Order transactions processing exception for order #$order_id with code {$e->getCode()}: {$e->getMessage()}.");
         }
     }
@@ -570,7 +570,7 @@ class WC_Gateway_PayzenSubscription extends WC_Gateway_PayzenStd
         global $woocommerce;
 
         if (isset($_POST['payzensubscription_old_pm'])) {
-            set_transient($this->id . '_change_payment_' . $order_id, $_POST['payzensubscription_old_pm']);
+            PayzenTools::set_transient($this->id . '_change_payment_' . $order_id, $_POST['payzensubscription_old_pm']);
         }
 
         $order = new WC_Order($order_id);

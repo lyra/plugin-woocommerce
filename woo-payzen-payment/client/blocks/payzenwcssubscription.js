@@ -14,6 +14,7 @@
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies.
@@ -33,18 +34,15 @@ var newData = null;
 
 const Content = (props) => {
     const { eventRegistration } = props || {};
-    const { onCheckoutValidation, onCheckoutSuccess } = eventRegistration || {};
+    const { onCheckoutSuccess } = eventRegistration || {};
+
+    // Display embedded payment fields once the payment method content is mounted.
+    useEffect(() => {
+        displayFields();
+    }, []);
 
     useEffect(() => {
         const unsubscribes = [];
-
-        if (typeof onCheckoutValidation === 'function') {
-            let unsubscribe = onCheckoutValidation(displayFields());
-
-            if (typeof unsubscribe === 'function') {
-                unsubscribes.push(unsubscribe);
-            }
-        }
 
         if (typeof onCheckoutSuccess === 'function') {
             // Fallback for older checkout blocks integrations.
@@ -60,7 +58,7 @@ const Content = (props) => {
         return () => {
             unsubscribes.forEach((unsubscribe) => unsubscribe());
         };
-    }, [onCheckoutValidation, onCheckoutSuccess]);
+    }, [onCheckoutSuccess]);
 
     if (payzen_data?.payment_fields) {
         var fields = <div dangerouslySetInnerHTML={{ __html: payzen_data?.payment_fields }} />;

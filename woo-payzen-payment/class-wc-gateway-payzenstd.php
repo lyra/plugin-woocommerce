@@ -1492,7 +1492,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
             }
         }
 
-        set_transient('payzen_hide_smartbutton_' . wp_get_session_token(), $hide_smart_button_popin);
+        PayzenTools::set_transient('payzen_hide_smartbutton_' . wp_get_session_token(), $hide_smart_button_popin);
 
         $html .= '<div id="' . $this->id . '_rest_wrapper" class="payzen_rest_wrapper"></div>';
         $html .= '<script type="text/javascript">';
@@ -1526,7 +1526,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         }
 
         $jsVars .= 'window.PAYZEN_HIDE_ADD_PAYMENT_LINK = new Boolean(' . ($show_add_payment_method_link && $this->use_wallet()). ');';
-        set_transient('payzen_js_vars_' . wp_get_session_token(), $jsVars);
+        PayzenTools::set_transient('payzen_js_vars_' . wp_get_session_token(), $jsVars);
         $html .= $jsVars;
 
         if ($this->load_embedded_form()) {
@@ -1697,8 +1697,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         $token = $this->create_form_token($params, "user {$email}");
         if ($token) {
-            set_transient('payzen_token_data_' . $transientSuffix, $token_data, 900);
-            set_transient('payzen_token_' . $transientSuffix, $token, 900);
+            PayzenTools::set_transient('payzen_token_data_' . $transientSuffix, $token_data, PayzenTools::TOKEN_TRANSIENT_EXPIRATION);
+            PayzenTools::set_transient('payzen_token_' . $transientSuffix, $token, PayzenTools::TOKEN_TRANSIENT_EXPIRATION);
         }
 
         return $token;
@@ -1749,8 +1749,8 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         $token = $this->create_form_token($params, "user {$email}", 'CreateToken');
         if ($token) {
-            set_transient('payzen_account_token_data_' . $reference, $token_data, 900);
-            set_transient('payzen_account_token_' . $reference, $token, 900);
+            PayzenTools::set_transient('payzen_account_token_data_' . $reference, $token_data, PayzenTools::TOKEN_TRANSIENT_EXPIRATION);
+            PayzenTools::set_transient('payzen_account_token_' . $reference, $token, PayzenTools::TOKEN_TRANSIENT_EXPIRATION);
         }
 
         return $token;
@@ -1951,7 +1951,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
             // Set flag about use of saved identifier.
             if (isset($_POST['use_identifier'])) {
-                set_transient($this->id . '_use_identifier_' . $order_id, $_POST['use_identifier'] === 'true');
+                PayzenTools::set_transient($this->id . '_use_identifier_' . $order_id, $_POST['use_identifier'] === 'true');
             }
 
             $this->payzen_fill_request($order);
@@ -2004,7 +2004,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         // Set flag about use of saved identifier.
         if (isset($_POST['payzen_use_identifier']) || isset($_COOKIE['payzen_use_identifier'])) {
             $use_identifier = isset($_POST['payzen_use_identifier']) ? $_POST['payzen_use_identifier'] : $_COOKIE['payzen_use_identifier'];
-            set_transient($this->id . '_use_identifier_' . $order_id, $use_identifier === 'true');
+            PayzenTools::set_transient($this->id . '_use_identifier_' . $order_id, $use_identifier === 'true');
         }
 
         $order = new WC_Order($order_id);
@@ -2090,7 +2090,7 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
         $selected_card = isset($_POST[$this->id . '_card_type']) ? $_POST[$this->id . '_card_type'] : $_COOKIE[$this->id . '_card_type'];
 
         // Save selected card into database as transcient.
-        set_transient($this->id . '_card_type_' . $order_id, $selected_card);
+        PayzenTools::set_transient($this->id . '_card_type_' . $order_id, $selected_card);
 
         if (PayzenTools::is_hpos_enabled()) {
             $order = new WC_Order($order_id);

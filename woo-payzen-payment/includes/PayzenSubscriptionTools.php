@@ -378,7 +378,7 @@ class PayzenSubscriptionTools
         $subscription->add_order_note($error_msg);
 
         if (is_admin()) { // Show error message only if it's made on backend.
-            set_transient('payzen_renewal_error_msg', $error_msg);
+            PayzenTools::set_transient('payzen_renewal_error_msg', $error_msg);
         }
     }
 
