@@ -1,3 +1,9 @@
+= 1.18.3, 2026-10-15 =
+* Bug fix: Fix JavaScript error on payment by embedded fields.
+* Set time until expiration in seconds for transients.
+* Update list of supported payment means.
+* Update list of supported currencies.
+
 = 1.18.2, 2026-09-30 =
 * Bug fix: Fix payment by embbeded fields when buyer creates an account on checkout.
 * Bug fix: Fix error related to retry on failed or partial payments by embedded fields.

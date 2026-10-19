@@ -37,7 +37,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
     const CMS_IDENTIFIER = 'WooCommerce_2.x-10.x';
     const SUPPORT_EMAIL = 'https://payzen.io/fr-FR/support/';
-    const PLUGIN_VERSION = '1.18.2';
+    const PLUGIN_VERSION = '1.18.3';
     const GATEWAY_VERSION = 'V2';
 
     const METHOD_ID = 'payzen_method_id';
@@ -1461,7 +1461,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         // Save WC Notices to restore them on return page.
         if ($session_id = $payzen_response->getExtInfo('session_id')) {
-            set_transient('payzen_session_id', $session_id);
+            PayzenTools::set_transient('payzen_session_id', $session_id);
         }
 
         $from_server = $payzen_response->get('hash') != null;
@@ -1503,7 +1503,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
 
         // Save WC Notices to restore them on return page.
         if ($session_id = $payzen_response->getExtInfo('session_id')) {
-            set_transient('payzen_session_id', $session_id);
+            PayzenTools::set_transient('payzen_session_id', $session_id);
         }
 
         $order_id = $payzen_response->get('order_id');
@@ -2073,7 +2073,7 @@ class WC_Gateway_Payzen extends WC_Payment_Gateway
         // Save WC Notices to restore them on return page.
         $wc_notices = WC()->session->get('wc_notices', array());
         if (($session_id = get_transient('payzen_session_id')) && ! empty($wc_notices)) {
-            set_transient('payzen_notices_' . $session_id, json_encode($wc_notices));
+            PayzenTools::set_transient('payzen_notices_' . $session_id, json_encode($wc_notices));
             delete_transient('payzen_session_id');
         }
 

@@ -223,7 +223,7 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
             $method = self::get_order_property($order, 'payment_method');
 
             if ($this->use_wallet()) {
-                set_transient($this->id . '_change_payment_' . $order_id, $method . '_old_pm');
+                PayzenTools::set_transient($this->id . '_change_payment_' . $order_id, $method . '_old_pm');
             } else {
                 echo '<input type="hidden" id="' . $this->id . '_old_pm" name="' . $this->id . '_old_pm" value="' . $method . '">';
             }
@@ -355,7 +355,7 @@ class WC_Gateway_PayzenWcsSubscription extends WC_Gateway_PayzenStd
         global $woocommerce;
 
         if (isset($_POST[$this->id . '_old_pm'])) {
-            set_transient($this->id . '_change_payment_' . $order_id, $_POST[$this->id . '_old_pm']);
+            PayzenTools::set_transient($this->id . '_change_payment_' . $order_id, $_POST[$this->id . '_old_pm']);
         }
 
         return parent::process_payment($order_id);

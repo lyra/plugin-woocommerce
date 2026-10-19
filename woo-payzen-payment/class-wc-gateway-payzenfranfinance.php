@@ -389,7 +389,7 @@ class WC_Gateway_PayzenFranfinance extends WC_Gateway_PayzenStd
         $option = $options[$option_id];
 
         // Save selected payment option into session...
-        set_transient('payzenfranfinance_option_' . $order_id, $option);
+        PayzenTools::set_transient('payzenfranfinance_option_' . $order_id, $option);
 
         // ... and into DB.
         $order = new WC_Order($order_id);
