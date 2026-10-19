@@ -12,6 +12,9 @@ use Lyranetwork\Payzen\Sdk\Form\Api as PayzenApi;
 
 class PayzenTools
 {
+    const TRANSIENT_EXPIRATION = 3600;
+    const TOKEN_TRANSIENT_EXPIRATION = 900;
+
     public static function get_contrib()
     {
         global $woocommerce;
@@ -225,5 +228,10 @@ class PayzenTools
         }
 
         return $features[$feature] ?? false;
+    }
+
+    public static function set_transient($transient, $value, $expiration = self::TRANSIENT_EXPIRATION)
+    {
+        return set_transient($transient, $value, $expiration);
     }
 }

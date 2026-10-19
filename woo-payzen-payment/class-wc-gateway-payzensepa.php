@@ -352,12 +352,12 @@ class WC_Gateway_PayzenSepa extends WC_Gateway_PayzenStd
         global $woocommerce;
 
         if (isset($_POST[$this->id . '_old_pm'])) {
-            set_transient($this->id . '_change_payment_' . $order_id, $_POST[$this->id . '_old_pm']);
+            PayzenTools::set_transient($this->id . '_change_payment_' . $order_id, $_POST[$this->id . '_old_pm']);
         }
 
         $token = PayzenTools::get_token_from_request($_POST);
         if ($token) {
-            set_transient($this->id . '_token_' . $order_id, $token);
+            PayzenTools::set_transient($this->id . '_token_' . $order_id, $token);
         }
 
         return parent::process_payment($order_id);
