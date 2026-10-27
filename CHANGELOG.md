@@ -1,3 +1,7 @@
+=1.8.4, 2026-10-27:
+* Bug fix: Fix double online refund for "Other payment means" payments.
+* Added compatibility with WooCommerce 11.x versions.
+
 = 1.18.3, 2026-10-15 =
 * Bug fix: Fix JavaScript error on payment by embedded fields.
 * Set time until expiration in seconds for transients.
