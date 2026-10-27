@@ -2621,14 +2621,24 @@ class WC_Gateway_PayzenStd extends WC_Gateway_Payzen
 
         $order = wc_get_order($order_id);
         if (! $order || is_null($amount)) {
-            return false;
+            return new WP_Error('payzen_error', __('Invalid refund request.', 'woo-payzen-payment'));
         }
 
         if (substr($order->get_payment_method(), 0, strlen('payzen')) !== 'payzen') {
             return false;
         }
 
-        payzen_launch_online_refund($order, $amount, $order->get_currency());
+        $amount = (float) wc_format_decimal($amount);
+        if ($amount <= 0) {
+            return new WP_Error('payzen_error', __('Refund amount should be greater than zero.', 'woo-payzen-payment'));
+        }
+
+        $refund_result = payzen_launch_online_refund($order, $amount, $order->get_currency());
+        if (is_wp_error($refund_result)) {
+            $this->log("Automatic refund process failed for order #$order_id. " . $refund_result->get_error_message());
+
+            return $refund_result;
+        }
 
         if ($reason && strlen($reason) > 500) {
             $reason = function_exists('mb_substr') ? mb_substr( $reason, 0, 450 ) : substr( $reason, 0, 450 );

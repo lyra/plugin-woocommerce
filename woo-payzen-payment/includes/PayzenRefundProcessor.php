@@ -15,10 +15,12 @@ use Lyranetwork\Payzen\Sdk\Refund\Processor as RefundProcessor;
 class PayzenRefundProcessor implements RefundProcessor
 {
     protected $logger;
+    protected $last_error;
 
     public function __construct()
     {
         $this->logger = new WC_Logger();
+        $this->last_error = null;
     }
 
     /**
@@ -27,10 +29,12 @@ class PayzenRefundProcessor implements RefundProcessor
      */
     public function doOnError($errorCode, $message)
     {
-        return new WP_Error(
+        $this->last_error = new WP_Error(
             'payzen_error', sprintf($this->translate('There was a problem initiating an automatic refund. (ERROR %1$s)'), $errorCode),
             $message
         );
+
+        return $this->last_error;
     }
 
     /**
@@ -40,12 +44,14 @@ class PayzenRefundProcessor implements RefundProcessor
     public function doOnSuccess($operationResponse, $operationType)
     {
         if ($operationType == 'frac_update') {
-            $this->doOnError(-1,
+            return $this->doOnError(-1,
                 sprintf($this->translate('Refund of split payment is not supported. Please, consider making necessary changes in %1$s Back Office.'),
                     'PayZen'
                     )
                 );
         }
+
+        return true;
     }
 
     /**
@@ -54,7 +60,17 @@ class PayzenRefundProcessor implements RefundProcessor
      */
     public function doOnFailure($errorCode, $message)
     {
-        $this->doOnError($errorCode, $message);
+        return $this->doOnError($errorCode, $message);
+    }
+
+    /**
+     * Return the last callback error captured during refund API execution.
+     *
+     * @return \WP_Error|null
+     */
+    public function get_last_error()
+    {
+        return $this->last_error;
     }
 
     /**

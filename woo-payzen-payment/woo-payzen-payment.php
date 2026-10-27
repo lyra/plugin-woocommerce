@@ -14,13 +14,13 @@
  * Description: This plugin links your WordPress WooCommerce shop to the payment gateway.
  * Author: Lyra Network
  * Contributors: Alsacréations (Geoffrey Crofte http://alsacreations.fr/a-propos#geoffrey)
- * Version: 1.18.3
+ * Version: 1.18.4
  * Author URI: https://www.lyra.com/
  * License: GPLv2 or later
  * Requires at least: 3.5
  * Tested up to: 7.0
  * WC requires at least: 2.0
- * WC tested up to: 10.9
+ * WC tested up to: 11.2
  *
  * Text Domain: woo-payzen-payment
  * Domain Path: /languages/
@@ -448,12 +448,16 @@ if (is_multisite() && $is_valid_ipn) {
 function payzen_launch_online_refund($order, $refund_amount, $refund_currency)
 {
     if (! $order || ! $order->get_id()) {
-        return;
+        return new WP_Error('payzen_error', __('Invalid order for online refund.', 'woo-payzen-payment'));
+    }
+
+    $refund_amount = (float) wc_format_decimal($refund_amount);
+    if ($refund_amount <= 0) {
+        return new WP_Error('payzen_error', __('Refund amount should be greater than zero.', 'woo-payzen-payment'));
     }
 
     // Prepare order information for refund.
     require_once 'includes/sdk-autoload.php';
-    require_once 'includes/PayzenRefundProcessor.php';
 
     $order_info = new PayzenOrderInfo();
     $order_info->setOrderRemoteId($order->get_id());
@@ -462,12 +466,47 @@ function payzen_launch_online_refund($order, $refund_amount, $refund_currency)
     $order_info->setOrderCurrencyIsoCode($refund_currency);
     $order_info->setOrderCurrencySign(html_entity_decode(get_woocommerce_currency_symbol($refund_currency)));
     $order_info->setOrderUserInfo(PayzenTools::get_user_info());
-    $refund_processor = new PayzenRefundProcessor();
+    $refund_context = payzen_get_refund_context();
+    if (is_wp_error($refund_context)) {
+        return $refund_context;
+    }
 
+    $refund_api = $refund_context['refund_api'];
+    $refund_processor = $refund_context['refund_processor'];
+
+    try {
+        // Do online refund.
+        $refund_api->refund($order_info, $refund_amount, PayzenTools::get_white_label());
+    } catch (Exception $e) {
+        return new WP_Error('payzen_error', __('There was a problem initiating an automatic refund.', 'woo-payzen-payment'), $e->getMessage());
+    }
+
+    $processor_error = $refund_processor->get_last_error();
+    if (is_wp_error($processor_error)) {
+        return $processor_error;
+    }
+
+    return true;
+}
+
+/**
+ * Build REST refund context used by online refund requests.
+ *
+ * @return array|\WP_Error
+ */
+function payzen_get_refund_context()
+{
+    require_once 'includes/PayzenRefundProcessor.php';
+
+    $refund_processor = new PayzenRefundProcessor();
     $std_payment_method = new WC_Gateway_PayzenStd();
 
     $test_mode = $std_payment_method->get_general_option('ctx_mode') == 'TEST';
     $key = $test_mode ? $std_payment_method->get_general_option('test_private_key') : $std_payment_method->get_general_option('prod_private_key');
+
+    if (! $key) {
+        return new WP_Error('payzen_error', __('Missing private key for automatic refund.', 'woo-payzen-payment'));
+    }
 
     $refund_api = new PayzenRefundApi(
         $refund_processor,
@@ -477,8 +516,10 @@ function payzen_launch_online_refund($order, $refund_amount, $refund_currency)
         'WooCommerce'
     );
 
-    // Do online refund.
-    $refund_api->refund($order_info, $refund_amount, PayzenTools::get_white_label());
+    return array(
+        'refund_api' => $refund_api,
+        'refund_processor' => $refund_processor
+    );
 }
 
 function payzen_display_refund_result_message($order_id)
@@ -506,26 +547,6 @@ function payzen_features_compatibility()
 // Declaring HPOS compatibility.
 add_action('before_woocommerce_init', 'payzen_features_compatibility');
 
-function payzen_online_refund($order_id, $refund_id)
-{
-    // Check if order was passed with other payment means submodule.
-    $order = new WC_Order((int) $order_id);
-    if (! $order || substr($order->get_payment_method(), 0, strlen('payzenother_')) !== 'payzenother_') {
-        return;
-    }
-
-    $refund = new WC_Order_Refund((int) $refund_id);
-    if (! $refund) {
-        return;
-    }
-
-    // Do online refund.
-    payzen_launch_online_refund($order, $refund->get_amount(), $refund->get_currency());
-}
-
-// Do online refund after local refund.
-add_action('woocommerce_order_refunded', 'payzen_online_refund', 10 , 2);
-
 function payzen_online_cancel($order_id)
 {
     $order = new WC_Order((int) $order_id);
@@ -533,7 +554,12 @@ function payzen_online_cancel($order_id)
         return;
     }
 
-    payzen_launch_online_refund($order, $order->get_total(), $order->get_currency());
+    $result = payzen_launch_online_refund($order, $order->get_total(), $order->get_currency());
+    if (is_wp_error($result)) {
+        $order->add_order_note(sprintf(__('Automatic online refund on cancellation failed: %s', 'woo-payzen-payment'), $result->get_error_message()));
+
+        return;
+    }
 }
 
 // Do online cancel after local cancellation.
